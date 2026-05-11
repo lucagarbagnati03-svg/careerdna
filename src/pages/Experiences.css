@@ -1,0 +1,236 @@
+@import './Journal.css';
+
+.page-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  gap: 16px;
+}
+
+/* Form */
+.exp-form {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.exp-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.exp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.exp-field label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.optional {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.date-picker {
+  display: flex;
+  gap: 6px;
+}
+
+.day-select {
+  flex: 1;
+}
+
+.month-select {
+  flex: 2;
+}
+
+.year-select {
+  flex: 1.5;
+}
+
+.exp-field input,
+.exp-field textarea,
+.day-select,
+.month-select,
+.year-select {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  resize: vertical;
+}
+
+.exp-field input:focus,
+.exp-field textarea:focus,
+.day-select:focus,
+.month-select:focus,
+.year-select:focus {
+  border-color: var(--accent);
+}
+
+.exp-field input::placeholder,
+.exp-field textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.day-select,
+.month-select,
+.year-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a5a78'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 24px;
+}
+
+.exp-form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Timeline */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 16px;
+}
+
+.timeline-line-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 20px;
+  padding-top: 4px;
+}
+
+.timeline-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--gradient);
+  flex-shrink: 0;
+  box-shadow: 0 0 8px rgba(124, 106, 247, 0.4);
+}
+
+.timeline-line {
+  width: 2px;
+  flex: 1;
+  background: var(--border);
+  margin-top: 6px;
+  min-height: 20px;
+}
+
+/* Experience card */
+.exp-card {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 16px;
+  transition: border-color 0.2s;
+}
+
+.exp-card:hover {
+  border-color: var(--border-light);
+}
+
+.exp-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.exp-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.exp-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.exp-job-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.exp-duration {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--accent-dim);
+  color: var(--accent-hover);
+}
+
+.exp-company {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-hover);
+}
+
+.exp-dates {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.exp-description {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 14px;
+  white-space: pre-wrap;
+}
+
+/* Skill row */
+.exp-skills-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.exp-extracting {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.exp-no-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+}

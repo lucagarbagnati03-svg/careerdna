@@ -1,0 +1,470 @@
+.dashboard {
+  padding: 36px 40px;
+  max-width: 1000px;
+}
+
+/* ── Hero ── */
+.db-hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.db-greeting {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent-hover);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+
+.db-title {
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  text-transform: capitalize;
+}
+
+.db-subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* Quick actions */
+.db-quick-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.qa-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--border-light);
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  transition: all 0.15s;
+}
+
+.qa-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent-hover);
+  background: var(--accent-dim);
+}
+
+.qa-btn.primary {
+  background: var(--gradient);
+  color: #fff;
+  border-color: transparent;
+}
+
+.qa-btn.primary:hover {
+  opacity: 0.88;
+  color: #fff;
+}
+
+/* ── Stats row ── */
+.db-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.db-stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+
+.db-stat-card:hover {
+  border-color: var(--border-light);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+}
+
+.db-stat-icon {
+  font-size: 18px;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+
+.db-stat-value {
+  font-size: 28px;
+  font-weight: 800;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
+}
+
+.db-stat-value.is-text {
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.db-stat-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* ── Main grid ── */
+.db-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 16px;
+  align-items: start;
+}
+
+.db-col-left,
+.db-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Section shell ── */
+.db-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px;
+}
+
+.db-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.db-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.db-section-link {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-hover);
+  opacity: 0.75;
+  transition: opacity 0.15s;
+}
+
+.db-section-link:hover { opacity: 1; }
+
+/* ── Empty states ── */
+.db-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 24px 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.db-empty span {
+  font-size: 24px;
+  opacity: 0.25;
+}
+
+.db-empty-cta {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-hover);
+  margin-top: 4px;
+}
+
+/* ── Skeletons ── */
+.db-skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.db-skeleton {
+  height: 60px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, var(--bg-hover) 25%, var(--bg-secondary) 50%, var(--bg-hover) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+.db-skeleton.short { height: 36px; }
+.db-skeleton.tall  { height: 100px; }
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Recent activity ── */
+.db-activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.db-activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 12px;
+  transition: background 0.15s;
+  text-decoration: none;
+}
+
+.db-activity-item:hover {
+  background: var(--bg-hover);
+}
+
+.db-activity-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gradient);
+  flex-shrink: 0;
+  margin-top: 6px;
+  box-shadow: 0 0 6px rgba(124, 106, 247, 0.5);
+}
+
+.db-activity-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.db-activity-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.db-activity-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.db-activity-date {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.db-activity-preview {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Top skills ── */
+.db-skills-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.db-skill-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.db-skill-rank {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  width: 22px;
+  flex-shrink: 0;
+}
+
+.db-skill-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.db-skill-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.db-skill-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.db-skill-level {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent-hover);
+  background: var(--accent-dim);
+  padding: 1px 7px;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+
+.db-skill-bar-track {
+  height: 4px;
+  background: var(--bg-hover);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.db-skill-bar-fill {
+  height: 100%;
+  background: var(--gradient);
+  border-radius: 99px;
+  transition: width 0.5s ease;
+}
+
+.db-skill-cat {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+  width: 56px;
+  text-align: right;
+  flex-shrink: 0;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+/* ── Skill gap card ── */
+.db-gap-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-decoration: none;
+  padding: 4px 0;
+  transition: opacity 0.15s;
+}
+
+.db-gap-card:hover { opacity: 0.85; }
+
+.db-gap-role {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.db-gap-pct {
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.db-gap-bar-track {
+  height: 6px;
+  background: var(--bg-hover);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.db-gap-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.6s ease;
+}
+
+.db-gap-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.db-gap-no-analysis {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 12px 0 4px;
+}
+
+/* ── Gap CTA (no role set) ── */
+.db-gap-cta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  padding: 4px 0;
+  transition: opacity 0.15s;
+}
+
+.db-gap-cta:hover { opacity: 0.85; }
+
+.db-gap-cta-icon {
+  font-size: 28px;
+  color: var(--accent);
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+.db-gap-cta-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 3px;
+}
+
+.db-gap-cta-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.db-gap-arrow {
+  margin-left: auto;
+  font-size: 18px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: color 0.15s, transform 0.15s;
+}
+
+.db-gap-card:hover .db-gap-arrow,
+.db-gap-cta:hover .db-gap-arrow {
+  color: var(--accent-hover);
+  transform: translateX(3px);
+}

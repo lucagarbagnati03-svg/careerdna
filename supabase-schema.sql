@@ -1,0 +1,67 @@
+-- Run this in your Supabase SQL editor to create the required tables.
+
+-- Journal entries
+create table if not exists journal_entries (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade not null,
+  title text,
+  content text not null,
+  created_at timestamptz default now()
+);
+alter table journal_entries enable row level security;
+create policy "Users own their journal entries"
+  on journal_entries for all using (auth.uid() = user_id);
+
+-- Skills
+create table if not exists skills (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade not null,
+  name text not null,
+  category text not null default 'Other',
+  level int not null default 3 check (level between 1 and 5),
+  created_at timestamptz default now()
+);
+alter table skills enable row level security;
+create policy "Users own their skills"
+  on skills for all using (auth.uid() = user_id);
+
+-- CV storage (one row per user, upserted on each upload)
+create table if not exists user_cv (
+  user_id          uuid primary key references auth.users(id) on delete cascade,
+  cv_text          text not null,
+  filename         text not null,
+  uploaded_at      timestamptz default now(),
+  newly_added      jsonb default '[]',
+  already_existed  jsonb default '[]'
+);
+alter table user_cv enable row level security;
+create policy "Users own their CV"
+  on user_cv for all using (auth.uid() = user_id);
+
+-- Add source column to skills (null = manual/legacy, 'cv' = from CV scan, 'journal' = from journal)
+alter table skills add column if not exists source text;
+
+-- Past experiences
+create table if not exists experiences (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade not null,
+  company text not null,
+  title text not null,
+  start_date date not null,
+  end_date date,
+  description text,
+  created_at timestamptz default now()
+);
+alter table experiences enable row level security;
+create policy "Users own their experiences"
+  on experiences for all using (auth.uid() = user_id);
+
+-- User preferences (target role, etc.)
+create table if not exists user_preferences (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  target_role text,
+  updated_at timestamptz default now()
+);
+alter table user_preferences enable row level security;
+create policy "Users own their preferences"
+  on user_preferences for all using (auth.uid() = user_id);
