@@ -151,6 +151,76 @@ export async function analyzeRoleRequirements(role) {
   return JSON.parse(clean)
 }
 
+// ── Live simulation: question generation ─────────────────────────────────────
+// activeRole and previousQuestions are always passed explicitly.
+export async function generateSimulationQuestions(profile, count, activeRole, previousQuestions = []) {
+  const { skillsStr, expStr } = formatProfile(profile)
+  const role = (activeRole ?? '').trim() || 'General Professional'
+
+  const avoidBlock = previousQuestions.length > 0
+    ? `\n\nDo NOT use any of these questions that were already asked in previous sessions:\n${previousQuestions.map((q, i) => `${i + 1}. ${q}`).join('\n')}\nGenerate completely fresh and different questions for this interview.`
+    : ''
+
+  const qs = await groqJSON([
+    {
+      role: 'system',
+      content: `You are a professional interviewer conducting a job interview for the position of ${role}. Generate ${count} interview questions tailored specifically for this exact role.
+Rules:
+- Questions must sound natural when spoken aloud
+- Mix behavioral (STAR-method) and ${role}-specific technical questions
+- Vary difficulty: start medium, build to challenging, end reflective
+- Reference the candidate's background where relevant
+- Do NOT number the questions${avoidBlock}
+Return ONLY a JSON array of question strings — no markdown, nothing else.
+["question 1", "question 2", ...]`,
+    },
+    {
+      role: 'user',
+      content: `Role: ${role}\nSkills: ${skillsStr}\nExperiences:\n${expStr}`,
+    },
+  ], Math.max(count * 80, 600), 0.7)
+  if (!Array.isArray(qs)) throw new Error('Invalid questions format from AI')
+  return qs.slice(0, count)
+}
+
+// ── Live simulation: full-session debrief ─────────────────────────────────────
+export async function analyzeSimulation(questionsAndAnswers, targetRole) {
+  const transcript = questionsAndAnswers
+    .map((qa, i) =>
+      `Q${i + 1}: ${qa.question}\nA${i + 1}: ${qa.answer?.trim() || '(no answer given)'}`
+    )
+    .join('\n\n')
+
+  const role = targetRole || 'General Professional'
+
+  return groqJSON([
+    {
+      role: 'system',
+      content: `You are a senior interviewer who has just conducted a full mock interview for the role of ${role}.
+You have read every question and every answer in this session. Your feedback MUST be deeply grounded in what the candidate actually said.
+
+Rules — follow every one or the feedback is useless:
+- STRENGTHS: Name 3 things the candidate genuinely did well, quoting or paraphrasing what they actually said. Start each with "In your answer to Q[N]..." or "When you described...". Never write a strength that could apply to any candidate.
+- IMPROVEMENTS: Identify 3 specific gaps in the actual answers. Reference the question number and what was missing or weak. Example: "Your answer to Q4 described the situation but never explained what actions YOU personally took." Never write "improve your communication skills" or any other generic advice.
+- TIP: Write one single actionable tip that is unique to THIS session and THIS candidate's performance. It must reference the role (${role}) and something specific they did or failed to do in these exact answers. It must be something they can do differently in their very next practice session — not a general directive like "prepare more examples". If every answer lacked quantified results, say exactly that and give a formula to fix it. If they spoke confidently but skipped the Result step repeatedly, point to question numbers and tell them exactly how to add it.
+- SCORE: 1-10 based on how ready this candidate is for a real ${role} interview right now.
+- Each simulation session must produce a different and unique tip based on the specific answers given. Never repeat generic advice.
+
+Return ONLY a valid JSON object — no markdown, no explanation:
+{
+  "score": 7,
+  "strengths": ["In your answer to Q2, you clearly described...", "...", "..."],
+  "improvements": ["Your answer to Q5 listed tasks but never explained the outcome...", "...", "..."],
+  "tip": "Specific, unique, actionable tip referencing this session."
+}`,
+    },
+    {
+      role: 'user',
+      content: `Role: ${role}\n\nFull interview transcript:\n\n${transcript}`,
+    },
+  ], 1200, 0.4)
+}
+
 const SYSTEM_PROMPT = `You are a career coach AI. Extract professional skills from a journal entry.
 Return ONLY a JSON array. Each item must have:
 - "name": skill name (concise, 1-4 words)

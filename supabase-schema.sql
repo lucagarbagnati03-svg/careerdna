@@ -60,6 +60,20 @@ alter table experiences enable row level security;
 create policy "Users own their experiences"
   on experiences for all using (auth.uid() = user_id);
 
+-- Live simulation sessions
+create table if not exists simulation_sessions (
+  id                    uuid primary key default gen_random_uuid(),
+  user_id               uuid references auth.users(id) on delete cascade not null,
+  target_role           text,
+  questions_and_answers jsonb not null,
+  overall_score         int,
+  final_report          jsonb,
+  created_at            timestamptz default now()
+);
+alter table simulation_sessions enable row level security;
+create policy "Users own their simulation sessions"
+  on simulation_sessions for all using (auth.uid() = user_id);
+
 -- Interview practice sessions
 create table if not exists interview_sessions (
   id          uuid primary key default gen_random_uuid(),

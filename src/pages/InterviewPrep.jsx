@@ -8,6 +8,7 @@ import {
   evaluateInterviewAnswer,
   sleep,
 } from '../lib/groq'
+import LiveSimulation from './LiveSimulation'
 import './InterviewPrep.css'
 
 // Normalize role: always lowercase + trimmed, everywhere in the app
@@ -29,20 +30,30 @@ function readinessColor(n) {
   return 'var(--danger)'
 }
 
-function calcReadiness(skills = [], experiences = [], sessions = [], cvUploaded = false) {
+// simSessions = rows from simulation_sessions with overall_score field
+function calcReadiness(skills = [], experiences = [], sessions = [], cvUploaded = false, simSessions = []) {
   const skillPts = Math.min(skills.length * 2, 25)
   const expPts   = Math.min(experiences.length * 8, 20)
   const cvPts    = cvUploaded ? 5 : 0
   const base     = skillPts + expPts + cvPts
-  const bonus    = Math.min(
-    sessions.reduce((sum, s) => {
-      if ((s.score ?? 0) >= 7) return sum + 2
-      if ((s.score ?? 0) >= 5) return sum + 1
-      return sum
-    }, 0), 30
-  )
-  const raw    = base + bonus
-  const capped = sessions.length === 0 ? Math.min(raw, 55) : Math.min(raw, 95)
+
+  const prepBonus = sessions.reduce((sum, s) => {
+    if ((s.score ?? 0) >= 7) return sum + 2
+    if ((s.score ?? 0) >= 5) return sum + 1
+    return sum
+  }, 0)
+
+  // Simulation sessions are harder → award more points
+  const simBonus = simSessions.reduce((sum, s) => {
+    if ((s.overall_score ?? 0) >= 7) return sum + 3
+    if ((s.overall_score ?? 0) >= 5) return sum + 1
+    return sum
+  }, 0)
+
+  const bonus       = Math.min(prepBonus + simBonus, 30)
+  const raw         = base + bonus
+  const hasPractice = sessions.length > 0 || simSessions.length > 0
+  const capped      = hasPractice ? Math.min(raw, 95) : Math.min(raw, 55)
   return Math.max(0, capped)
 }
 
@@ -112,15 +123,21 @@ export default function InterviewPrep() {
   const [feedback, setFeedback]   = useState(null)
   const [evalError, setEvalError] = useState('')
 
-  // Sessions (all roles — filtered in UI)
+  // Prep practice sessions (all roles — filtered in UI)
   const [sessions, setSessions]               = useState([])
   const [sessionsLoading, setSessionsLoading] = useState(true)
   const [expandedSession, setExpandedSession] = useState(null)
+
+  // Simulation sessions (all roles — filtered in UI)
+  const [simSessions, setSimSessions]             = useState([])
+  const [simSessionsLoading, setSimSessionsLoading] = useState(true)
+  const [expandedSim, setExpandedSim]             = useState(null)
 
   useEffect(() => {
     if (!user) return
     loadProfile()
     loadSessions()
+    loadSimSessions()
   }, [user])
 
   // ── Persist per-role data ───────────────────────────────────────────────────
@@ -261,6 +278,36 @@ export default function InterviewPrep() {
     }
   }
 
+  async function loadSimSessions() {
+    setSimSessionsLoading(true)
+    try {
+      const { data } = await supabase
+        .from('simulation_sessions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(30)
+      setSimSessions(data ?? [])
+    } finally {
+      setSimSessionsLoading(false)
+    }
+  }
+
+  async function deleteSimSession(id, role) {
+    await supabase.from('simulation_sessions').delete().eq('id', id)
+    const updated = simSessions.filter(s => s.id !== id)
+    setSimSessions(updated)
+    if (expandedSim === id) setExpandedSim(null)
+
+    // Recalculate readiness without the deleted session
+    const roleSimSessions  = updated.filter(s => norm(s.target_role) === role)
+    const rolePrepSessions = sessions.filter(s => norm(s.target_role) === role)
+    const newReadiness = calcReadiness(
+      profile?.skills, profile?.experiences, rolePrepSessions, cvUploaded, roleSimSessions
+    )
+    await persistRoleData(role, { readiness: newReadiness }, roleData)
+  }
+
   // ── Regenerate questions ────────────────────────────────────────────────────
   async function regenerate() {
     if (!profile || !activeRole) return
@@ -327,10 +374,31 @@ export default function InterviewPrep() {
     }
   }
 
+  // ── Simulation session saved callback ──────────────────────────────────────
+  async function handleSimulationSaved(role, sessionScore) {
+    // Reload all simulation sessions for latest data
+    await loadSimSessions()
+
+    const { data: simData } = await supabase
+      .from('simulation_sessions')
+      .select('overall_score')
+      .eq('user_id', user.id)
+      .eq('target_role', role)
+
+    const rolePrepSessions = sessions.filter(s => norm(s.target_role) === role)
+    const newReadiness = calcReadiness(
+      profile?.skills, profile?.experiences, rolePrepSessions, cvUploaded, simData ?? []
+    )
+    console.log('[InterviewPrep] Updating readiness for', role, '→', newReadiness)
+    await persistRoleData(role, { readiness: newReadiness }, roleData)
+    setAllRoles(prev => prev.includes(role) ? prev : [...prev, role])
+  }
+
   // ── Derived values ──────────────────────────────────────────────────────────
-  const filteredSessions = sessions.filter(s => norm(s.target_role) === activeRole)
+  const filteredSessions    = sessions.filter(s => norm(s.target_role) === activeRole)
+  const filteredSimSessions = simSessions.filter(s => norm(s.target_role) === activeRole)
   const readiness = calcReadiness(
-    profile?.skills, profile?.experiences, filteredSessions, cvUploaded
+    profile?.skills, profile?.experiences, filteredSessions, cvUploaded, filteredSimSessions
   )
   const noData = profile && profile.skills.length === 0 && profile.experiences.length === 0
 
@@ -351,17 +419,12 @@ export default function InterviewPrep() {
 
       {/* ══ LIVE SIMULATION placeholder ══ */}
       {tab === 'live' && (
-        <div className="ip-coming-soon">
-          <div className="ip-cs-icon">◈</div>
-          <h2 className="ip-cs-title">Live Simulation — Coming Soon</h2>
-          <p className="ip-cs-sub">
-            A real-time AI interviewer that asks follow-up questions, adapts to your answers,
-            and gives a full debrief at the end. Switch to Prep Mode to get started now.
-          </p>
-          <button className="btn-primary ip-cs-btn" onClick={() => setTab('prep')}>
-            Go to Prep Mode →
-          </button>
-        </div>
+        <LiveSimulation
+          profile={profile}
+          activeRole={activeRole}
+          onBack={() => setTab('prep')}
+          onSessionSaved={handleSimulationSaved}
+        />
       )}
 
       {/* ══ PREP MODE ══ */}
@@ -676,6 +739,107 @@ export default function InterviewPrep() {
                               </div>
                             )}
                           </>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          {/* ── Past Simulations (filtered by active role) ── */}
+          <div className="ip-section">
+            <SectionHeader
+              title="Past Simulations"
+              action={activeRole && <span className="ip-sessions-role-badge">◈ {activeRole}</span>}
+            />
+
+            {simSessionsLoading ? (
+              <LoadingCard label="Loading simulation history…" />
+            ) : filteredSimSessions.length === 0 ? (
+              <div className="ip-empty">
+                <span>◈</span>
+                <p>
+                  {activeRole
+                    ? `No simulations for "${activeRole}" yet. Try the Live Simulation tab.`
+                    : 'No simulations yet.'}
+                </p>
+              </div>
+            ) : (
+              <div className="ip-sessions-list">
+                {filteredSimSessions.map(s => (
+                  <div key={s.id} className="ip-session-card">
+                    <div
+                      className="ip-session-header"
+                      onClick={() => setExpandedSim(expandedSim === s.id ? null : s.id)}
+                    >
+                      <div
+                        className="ip-session-score"
+                        style={{ color: scoreColor(s.overall_score), background: scoreBg(s.overall_score) }}
+                      >
+                        {s.overall_score}/10
+                      </div>
+                      <div className="ip-session-meta">
+                        <span className="ip-session-role">
+                          Full Simulation · {s.questions_and_answers?.length ?? 0} questions
+                        </span>
+                        <p className="ip-session-q">
+                          {s.final_report?.strengths?.[0]
+                            ? `Strength: ${s.final_report.strengths[0]}`
+                            : 'Tap to see full report'}
+                        </p>
+                      </div>
+                      <div className="ip-session-right">
+                        <span className="ip-session-date">{fmtDate(s.created_at)}</span>
+                        <button
+                          className="delete-btn"
+                          title="Delete simulation"
+                          onClick={e => { e.stopPropagation(); deleteSimSession(s.id, norm(s.target_role)) }}
+                        >
+                          ×
+                        </button>
+                        <span className="ip-session-chevron">
+                          {expandedSim === s.id ? '▲' : '▼'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {expandedSim === s.id && (
+                      <div className="ip-session-body">
+                        {/* All Q&A */}
+                        {(s.questions_and_answers ?? []).map((qa, i) => (
+                          <div key={i} className="ip-session-section">
+                            <div className="ip-session-label">
+                              Q{qa.question_number ?? i + 1}: {qa.question}
+                            </div>
+                            <p className="ip-session-text">
+                              {qa.answer || '(no answer recorded)'}
+                            </p>
+                          </div>
+                        ))}
+
+                        {/* Final report */}
+                        {s.final_report?.strengths?.length > 0 && (
+                          <div className="ip-session-section good">
+                            <div className="ip-session-label">✓ Strengths</div>
+                            {s.final_report.strengths.map((x, i) => (
+                              <p key={i} className="ip-session-text">• {x}</p>
+                            ))}
+                          </div>
+                        )}
+                        {s.final_report?.improvements?.length > 0 && (
+                          <div className="ip-session-section missing">
+                            <div className="ip-session-label">⚠ Areas to Improve</div>
+                            {s.final_report.improvements.map((x, i) => (
+                              <p key={i} className="ip-session-text">• {x}</p>
+                            ))}
+                          </div>
+                        )}
+                        {s.final_report?.tip && (
+                          <div className="ip-session-section improve">
+                            <div className="ip-session-label">◆ Key Tip</div>
+                            <p className="ip-session-text">{s.final_report.tip}</p>
+                          </div>
                         )}
                       </div>
                     )}
