@@ -41,6 +41,10 @@ create policy "Users own their CV"
 -- Add source column to skills (null = manual/legacy, 'cv' = from CV scan, 'journal' = from journal)
 alter table skills add column if not exists source text;
 
+-- Per-role cache: { "lawyer": { analysis, questions, readiness }, ... }
+-- Replaces the old single-role columns (interview_analysis, interview_questions, analysis_role, readiness_score)
+alter table user_preferences add column if not exists role_data jsonb default '{}';
+
 -- Past experiences
 create table if not exists experiences (
   id uuid primary key default gen_random_uuid(),
@@ -55,6 +59,21 @@ create table if not exists experiences (
 alter table experiences enable row level security;
 create policy "Users own their experiences"
   on experiences for all using (auth.uid() = user_id);
+
+-- Interview practice sessions
+create table if not exists interview_sessions (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid references auth.users(id) on delete cascade not null,
+  target_role text,
+  question    text not null,
+  user_answer text not null,
+  score       int,
+  feedback    jsonb,
+  created_at  timestamptz default now()
+);
+alter table interview_sessions enable row level security;
+create policy "Users own their interview sessions"
+  on interview_sessions for all using (auth.uid() = user_id);
 
 -- User preferences (target role, etc.)
 create table if not exists user_preferences (

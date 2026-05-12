@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { displayCategory } from '../lib/categories'
 import './Dashboard.css'
 
 // Reuse the same localStorage cache key format as SkillGap.jsx
@@ -226,7 +227,7 @@ export default function Dashboard() {
                         />
                       </div>
                     </div>
-                    <span className="db-skill-cat">{skill.category}</span>
+                    <span className="db-skill-cat">{displayCategory(skill.category)}</span>
                   </div>
                 ))}
               </div>

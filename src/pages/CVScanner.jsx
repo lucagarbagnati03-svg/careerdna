@@ -5,7 +5,7 @@ import { extractTextFromPDF } from '../lib/pdfExtract'
 import { extractSkillsFromCV } from '../lib/groq'
 import './CVScanner.css'
 
-const CATEGORIES = ['Technical', 'Soft Skills', 'Domain', 'Tools', 'Other']
+import { CATEGORIES, orderedCategories, displayCategory } from '../lib/categories'
 
 const STEPS = [
   { id: 'extract', label: 'Reading PDF' },
@@ -251,8 +251,8 @@ export default function CVScanner() {
                 <p>No skills extracted from this CV yet.</p>
               </div>
             ) : (
-              CATEGORIES.map(cat => {
-                const items = cvSkills.filter(s => s.category === cat)
+              orderedCategories(cvSkills).map(cat => {
+                const items = cvSkills.filter(s => displayCategory(s.category) === cat)
                 if (!items.length) return null
                 return (
                   <div key={cat} className="results-group">
@@ -365,8 +365,8 @@ export default function CVScanner() {
           {result.newSkills.length > 0 && (
             <div className="results-section">
               <div className="results-section-label new">Newly added</div>
-              {CATEGORIES.map(cat => {
-                const items = result.newSkills.filter(s => s.category === cat)
+              {orderedCategories(result.newSkills).map(cat => {
+                const items = result.newSkills.filter(s => displayCategory(s.category) === cat)
                 if (!items.length) return null
                 return (
                   <div key={cat} className="results-group">

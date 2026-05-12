@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { CATEGORIES, orderedCategories, displayCategory } from '../lib/categories'
 import './Skills.css'
-
-const CATEGORIES = ['Technical', 'Soft Skills', 'Domain', 'Tools', 'Other']
 
 export default function Skills() {
   const { user } = useAuth()
@@ -53,11 +52,10 @@ export default function Skills() {
     setSkills(prev => prev.filter(s => s.id !== id))
   }
 
-  const grouped = CATEGORIES.reduce((acc, cat) => {
-    const items = skills.filter(s => s.category === cat)
-    if (items.length) acc[cat] = items
-    return acc
-  }, {})
+  const cats   = orderedCategories(skills)
+  const grouped = Object.fromEntries(
+    cats.map(cat => [cat, skills.filter(s => displayCategory(s.category) === cat)])
+  )
 
   return (
     <div className="page">

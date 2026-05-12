@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { analyzeRoleRequirements } from '../lib/groq'
+import { displayCategory } from '../lib/categories'
 import './SkillGap.css'
 
 // Cache AI-generated requirements in localStorage so we don't re-call on every visit
@@ -55,7 +56,7 @@ export default function SkillGap() {
 
   async function handleAnalyze(e) {
     e?.preventDefault()
-    const role = roleInput.trim()
+    const role = roleInput.trim().toLowerCase()
     if (!role) return
     setError('')
     setAnalyzing(true)
@@ -270,7 +271,7 @@ function SkillCard({ gap }) {
         )}
       </div>
       <div className="sgc-bottom">
-        <span className="sgc-category">{gap.category}</span>
+        <span className="sgc-category">{displayCategory(gap.category)}</span>
         <span className={`sgc-status-text ${gap.have ? 'have' : 'missing'}`}>
           {gap.have ? '✓ You have this' : '✗ Missing'}
         </span>
