@@ -1,0 +1,28 @@
+.dp-wrap {
+  display: flex;
+  gap: 6px;
+}
+
+.dp-select {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 10px 10px 14px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a5a78'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 24px;
+}
+
+.dp-select:focus { border-color: var(--accent); }
+
+.dp-day   { flex: 1; }
+.dp-month { flex: 2; }
+.dp-year  { flex: 1.5; }

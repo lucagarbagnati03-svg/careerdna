@@ -2,18 +2,24 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { extractSkillsFromText } from '../lib/groq'
+import DatePicker from '../components/DatePicker'
 import './Journal.css'
+
+function todayISO() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
 
 export default function Journal() {
   const { user } = useAuth()
   const [entries, setEntries] = useState([])
   const [text, setText] = useState('')
   const [title, setTitle] = useState('')
+  const [entryDate, setEntryDate] = useState(todayISO)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  // extracting[entryId] = 'idle' | 'loading' | { count, skills } | 'error'
   const [extracting, setExtracting] = useState({})
 
   useEffect(() => {
@@ -28,7 +34,7 @@ export default function Journal() {
         .from('journal_entries')
         .select('*')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
+        .order('entry_date', { ascending: false })
       if (error) {
         console.error('Journal load error:', error)
         setLoadError(error.message)
@@ -45,19 +51,21 @@ export default function Journal() {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!text.trim()) return
+    if (!text.trim() || !entryDate) return
     setSaving(true)
     setError('')
     const { error } = await supabase.from('journal_entries').insert({
-      user_id: user.id,
-      title: title.trim() || null,
-      content: text.trim(),
+      user_id:    user.id,
+      title:      title.trim() || null,
+      content:    text.trim(),
+      entry_date: entryDate,
     })
     if (error) {
       setError(error.message)
     } else {
       setText('')
       setTitle('')
+      setEntryDate(todayISO())
       await loadEntries()
     }
     setSaving(false)
@@ -78,7 +86,6 @@ export default function Journal() {
         return
       }
 
-      // Upsert skills — skip duplicates by name (case-insensitive) for this user
       const { data: existing } = await supabase
         .from('skills')
         .select('name')
@@ -104,8 +111,11 @@ export default function Journal() {
   }
 
   function formatDate(iso) {
-    return new Date(iso).toLocaleDateString('en-US', {
-      month: 'short', day: 'numeric', year: 'numeric',
+    if (!iso) return ''
+    // Parse YYYY-MM-DD as local date to avoid UTC offset shifting the day
+    const [y, m, d] = iso.split('-')
+    return new Date(Number(y), Number(m) - 1, Number(d)).toLocaleDateString('en-US', {
+      month: 'long', day: 'numeric', year: 'numeric',
     })
   }
 
@@ -124,16 +134,22 @@ export default function Journal() {
           value={title}
           onChange={e => setTitle(e.target.value)}
         />
+
+        <div className="journal-date-row">
+          <label className="journal-date-label">Episode date</label>
+          <DatePicker value={entryDate} onChange={setEntryDate} required />
+        </div>
+
         <textarea
           className="journal-textarea"
-          placeholder="What did you work on today? What did you learn? Any wins or challenges?"
+          placeholder="What did you work on? What did you learn? Any wins or challenges?"
           value={text}
           onChange={e => setText(e.target.value)}
           rows={5}
           required
         />
         {error && <div className="error-msg">{error}</div>}
-        <button type="submit" className="btn-primary" disabled={saving || !text.trim()}>
+        <button type="submit" className="btn-primary" disabled={saving || !text.trim() || !entryDate}>
           {saving ? 'Saving…' : '+ Add Entry'}
         </button>
       </form>
@@ -162,7 +178,9 @@ export default function Journal() {
                   <div className="entry-header">
                     <div>
                       <div className="entry-title">{entry.title || 'Untitled Entry'}</div>
-                      <div className="entry-date">{formatDate(entry.created_at)}</div>
+                      <div className="entry-date">
+                        {formatDate(entry.entry_date || entry.created_at?.slice(0, 10))}
+                      </div>
                     </div>
                     <button
                       className="delete-btn"

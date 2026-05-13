@@ -6,8 +6,12 @@ create table if not exists journal_entries (
   user_id uuid references auth.users(id) on delete cascade not null,
   title text,
   content text not null,
+  entry_date date not null default current_date,
   created_at timestamptz default now()
 );
+
+-- Add entry_date to existing tables (no-op if column already exists)
+alter table journal_entries add column if not exists entry_date date not null default current_date;
 alter table journal_entries enable row level security;
 create policy "Users own their journal entries"
   on journal_entries for all using (auth.uid() = user_id);

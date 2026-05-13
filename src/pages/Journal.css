@@ -48,6 +48,18 @@
   color: var(--text-muted);
 }
 
+.journal-date-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.journal-date-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
 .journal-textarea {
   background: var(--bg-secondary);
   border: 1px solid var(--border);
