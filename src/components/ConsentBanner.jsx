@@ -40,6 +40,17 @@ export default function ConsentBanner() {
           <p>Under GDPR and the Swiss nLPD you have the right to access, correct, export, or delete your data at any time. See our Privacy Policy for full details.</p>
         </div>
 
+        <div className="consent-nda">
+          <div className="consent-nda-header">⚠ Data Sensitivity &amp; Non-Disclosure Notice</div>
+          <p>By using CareerDNA's recording and analysis services, you acknowledge and agree to the following terms regarding data sensitivity and confidentiality:</p>
+          <ol>
+            <li><strong>User Responsibility:</strong> You are solely responsible for the content of your voice and text recordings. CareerDNA is designed to capture professional achievements and skills, not trade secrets or proprietary corporate data.</li>
+            <li><strong>Confidentiality &amp; NDAs:</strong> If your employment is subject to a Non-Disclosure Agreement (NDA) or any confidentiality obligation, you must ensure that your inputs do not violate such agreements. We strictly advise you to describe your activities in general, non-proprietary terms (e.g., focus on the process and results rather than specific client names, secret formulas, or unreleased product details).</li>
+            <li><strong>Indemnification:</strong> CareerDNA shall not be held liable for any unauthorized disclosure of third-party confidential information resulting from your recordings. You agree to indemnify and hold CareerDNA harmless against any legal claims arising from a breach of your professional confidentiality obligations.</li>
+            <li><strong>Privacy Commitment:</strong> While we employ a Privacy-First architecture (utilizing local transcription and sovereign AI models), no system is entirely immune to risk. Please exercise professional discretion in every interaction with the platform.</li>
+          </ol>
+        </div>
+
         <div className="consent-links">
           <a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
           <span className="consent-dot">·</span>

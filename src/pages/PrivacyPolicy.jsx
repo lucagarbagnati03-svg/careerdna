@@ -72,14 +72,25 @@ export default function PrivacyPolicy() {
           <p>Only the resulting text transcript is saved to your CareerDNA account in Supabase. You can delete any simulation session at any time from the Interview Prep page.</p>
         </div>
 
+        <div className="legal-section legal-nda-section">
+          <h2>7. Data Sensitivity &amp; Non-Disclosure Notice</h2>
+          <p>By using CareerDNA's recording and analysis services, you acknowledge and agree to the following terms regarding data sensitivity and confidentiality:</p>
+          <ol className="legal-nda-list">
+            <li><strong>User Responsibility:</strong> You are solely responsible for the content of your voice and text recordings. CareerDNA is designed to capture professional achievements and skills, not trade secrets or proprietary corporate data.</li>
+            <li><strong>Confidentiality &amp; NDAs:</strong> If your employment is subject to a Non-Disclosure Agreement (NDA) or any confidentiality obligation, you must ensure that your inputs do not violate such agreements. We strictly advise you to describe your activities in general, non-proprietary terms (e.g., focus on the process and results rather than specific client names, secret formulas, or unreleased product details).</li>
+            <li><strong>Indemnification:</strong> CareerDNA shall not be held liable for any unauthorized disclosure of third-party confidential information resulting from your recordings. You agree to indemnify and hold CareerDNA harmless against any legal claims arising from a breach of your professional confidentiality obligations.</li>
+            <li><strong>Privacy Commitment:</strong> While we employ a Privacy-First architecture (utilizing local transcription and sovereign AI models), no system is entirely immune to risk. Please exercise professional discretion in every interaction with the platform.</li>
+          </ol>
+        </div>
+
         <div className="legal-section">
-          <h2>7. Data Retention</h2>
+          <h2>8. Data Retention</h2>
           <p>Your data is retained for as long as your account is active. You may delete any individual piece of content (journal entries, skills, experiences, CV, simulation sessions) at any time using the delete controls within the app.</p>
           <p>To request full account deletion and permanent erasure of all associated data, contact us using the details below. We will process your request within 30 days.</p>
         </div>
 
         <div className="legal-section">
-          <h2>8. Your Rights (GDPR &amp; Swiss nLPD)</h2>
+          <h2>9. Your Rights (GDPR &amp; Swiss nLPD)</h2>
           <p>As a user in the European Union or Switzerland, you have the following rights regarding your personal data:</p>
           <ul>
             <li><strong>Right of access</strong> — you may request a copy of all personal data we hold about you</li>
@@ -94,7 +105,7 @@ export default function PrivacyPolicy() {
         </div>
 
         <div className="legal-section">
-          <h2>9. Cookies and Local Storage</h2>
+          <h2>10. Cookies and Local Storage</h2>
           <p>CareerDNA uses browser <strong>localStorage</strong> for the following non-tracking purposes:</p>
           <ul>
             <li>Storing your consent acknowledgement (<code>cdna_consent_v1</code>)</li>
@@ -104,12 +115,12 @@ export default function PrivacyPolicy() {
         </div>
 
         <div className="legal-section">
-          <h2>10. Changes to This Policy</h2>
+          <h2>11. Changes to This Policy</h2>
           <p>We may update this Privacy Policy to reflect changes in our practices or legal requirements. When we do, we will update the "Last updated" date at the top of this page. For significant changes, we will notify you via the app.</p>
         </div>
 
         <div className="legal-section">
-          <h2>11. Governing Law</h2>
+          <h2>12. Governing Law</h2>
           <p>This Privacy Policy is governed by the laws of the European Union (GDPR, Regulation 2016/679) and, for Swiss users, by the Swiss Federal Act on Data Protection (nLPD, effective 1 September 2023). Any disputes shall be resolved in the competent courts of the applicable jurisdiction.</p>
         </div>
 

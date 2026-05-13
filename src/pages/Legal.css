@@ -116,6 +116,33 @@
   margin: 40px 0;
 }
 
+/* ── NDA / Data Sensitivity section ── */
+.legal-nda-section {
+  background: rgba(251, 191, 36, 0.05);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-left: 4px solid var(--warning);
+  border-radius: 12px;
+  padding: 20px 24px;
+}
+
+.legal-nda-section h2 {
+  color: var(--warning);
+  -webkit-text-fill-color: var(--warning);
+  background: none;
+  border-bottom-color: rgba(251, 191, 36, 0.2);
+}
+
+.legal-nda-list {
+  margin: 10px 0 0 20px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 10px !important;
+}
+
+.legal-nda-list li {
+  list-style: decimal !important;
+}
+
 .legal-contact-box {
   background: var(--bg-card);
   border: 1px solid var(--border);

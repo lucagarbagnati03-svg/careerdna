@@ -81,6 +81,48 @@
 .consent-summary li { list-style: disc; }
 .consent-summary strong { color: var(--text-primary); }
 
+/* ── NDA / Data Sensitivity notice ── */
+.consent-nda {
+  width: 100%;
+  background: rgba(251, 191, 36, 0.07);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-left: 4px solid var(--warning);
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-align: left;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-height: 200px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-light) transparent;
+}
+
+.consent-nda::-webkit-scrollbar { width: 4px; }
+.consent-nda::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 2px; }
+
+.consent-nda-header {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--warning);
+  margin-bottom: 8px;
+}
+
+.consent-nda p {
+  margin-bottom: 8px;
+}
+
+.consent-nda ol {
+  margin: 6px 0 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.consent-nda li { list-style: decimal; }
+.consent-nda strong { color: var(--text-primary); }
+
 .consent-links {
   display: flex;
   align-items: center;
