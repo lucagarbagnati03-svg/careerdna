@@ -1,7 +1,9 @@
-import * as pdfjs from 'pdfjs-dist/build/pdf.mjs'
-import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
+import * as pdfjs from 'pdfjs-dist'
 
-pdfjs.GlobalWorkerOptions.workerSrc = workerUrl
+// Use CDN worker to avoid Vite production build issues with local worker bundling.
+// CDN version must match the installed pdfjs-dist version (3.11.174).
+pdfjs.GlobalWorkerOptions.workerSrc =
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
 
 export async function extractTextFromPDF(file) {
   const arrayBuffer = await file.arrayBuffer()
