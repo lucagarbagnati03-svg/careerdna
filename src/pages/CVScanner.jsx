@@ -311,6 +311,14 @@ export default function CVScanner() {
         </div>
       )}
 
+      {/* CV processing disclaimer */}
+      {showDrop && (
+        <div className="cv-disclaimer">
+          <span className="cv-disclaimer-icon">ℹ</span>
+          <p>Your CV is processed by Groq AI and stored securely in Supabase (EU-West, Ireland). It is never used to train AI models. You can delete it at any time.</p>
+        </div>
+      )}
+
       {error && <div className="cv-error">{error}</div>}
 
       {/* ── Scan button ── */}

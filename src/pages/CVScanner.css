@@ -321,6 +321,31 @@
   color: var(--danger);
 }
 
+/* ── CV disclaimer ── */
+.cv-disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 4px;
+}
+
+.cv-disclaimer-icon {
+  font-size: 14px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.cv-disclaimer p {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
 /* ── Error ── */
 .cv-error {
   background: rgba(248, 113, 113, 0.08);

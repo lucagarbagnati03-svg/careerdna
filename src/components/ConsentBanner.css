@@ -1,0 +1,118 @@
+.consent-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.consent-modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 36px 40px;
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
+}
+
+.consent-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.consent-logo-icon { font-size: 28px; }
+
+.consent-logo-name {
+  font-size: 22px;
+  font-weight: 800;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.consent-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  max-width: 380px;
+}
+
+.consent-summary {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  max-height: 200px;
+  overflow-y: auto;
+  text-align: left;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-light) transparent;
+  width: 100%;
+}
+
+.consent-summary::-webkit-scrollbar { width: 4px; }
+.consent-summary::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 2px; }
+
+.consent-summary p { margin-bottom: 10px; }
+.consent-summary p:last-child { margin-bottom: 0; }
+
+.consent-summary ul {
+  margin: 8px 0 10px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.consent-summary li { list-style: disc; }
+.consent-summary strong { color: var(--text-primary); }
+
+.consent-links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.consent-links a {
+  color: var(--accent-hover);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  transition: opacity 0.15s;
+}
+
+.consent-links a:hover { opacity: 0.75; }
+.consent-dot { color: var(--text-muted); }
+
+.consent-accept-btn {
+  background: var(--gradient);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 36px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+  width: 100%;
+  max-width: 320px;
+}
+
+.consent-accept-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}

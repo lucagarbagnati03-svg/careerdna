@@ -6,6 +6,7 @@ import {
   analyzeInterviewProfile,
   generateInterviewQuestions,
   evaluateInterviewAnswer,
+  analyzeSimulation,
   sleep,
 } from '../lib/groq'
 import LiveSimulation from './LiveSimulation'
@@ -132,6 +133,12 @@ export default function InterviewPrep() {
   const [simSessions, setSimSessions]             = useState([])
   const [simSessionsLoading, setSimSessionsLoading] = useState(true)
   const [expandedSim, setExpandedSim]             = useState(null)
+  // Inline edit state for past simulation Q&A
+  const [simEditing, setSimEditing]               = useState(null) // { sessionId, qIdx, value }
+  const [simSaving, setSimSaving]                 = useState(false)
+  const [simSavedConfirm, setSimSavedConfirm]     = useState(null) // { sessionId, qIdx }
+  const [simEditedIds, setSimEditedIds]           = useState(new Set()) // sessions with unsaved changes
+  const [simRecalculating, setSimRecalculating]   = useState(null) // sessionId being recalculated
 
   useEffect(() => {
     if (!user) return
@@ -308,6 +315,66 @@ export default function InterviewPrep() {
     await persistRoleData(role, { readiness: newReadiness }, roleData)
   }
 
+  // ── Save one answer in a past simulation session ──────────────────────────────
+  async function saveSimAnswer(sessionId, qIdx, newAnswer) {
+    setSimSaving(true)
+    const session = simSessions.find(s => s.id === sessionId)
+    if (!session) { setSimSaving(false); return }
+
+    const updatedQA = (session.questions_and_answers ?? []).map((qa, i) =>
+      i === qIdx ? { ...qa, answer: newAnswer } : qa
+    )
+    // Update local state so the card shows the new answer immediately
+    setSimSessions(prev => prev.map(s =>
+      s.id === sessionId ? { ...s, questions_and_answers: updatedQA } : s
+    ))
+    await supabase.from('simulation_sessions')
+      .update({ questions_and_answers: updatedQA })
+      .eq('id', sessionId)
+
+    setSimSaving(false)
+    setSimEditing(null)                             // close textarea, return to read-only
+    setSimSavedConfirm({ sessionId, qIdx })         // show "Saved ✓"
+    setTimeout(() => setSimSavedConfirm(null), 3000)
+    setSimEditedIds(prev => new Set([...prev, sessionId])) // mark for recalculate
+  }
+
+  // ── Re-run Groq on a past simulation session ──────────────────────────────────
+  async function recalculateSimFeedback(sessionId) {
+    setSimRecalculating(sessionId)
+    const session = simSessions.find(s => s.id === sessionId)
+    if (!session) { setSimRecalculating(null); return }
+
+    const role = norm(session.target_role) || null
+    try {
+      const newReport = await analyzeSimulation(session.questions_and_answers ?? [], role)
+      const finalReport = {
+        score:        newReport.score,
+        strengths:    newReport.strengths    ?? [],
+        improvements: newReport.improvements ?? [],
+        tip:          newReport.tip          ?? '',
+      }
+      await supabase.from('simulation_sessions')
+        .update({
+          overall_score: typeof newReport.score === 'number' ? Math.round(newReport.score) : null,
+          final_report:  finalReport,
+        })
+        .eq('id', sessionId)
+
+      setSimSessions(prev => prev.map(s =>
+        s.id === sessionId
+          ? { ...s, overall_score: Math.round(newReport.score ?? 0), final_report: finalReport }
+          : s
+      ))
+      setSimEditedIds(prev => { const n = new Set(prev); n.delete(sessionId); return n })
+      // Refresh readiness for this role
+      await handleSimulationSaved(role, newReport.score)
+    } catch (err) {
+      console.error('[InterviewPrep] Sim recalculation failed:', err)
+    }
+    setSimRecalculating(null)
+  }
+
   // ── Regenerate questions ────────────────────────────────────────────────────
   async function regenerate() {
     if (!profile || !activeRole) return
@@ -413,7 +480,6 @@ export default function InterviewPrep() {
         </button>
         <button className={`ip-mode-tab ${tab === 'live' ? 'active' : ''}`} onClick={() => setTab('live')}>
           <span>◈</span> Live Simulation
-          <span className="ip-soon-badge">Soon</span>
         </button>
       </div>
 
@@ -806,17 +872,75 @@ export default function InterviewPrep() {
 
                     {expandedSim === s.id && (
                       <div className="ip-session-body">
-                        {/* All Q&A */}
+                        {/* All Q&A — editable */}
                         {(s.questions_and_answers ?? []).map((qa, i) => (
                           <div key={i} className="ip-session-section">
                             <div className="ip-session-label">
                               Q{qa.question_number ?? i + 1}: {qa.question}
                             </div>
-                            <p className="ip-session-text">
-                              {qa.answer || '(no answer recorded)'}
-                            </p>
+
+                            {simEditing?.sessionId === s.id && simEditing?.qIdx === i ? (
+                              /* ── Edit mode ── */
+                              <div className="ip-sim-edit-wrap">
+                                <textarea
+                                  className="ip-sim-edit-textarea"
+                                  value={simEditing.value}
+                                  onChange={e => setSimEditing(prev => ({ ...prev, value: e.target.value }))}
+                                  rows={3}
+                                  autoFocus
+                                />
+                                <div className="ip-sim-edit-actions">
+                                  <button
+                                    className="ip-sim-save-btn"
+                                    onClick={() => saveSimAnswer(s.id, i, simEditing.value)}
+                                    disabled={simSaving}
+                                  >
+                                    {simSaving ? 'Saving…' : 'Save ✓'}
+                                  </button>
+                                  <button
+                                    className="ip-sim-cancel-btn"
+                                    onClick={() => setSimEditing(null)}
+                                    disabled={simSaving}
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              /* ── Read mode ── */
+                              <div className="ip-sim-answer-row">
+                                <p className="ip-session-text">
+                                  {qa.answer || '(no answer recorded)'}
+                                </p>
+                                {simSavedConfirm?.sessionId === s.id && simSavedConfirm?.qIdx === i && (
+                                  <span className="ip-sim-saved-confirm">Saved ✓</span>
+                                )}
+                                <button
+                                  className="delete-btn"
+                                  title="Edit answer"
+                                  onClick={() => setSimEditing({ sessionId: s.id, qIdx: i, value: qa.answer || '' })}
+                                >
+                                  ✎
+                                </button>
+                              </div>
+                            )}
                           </div>
                         ))}
+
+                        {/* Recalculate feedback button (shows after any answer is saved) */}
+                        {simEditedIds.has(s.id) && (
+                          <div className="ip-sim-recalc-row">
+                            <button
+                              className="btn-primary"
+                              onClick={() => recalculateSimFeedback(s.id)}
+                              disabled={simRecalculating === s.id}
+                            >
+                              {simRecalculating === s.id
+                                ? <><span className="spinner" /> Recalculating…</>
+                                : 'Recalculate Feedback'}
+                            </button>
+                          </div>
+                        )}
 
                         {/* Final report */}
                         {s.final_report?.strengths?.length > 0 && (

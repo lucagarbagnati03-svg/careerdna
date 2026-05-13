@@ -318,6 +318,24 @@
   padding: 8px 12px;
 }
 
+.profile-legal-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.profile-legal-links a {
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  transition: color 0.15s;
+}
+
+.profile-legal-links a:hover { color: var(--accent-hover); }
+.profile-legal-dot { color: var(--text-muted); }
+
 /* Main */
 .main-content {
   flex: 1;

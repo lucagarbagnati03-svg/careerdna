@@ -6,21 +6,28 @@ import './LiveSimulation.css'
 // ── Browser capability check ──────────────────────────────────────────────────
 const SR = window.webkitSpeechRecognition || window.SpeechRecognition
 
-// Preferred voices in priority order — Daniel (en-GB) and Samantha (en-US) first
-const PREFERRED_VOICES = ['Daniel', 'Samantha', 'Karen', 'Moira']
+// Priority order: Samantha (en-US) first, then Daniel (en-GB), Karen (en-AU), Moira (en-IE)
+const PREFERRED_VOICE_NAMES = ['Samantha', 'Daniel', 'Karen', 'Moira']
 
-function getBestVoice() {
-  // Only consider English voices — prevents browser from picking system locale (e.g. Italian)
-  const voices = window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'))
-  for (const name of PREFERRED_VOICES) {
+function pickBestEnglishVoice() {
+  // Strictly filter to English-only — never use it/fr/de etc.
+  const voices = window.speechSynthesis.getVoices()
+    .filter(v => v.lang.startsWith('en'))
+  if (voices.length === 0) return null
+
+  // 1. Exact name match in priority order
+  for (const name of PREFERRED_VOICE_NAMES) {
     const match = voices.find(v => v.name === name)
     if (match) return match
   }
-  // Fallback: prefer en-GB, then en-US, then any English
-  return voices.find(v => v.lang === 'en-GB' && !v.name.toLowerCase().includes('compact'))
-      || voices.find(v => v.lang === 'en-US' && !v.name.toLowerCase().includes('compact'))
-      || voices.find(v => v.lang.startsWith('en'))
-      || null
+  // 2. Any non-compact en-US voice
+  const enUS = voices.find(v => v.lang === 'en-US' && !v.name.toLowerCase().includes('compact'))
+  if (enUS) return enUS
+  // 3. Any non-compact en-GB voice
+  const enGB = voices.find(v => v.lang === 'en-GB' && !v.name.toLowerCase().includes('compact'))
+  if (enGB) return enGB
+  // 4. Any English voice
+  return voices[0]
 }
 const hasSpeech   = !!SR
 const hasSynthesis = 'speechSynthesis' in window
@@ -101,10 +108,12 @@ export default function LiveSimulation({ profile, activeRole, onBack, onSessionS
   const [report, setReport]           = useState(null)
   const [sessionQA, setSessionQA]     = useState([])
   const [showSession, setShowSession] = useState(false)
-  const [savedSessionId, setSavedSessionId] = useState(null)   // feature 1
-  const [editingIdx, setEditingIdx]   = useState(null)         // feature 1
-  const [editValue, setEditValue]     = useState('')           // feature 1
-  const [recalculating, setRecalculating] = useState(false)   // feature 1
+  const [savedSessionId, setSavedSessionId] = useState(null)
+  const [editingIdx, setEditingIdx]         = useState(null)
+  const [editValue, setEditValue]           = useState('')
+  const [savingAnswerIdx, setSavingAnswerIdx] = useState(false)  // saving one answer
+  const [savedConfirmIdx, setSavedConfirmIdx] = useState(null)  // shows "Saved ✓"
+  const [recalculating, setRecalculating]   = useState(false)   // running Groq
   const [hintKeywords, setHintKeywords] = useState([])        // feature 4
   const [showHint, setShowHint]       = useState(false)       // feature 4
   const [error, setError]             = useState('')
@@ -118,19 +127,34 @@ export default function LiveSimulation({ profile, activeRole, onBack, onSessionS
   const listeningRef     = useRef(false)
   const journalEntriesRef= useRef([])   // feature 4: populated once at mount
   const hintTimerRef     = useRef(null) // feature 4
+  const selectedVoiceRef = useRef(null) // chosen once per session, never changes mid-interview
 
   useEffect(() => {
-    hasSynthesis && window.speechSynthesis.getVoices()
-    // Fetch journal entries once for keyword hint matching (feature 4)
+    // Load voices — Chrome populates them asynchronously via onvoiceschanged
+    if (hasSynthesis) {
+      const tryLoad = () => {
+        const v = pickBestEnglishVoice()
+        if (v) selectedVoiceRef.current = v
+      }
+      tryLoad() // attempt immediately (Firefox / Safari populate synchronously)
+      window.speechSynthesis.onvoiceschanged = tryLoad // Chrome fires this when ready
+    }
+    // Fetch journal entries silently for keyword hint matching.
+    // This is non-critical — a failure just means hints won't appear; never show an error.
     ;(async () => {
-      const { data: { user: u } } = await supabase.auth.getUser()
-      if (!u?.id) return
-      const { data } = await supabase
-        .from('journal_entries').select('content').eq('user_id', u.id)
-      journalEntriesRef.current = data ?? []
+      try {
+        const { data: { user: u } } = await supabase.auth.getUser()
+        if (!u?.id) return
+        const { data } = await supabase
+          .from('journal_entries').select('content').eq('user_id', u.id)
+        journalEntriesRef.current = data ?? []
+      } catch {
+        // Silent — journal hints simply won't appear if this fails
+      }
     })()
     return () => {
       window.speechSynthesis?.cancel()
+      if (hasSynthesis) window.speechSynthesis.onvoiceschanged = null
       stopListening()
       clearTimeout(hintTimerRef.current)
     }
@@ -144,10 +168,11 @@ export default function LiveSimulation({ profile, activeRole, onBack, onSessionS
     }
     setError('')
     setPhase('generating')
+
+    // Fetch previous questions to avoid repeats — non-critical, isolated try/catch
+    let previousQuestions = []
     try {
-      // Fetch last 2 sessions for this role to avoid repeating questions
       const { data: { user: authUser } } = await supabase.auth.getUser()
-      let previousQuestions = []
       if (authUser?.id && activeRole) {
         const { data: prevSessions } = await supabase
           .from('simulation_sessions')
@@ -160,8 +185,12 @@ export default function LiveSimulation({ profile, activeRole, onBack, onSessionS
           .flatMap(s => (s.questions_and_answers ?? []).map(qa => qa.question))
           .filter(Boolean)
       }
+    } catch {
+      // Non-critical — proceed without dedup; no error shown to user
+    }
 
-      // Pass activeRole and previously asked questions explicitly
+    // Generate questions — this is the only call that can abort the start flow
+    try {
       const qs = await generateSimulationQuestions(profile, count, activeRole, previousQuestions)
       questionsRef.current  = qs
       answersRef.current    = new Array(qs.length).fill('')
@@ -173,7 +202,20 @@ export default function LiveSimulation({ profile, activeRole, onBack, onSessionS
       setPhase('interview')
       speakQuestion(qs[0])
     } catch (err) {
-      setError(err.message)
+      const raw = err?.message ?? ''
+      let friendly
+      if (raw.toLowerCase().includes('fetch') || raw.toLowerCase().includes('network')) {
+        friendly = 'Network error — check your internet connection and try again.'
+      } else if (raw.toLowerCase().includes('rate limit') || raw.toLowerCase().includes('429')) {
+        friendly = 'The AI is busy right now. Wait a few seconds, then press Retry.'
+      } else if (raw.toLowerCase().includes('model') || raw.toLowerCase().includes('decommissioned')) {
+        friendly = 'AI model error — please try again.'
+      } else if (raw.toLowerCase().includes('api key') || raw.toLowerCase().includes('unauthorized')) {
+        friendly = 'API key error — check your Groq API key in settings.'
+      } else {
+        friendly = `Could not generate interview questions. ${raw ? '(' + raw + ')' : 'Please try again.'}`
+      }
+      setError(friendly)
       setPhase('setup')
     }
   }
@@ -187,11 +229,16 @@ export default function LiveSimulation({ profile, activeRole, onBack, onSessionS
     window.speechSynthesis.cancel()
 
     const utt = new SpeechSynthesisUtterance(text)
-    utt.lang  = 'en-GB'   // forces English; overridden per-voice below
+    // Always set lang first so the browser knows it's English even without a specific voice
+    utt.lang  = 'en-US'
     utt.rate  = 0.85
     utt.pitch = 1.0
-    const chosenVoice = getBestVoice()
-    if (chosenVoice) { utt.voice = chosenVoice; utt.lang = chosenVoice.lang }
+    // Use the voice selected once at mount — never re-pick mid-interview
+    const voice = selectedVoiceRef.current
+    if (voice) {
+      utt.voice = voice
+      utt.lang  = voice.lang  // match lang to the exact voice to prevent browser reset
+    }
 
     utt.onend = () => {
       setMode('listening')
@@ -373,29 +420,31 @@ export default function LiveSimulation({ profile, activeRole, onBack, onSessionS
     setPhase('report')
   }
 
-  // ── Edit answer + recalculate (feature 1) ────────────────────────────────────
-  async function handleEditSave() {
-    if (editingIdx === null) return
-    setRecalculating(true)
-
+  // ── Save a single answer to Supabase (no Groq) ───────────────────────────────
+  async function saveIndividualAnswer(idx) {
+    setSavingAnswerIdx(true)
     const updatedQA = sessionQA.map((qa, i) =>
-      i === editingIdx ? { ...qa, answer: editValue } : qa
+      i === idx ? { ...qa, answer: editValue } : qa
     )
     setSessionQA(updatedQA)
-    setEditingIdx(null)
-
-    const role = (activeRole ?? '').trim() || null
-
-    // Persist updated Q&A to Supabase
     if (savedSessionId) {
       await supabase.from('simulation_sessions')
         .update({ questions_and_answers: updatedQA })
         .eq('id', savedSessionId)
     }
+    setSavingAnswerIdx(false)
+    setSavedConfirmIdx(idx)
+    // Auto-clear the "Saved ✓" confirmation after 3 s
+    setTimeout(() => setSavedConfirmIdx(prev => prev === idx ? null : prev), 3000)
+    // Keep textarea open so the user can keep editing before recalculating
+  }
 
-    // Re-analyze with updated answers
+  // ── Re-run Groq analysis on all current answers ───────────────────────────────
+  async function recalculateFeedback() {
+    setRecalculating(true)
+    const role = (activeRole ?? '').trim() || null
     try {
-      const newReport = await analyzeSimulation(updatedQA, role)
+      const newReport = await analyzeSimulation(sessionQA, role)
       setReport(newReport)
       if (savedSessionId) {
         await supabase.from('simulation_sessions')
@@ -437,6 +486,8 @@ export default function LiveSimulation({ profile, activeRole, onBack, onSessionS
     setSavedSessionId(null)
     setEditingIdx(null)
     setEditValue('')
+    setSavingAnswerIdx(false)
+    setSavedConfirmIdx(null)
     setRecalculating(false)
     setShowHint(false)
     setHintKeywords([])
@@ -466,6 +517,11 @@ export default function LiveSimulation({ profile, activeRole, onBack, onSessionS
             The interview will feel like a real one — no pauses, no editing.
           </p>
 
+          <div className="sim-voice-notice">
+            <span className="sim-voice-notice-icon">🎙</span>
+            <p>Your voice is transcribed locally in your browser using the Web Speech API. No audio is ever recorded or stored on our servers. Only the text transcript is saved.</p>
+          </div>
+
           {!hasSpeech || !hasSynthesis ? (
             <div className="sim-browser-warn">
               ⚠ Voice features require Chrome or Edge. Please open this page in Chrome to use the simulation.
@@ -485,11 +541,20 @@ export default function LiveSimulation({ profile, activeRole, onBack, onSessionS
                 ))}
               </div>
 
-              {error && <div className="sim-error">{error}</div>}
+              {error && (
+                <div className="sim-error-block">
+                  <p className="sim-error">{error}</p>
+                  <button className="sim-retry-btn" onClick={startInterview}>
+                    ↻ Retry
+                  </button>
+                </div>
+              )}
 
-              <button className="sim-start-btn" onClick={startInterview}>
-                Start Interview →
-              </button>
+              {!error && (
+                <button className="sim-start-btn" onClick={startInterview}>
+                  Start Interview →
+                </button>
+              )}
             </>
           )}
 
@@ -598,124 +663,144 @@ export default function LiveSimulation({ profile, activeRole, onBack, onSessionS
       {/* ── REPORT ── */}
       {phase === 'report' && (
         <div className="sim-card sim-report">
-          <div className="sim-report-title">Interview Complete</div>
 
-          {error && !report ? (
-            <div className="sim-error">{error}</div>
-          ) : report ? (
-            <>
-              {/* Score */}
-              <div
-                className="sim-report-score"
-                style={{ color: scoreColor(report.score), background: scoreBg(report.score) }}
-              >
-                {report.score}
-                <span className="sim-score-denom">/10</span>
-              </div>
-              <div className="sim-score-label">
-                {report.score >= 8 ? 'Excellent performance' : report.score >= 5 ? 'Solid — room to grow' : 'Keep practicing'}
-              </div>
+          {/* ── Scrollable body: all feedback content ── */}
+          <div className="sim-report-body">
+            <div className="sim-report-title">Interview Complete</div>
 
-              {/* Strengths + Improvements */}
-              <div className="sim-report-cols">
-                <div className="sim-report-col green">
-                  <div className="sim-report-col-title">✓ Strengths</div>
-                  <ul className="sim-report-list">
-                    {report.strengths?.map((s, i) => <li key={i}>{s}</li>)}
-                  </ul>
+            {error && !report ? (
+              <div className="sim-error">{error}</div>
+            ) : report ? (
+              <>
+                {/* Score */}
+                <div
+                  className="sim-report-score"
+                  style={{ color: scoreColor(report.score), background: scoreBg(report.score) }}
+                >
+                  {report.score}
+                  <span className="sim-score-denom">/10</span>
                 </div>
-                <div className="sim-report-col amber">
-                  <div className="sim-report-col-title">⚠ To Improve</div>
-                  <ul className="sim-report-list">
-                    {report.improvements?.map((s, i) => <li key={i}>{s}</li>)}
-                  </ul>
+                <div className="sim-score-label">
+                  {report.score >= 8 ? 'Excellent performance' : report.score >= 5 ? 'Solid — room to grow' : 'Keep practicing'}
                 </div>
-              </div>
 
-              {/* Tip */}
-              {report.tip && (
-                <div className="sim-report-tip">
-                  <span className="sim-tip-icon">◆</span>
-                  <div>
-                    <div className="sim-tip-label">Key Tip for Next Interview</div>
-                    <p>{report.tip}</p>
+                {/* Strengths + Improvements */}
+                <div className="sim-report-cols">
+                  <div className="sim-report-col green">
+                    <div className="sim-report-col-title">✓ Strengths</div>
+                    <ul className="sim-report-list">
+                      {report.strengths?.map((s, i) => <li key={i}>{s}</li>)}
+                    </ul>
+                  </div>
+                  <div className="sim-report-col amber">
+                    <div className="sim-report-col-title">⚠ To Improve</div>
+                    <ul className="sim-report-list">
+                      {report.improvements?.map((s, i) => <li key={i}>{s}</li>)}
+                    </ul>
                   </div>
                 </div>
-              )}
-            </>
-          ) : null}
 
-          <div className="sim-report-actions">
-            <button className="sim-start-btn" onClick={handleReset}>Try Again</button>
-            <button className="sim-outline-btn" onClick={onBack}>← Back to Prep</button>
-          </div>
-
-          {/* View Full Session toggle */}
-          {sessionQA.length > 0 && (
-            <button
-              className="sim-toggle-session-btn"
-              onClick={() => setShowSession(v => !v)}
-            >
-              {showSession ? '▲ Hide Full Session' : '▼ View Full Session'}
-            </button>
-          )}
-
-          {showSession && sessionQA.length > 0 && (
-            <div className="sim-session-review">
-              {sessionQA.map((qa, i) => (
-                <div key={qa.question_number} className="sim-qa-item">
-                  <div className="sim-qa-q">
-                    <span className="sim-qa-num">Q{qa.question_number}</span>
-                    {qa.question}
-                  </div>
-                  {editingIdx === i ? (
-                    <textarea
-                      className="sim-qa-edit-textarea"
-                      value={editValue}
-                      onChange={e => setEditValue(e.target.value)}
-                      rows={4}
-                      autoFocus
-                    />
-                  ) : (
-                    <div className="sim-qa-answer-row">
-                      {qa.answer
-                        ? <p className="sim-qa-a">{qa.answer}</p>
-                        : <p className="sim-qa-empty">No answer recorded</p>
-                      }
-                      <button
-                        className="sim-qa-edit-btn"
-                        title="Edit this answer"
-                        onClick={() => { setEditingIdx(i); setEditValue(qa.answer || '') }}
-                      >
-                        ✎
-                      </button>
+                {/* Tip */}
+                {report.tip && (
+                  <div className="sim-report-tip">
+                    <span className="sim-tip-icon">◆</span>
+                    <div>
+                      <div className="sim-tip-label">Key Tip for Next Interview</div>
+                      <p>{report.tip}</p>
                     </div>
-                  )}
-                </div>
-              ))}
+                  </div>
+                )}
+              </>
+            ) : null}
 
-              {editingIdx !== null && (
+            {/* View Full Session toggle + Q&A (inside scrollable area) */}
+            {sessionQA.length > 0 && (
+              <button
+                className="sim-toggle-session-btn"
+                onClick={() => setShowSession(v => !v)}
+              >
+                {showSession ? '▲ Hide Full Session' : '▼ View Full Session'}
+              </button>
+            )}
+
+            {showSession && sessionQA.length > 0 && (
+              <div className="sim-session-review">
+                {sessionQA.map((qa, i) => (
+                  <div key={qa.question_number} className="sim-qa-item">
+                    <div className="sim-qa-q">
+                      <span className="sim-qa-num">Q{qa.question_number}</span>
+                      {qa.question}
+                    </div>
+                    {editingIdx === i ? (
+                      <div className="sim-qa-edit-wrap">
+                        <textarea
+                          className="sim-qa-edit-textarea"
+                          value={editValue}
+                          onChange={e => setEditValue(e.target.value)}
+                          rows={4}
+                          autoFocus
+                        />
+                        <div className="sim-qa-inline-actions">
+                          <button
+                            className="sim-qa-save-answer-btn"
+                            onClick={() => saveIndividualAnswer(i)}
+                            disabled={savingAnswerIdx}
+                          >
+                            {savingAnswerIdx ? 'Saving…' : 'Save'}
+                          </button>
+                          {savedConfirmIdx === i && (
+                            <span className="sim-qa-saved-confirm">Saved ✓</span>
+                          )}
+                          <button
+                            className="sim-qa-cancel-btn"
+                            onClick={() => { setEditingIdx(null); setSavedConfirmIdx(null) }}
+                            disabled={savingAnswerIdx}
+                          >
+                            Done
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="sim-qa-answer-row">
+                        {qa.answer
+                          ? <p className="sim-qa-a">{qa.answer}</p>
+                          : <p className="sim-qa-empty">No answer recorded</p>
+                        }
+                        <button
+                          className="sim-qa-edit-btn"
+                          title="Edit this answer"
+                          onClick={() => { setEditingIdx(i); setEditValue(qa.answer || '') }}
+                        >
+                          ✎
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+
                 <div className="sim-qa-save-row">
                   <button
                     className="sim-start-btn sim-recalc-btn"
-                    onClick={handleEditSave}
+                    onClick={recalculateFeedback}
                     disabled={recalculating}
                   >
                     {recalculating
                       ? <><span className="sim-inline-spinner" /> Recalculating…</>
-                      : 'Save & Recalculate Feedback'}
-                  </button>
-                  <button
-                    className="sim-outline-btn"
-                    onClick={() => setEditingIdx(null)}
-                    disabled={recalculating}
-                  >
-                    Cancel
+                      : 'Recalculate Feedback'}
                   </button>
                 </div>
-              )}
+              </div>
+            )}
+          </div>
+
+          {/* ── Sticky footer: action buttons always visible ── */}
+          <div className="sim-report-footer">
+            <div className="sim-report-actions">
+              <button className="sim-start-btn" onClick={handleReset}>Try Again</button>
+              <button className="sim-outline-btn" onClick={onBack}>← Back to Prep</button>
             </div>
-          )}
+          </div>
+
         </div>
       )}
 

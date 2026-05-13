@@ -48,7 +48,10 @@ function truncate(str, n) {
 export default function Dashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const firstName = user?.email?.split('@')[0] ?? 'there'
+  const firstName = user?.user_metadata?.full_name
+    || user?.user_metadata?.display_name
+    || user?.email?.split('@')[0]
+    || 'there'
 
   const [stats,         setStats]         = useState({ journal: '—', skills: '—', experiences: '—' })
   const [targetRole,    setTargetRole]    = useState(null)   // string | null

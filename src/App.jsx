@@ -9,6 +9,9 @@ import SkillGap from './pages/SkillGap'
 import InterviewPrep from './pages/InterviewPrep'
 import CVScanner from './pages/CVScanner'
 import Experiences from './pages/Experiences'
+import PrivacyPolicy from './pages/PrivacyPolicy'
+import TermsOfService from './pages/TermsOfService'
+import ConsentBanner from './components/ConsentBanner'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -34,7 +37,12 @@ function AppLoader() {
 export default function App() {
   return (
     <BrowserRouter>
+      <ConsentBanner />
       <Routes>
+        {/* Public routes — no authentication required */}
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms"   element={<TermsOfService />} />
+
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/" element={
           <ProtectedRoute>

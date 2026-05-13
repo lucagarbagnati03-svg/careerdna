@@ -8,7 +8,7 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  overflow-y: auto;
+  /* overflow intentionally NOT set here — the report card handles its own scroll */
 }
 
 /* ── Shared card ── */
@@ -113,6 +113,14 @@
   box-shadow: 0 0 0 3px rgba(124,106,247,0.2);
 }
 
+.sim-error-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
 .sim-error {
   font-size: 13px;
   color: var(--danger);
@@ -122,6 +130,24 @@
   padding: 10px 16px;
   width: 100%;
   text-align: center;
+  line-height: 1.5;
+}
+
+.sim-retry-btn {
+  background: var(--bg-card);
+  border: 1px solid rgba(248,113,113,0.4);
+  color: var(--danger);
+  border-radius: 10px;
+  padding: 9px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.sim-retry-btn:hover {
+  background: rgba(248,113,113,0.1);
+  border-color: var(--danger);
 }
 
 .sim-start-btn {
@@ -154,6 +180,27 @@
 }
 
 .sim-outline-btn:hover { border-color: var(--accent); color: var(--accent-hover); }
+
+/* ── Voice notice ── */
+.sim-voice-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  max-width: 380px;
+  text-align: left;
+}
+
+.sim-voice-notice-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+.sim-voice-notice p {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
 
 .sim-back-link {
   background: none;
@@ -420,7 +467,46 @@
 .sim-next-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* ── Report ── */
-.sim-report { max-width: 600px; }
+.sim-report {
+  max-width: 600px;
+  /* Constrain to viewport so it never pushes outside the overlay */
+  max-height: calc(100vh - 48px);
+  /* Remove shared card padding/gap — handled by body/footer below */
+  padding: 0;
+  gap: 0;
+  overflow: hidden;  /* clip; children handle scroll */
+}
+
+/* Scrollable content area */
+.sim-report-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 36px 36px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+  /* Custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-light) transparent;
+}
+
+.sim-report-body::-webkit-scrollbar { width: 4px; }
+.sim-report-body::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 2px; }
+
+/* Sticky footer — always visible at the bottom of the report card */
+.sim-report-footer {
+  flex-shrink: 0;
+  padding: 14px 36px 24px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-secondary);
+  border-radius: 0 0 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
 .sim-report-title {
   font-size: 22px;
@@ -531,13 +617,12 @@
 
 .sim-report-actions {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
-  flex-wrap: wrap;
 }
 
-.sim-report-actions .sim-start-btn { flex: 1; }
-.sim-report-actions .sim-outline-btn { flex: 1; }
+.sim-report-actions .sim-start-btn  { flex: 1; }
+.sim-report-actions .sim-outline-btn{ flex: 1; }
 
 /* ── View Full Session ── */
 .sim-toggle-session-btn {
@@ -626,6 +711,57 @@
 .sim-qa-answer-row .sim-qa-empty {
   flex: 1;
 }
+
+/* Wrapper so inline actions sit below the textarea */
+.sim-qa-edit-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Row: Save · Saved ✓ · Done */
+.sim-qa-inline-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sim-qa-save-answer-btn {
+  background: var(--gradient);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.sim-qa-save-answer-btn:hover:not(:disabled) { opacity: 0.88; }
+.sim-qa-save-answer-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.sim-qa-saved-confirm {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--success);
+}
+
+.sim-qa-cancel-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-left: auto;
+}
+
+.sim-qa-cancel-btn:hover { border-color: var(--border-light); color: var(--text-secondary); }
 
 .sim-qa-edit-btn {
   background: none;

@@ -178,6 +178,15 @@ export default function DashboardLayout() {
                   <div className="profile-error">{resetError}</div>
                 )}
               </div>
+
+              <div className="profile-divider" />
+
+              {/* Legal links */}
+              <div className="profile-legal-links">
+                <a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+                <span className="profile-legal-dot">·</span>
+                <a href="/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a>
+              </div>
             </div>
           </div>
         </div>
