@@ -315,6 +315,21 @@ export default function InterviewPrep() {
     await persistRoleData(role, { readiness: newReadiness }, roleData)
   }
 
+  async function deletePrepSession(id, role) {
+    await supabase.from('interview_sessions').delete().eq('id', id)
+    const updated = sessions.filter(s => s.id !== id)
+    setSessions(updated)
+    if (expandedSession === id) setExpandedSession(null)
+
+    // Recalculate readiness without the deleted session
+    const rolePrepSessions = updated.filter(s => norm(s.target_role) === role)
+    const roleSimSessions  = simSessions.filter(s => norm(s.target_role) === role)
+    const newReadiness = calcReadiness(
+      profile?.skills, profile?.experiences, rolePrepSessions, cvUploaded, roleSimSessions
+    )
+    await persistRoleData(role, { readiness: newReadiness }, roleData)
+  }
+
   // ── Save one answer in a past simulation session ──────────────────────────────
   async function saveSimAnswer(sessionId, qIdx, newAnswer) {
     setSimSaving(true)
@@ -774,6 +789,13 @@ export default function InterviewPrep() {
                       </div>
                       <div className="ip-session-right">
                         <span className="ip-session-date">{fmtDate(s.created_at)}</span>
+                        <button
+                          className="delete-btn"
+                          title="Delete session"
+                          onClick={e => { e.stopPropagation(); deletePrepSession(s.id, norm(s.target_role)) }}
+                        >
+                          ×
+                        </button>
                         <span className="ip-session-chevron">{expandedSession === s.id ? '▲' : '▼'}</span>
                       </div>
                     </div>
