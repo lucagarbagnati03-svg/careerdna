@@ -82,10 +82,14 @@ export default function Dashboard() {
       setTargetRole(role)
 
       if (role) {
-        const reqs        = getSkillGapCache(role)
-        // Build the same Set that calcMatchPct expects: lowercase names of all user skills
+        const reqs           = getSkillGapCache(role)
         const userSkillNames = new Set((allSkills ?? []).map(s => s.name.toLowerCase()))
-        const pct         = reqs ? calcMatchPct(reqs, userSkillNames) : null
+        const pct            = reqs ? calcMatchPct(reqs, userSkillNames) : null
+        // DEBUG — remove after confirming data matches SkillGap.jsx
+        console.log('[Dashboard] role:', role)
+        console.log('[Dashboard] requirements count:', reqs?.length ?? 0, reqs)
+        console.log('[Dashboard] allSkills count:', allSkills?.length ?? 0, allSkills?.map(s => s.name))
+        console.log('[Dashboard] gapPct:', pct)
         setGapPct(pct)
       }
     } finally {

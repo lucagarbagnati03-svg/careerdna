@@ -97,6 +97,14 @@ export default function SkillGap() {
   // Use the single shared calcMatchPct — guaranteed identical to Dashboard's calculation.
   const weightedScore = calcMatchPct(requirements, userSkillNames) ?? 0
 
+  // DEBUG — remove after confirming data matches Dashboard.jsx
+  if (requirements.length > 0 && userSkills.length > 0) {
+    console.log('[SkillGap] analyzedRole:', analyzedRole)
+    console.log('[SkillGap] requirements count:', requirements.length, requirements)
+    console.log('[SkillGap] userSkills count:', userSkills.length, userSkills.map(s => s.name))
+    console.log('[SkillGap] weightedScore:', weightedScore)
+  }
+
   const roleChanged = roleInput.trim().toLowerCase() !== analyzedRole.toLowerCase()
 
   return (
