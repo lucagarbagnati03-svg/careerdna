@@ -18,11 +18,11 @@ export default function Journal() {
   const [title, setTitle] = useState('')
   const [entryDate, setEntryDate] = useState(todayISO)
   // Mobile tab: 'journal' | 'experiences' (desktop always shows journal)
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768)
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768)
   const [mobileTab, setMobileTab] = useState('journal')
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth <= 768)
+    const check = () => setIsMobile(window.innerWidth < 768)
     window.addEventListener('resize', check)
     return () => window.removeEventListener('resize', check)
   }, [])

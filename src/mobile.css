@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════
-   CareerDNA — Mobile styles (portrait phones, max-width: 768px)
+   CareerDNA — Mobile styles (portrait phones, max-width: 767px)
    Desktop styles are completely unchanged.
    ═══════════════════════════════════════════════════════════════ */
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
 
   /* ── Prevent horizontal scroll globally ── */
   html, body, #root { overflow-x: hidden; max-width: 100vw; }
@@ -448,7 +448,7 @@
   ────────────────────────────────────────────── */
   .auth-card { padding: 28px 20px; }
 
-} /* end @media (max-width: 768px) */
+} /* end @media (max-width: 767px) */
 
 /* ═══════════════════════════════════════════════════════════════
    MOBILE PREVIEW MODE — triggered by 📱 toggle button on desktop.
@@ -482,7 +482,7 @@
 }
 
 /* Hide toggle on actual mobile — media query takes over naturally */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .mobile-preview-toggle { display: none; }
 }
 
