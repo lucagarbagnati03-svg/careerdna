@@ -1,32 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Link, useOutletContext } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { displayCategory } from '../lib/categories'
+import { getSkillGapCache, calcMatchPct, pctColor } from '../lib/skillGap'
 import './Dashboard.css'
-
-function getCachedRequirements(role) {
-  try {
-    const raw = localStorage.getItem(`careerdna:role:${role.toLowerCase().trim()}`)
-    return raw ? JSON.parse(raw) : null
-  } catch { return null }
-}
-
-function calcMatchPct(requirements, userSkillNames) {
-  if (!requirements?.length) return null
-  const essential = requirements.filter(r => r.importance === 'essential')
-  const preferred  = requirements.filter(r => r.importance === 'preferred')
-  const essHave    = essential.filter(r => userSkillNames.has(r.name.toLowerCase())).length
-  const prefHave   = preferred.filter(r =>  userSkillNames.has(r.name.toLowerCase())).length
-  const denom      = essential.length * 2 + preferred.length
-  return denom ? Math.round(((essHave * 2 + prefHave) / denom) * 100) : 0
-}
-
-function pctColor(p) {
-  if (p >= 70) return 'var(--success)'
-  if (p >= 40) return 'var(--warning)'
-  return 'var(--danger)'
-}
 
 function greeting() {
   const h = new Date().getHours()
@@ -46,7 +24,6 @@ function truncate(str, n) {
 
 export default function Dashboard() {
   const { user } = useAuth()
-  const { openModal } = useOutletContext() ?? {}
 
   const firstName = user?.user_metadata?.full_name
     || user?.user_metadata?.display_name
@@ -83,7 +60,7 @@ export default function Dashboard() {
         { data: pref },
         { data: entries },
         { data: skills },
-        { data: allSkillNames },
+        { data: allSkills },
       ] = await Promise.all([
         supabase.from('journal_entries').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
         supabase.from('skills').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
@@ -93,7 +70,8 @@ export default function Dashboard() {
           .eq('user_id', user.id).order('created_at', { ascending: false }).limit(10),
         supabase.from('skills').select('name, category, level')
           .eq('user_id', user.id).order('level', { ascending: false }).limit(10),
-        supabase.from('skills').select('name').eq('user_id', user.id),
+        // Fetch all skills (no limit) for gap calculation — same query as SkillGap.jsx
+        supabase.from('skills').select('name, level, category').eq('user_id', user.id),
       ])
 
       setStats({ journal: jCount ?? 0, skills: sCount ?? 0, experiences: eCount ?? 0 })
@@ -104,9 +82,10 @@ export default function Dashboard() {
       setTargetRole(role)
 
       if (role) {
-        const reqs    = getCachedRequirements(role)
-        const nameSet = new Set((allSkillNames ?? []).map(s => s.name.toLowerCase()))
-        const pct     = reqs ? calcMatchPct(reqs, nameSet) : null
+        const reqs        = getSkillGapCache(role)
+        // Build the same Set that calcMatchPct expects: lowercase names of all user skills
+        const userSkillNames = new Set((allSkills ?? []).map(s => s.name.toLowerCase()))
+        const pct         = reqs ? calcMatchPct(reqs, userSkillNames) : null
         setGapPct(pct)
       }
     } finally {
@@ -145,10 +124,7 @@ export default function Dashboard() {
           <span className="db-mobile-brand-icon">🧬</span>
           <div className="db-hero-text">
             <p className="db-greeting">{greeting()}</p>
-            <h1 className="db-title">
-              {firstName}
-              <button className="db-edit-name-btn" onClick={openModal} title="Edit profile">✎</button>
-            </h1>
+            <h1 className="db-title">{firstName}</h1>
             <p className="db-subtitle">Here's what's happening with your career profile.</p>
           </div>
         </div>

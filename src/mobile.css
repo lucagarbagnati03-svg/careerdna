@@ -241,31 +241,6 @@
 
   .db-hero-text { flex: 1; min-width: 0; }
 
-  /* FIX 2 — pencil edit button next to name */
-  .db-edit-name-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 8px;
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    font-size: 15px;
-    color: var(--text-muted);
-    background: var(--bg-hover);
-    border: 1px solid var(--border);
-    cursor: pointer;
-    vertical-align: middle;
-    transition: all 0.15s;
-    flex-shrink: 0;
-  }
-
-  .db-edit-name-btn:hover {
-    color: var(--accent-hover);
-    border-color: var(--accent);
-    background: var(--accent-dim);
-  }
-
   .db-hero {
     flex-direction: column;
     align-items: flex-start;

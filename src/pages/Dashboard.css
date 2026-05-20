@@ -3,9 +3,8 @@
   max-width: 1000px;
 }
 
-/* Hidden on desktop — mobile.css reveals these */
+/* Hidden on desktop — mobile.css reveals it */
 .db-mobile-brand-icon { display: none; }
-.db-edit-name-btn     { display: none; }
 
 /* ── Hero ── */
 .db-hero {

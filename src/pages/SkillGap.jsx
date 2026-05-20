@@ -3,30 +3,25 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { analyzeRoleRequirements } from '../lib/groq'
 import { displayCategory } from '../lib/categories'
+import {
+  getSkillGapCache,
+  setSkillGapCache,
+  calcMatchPct,
+  pctColor,
+  pctGradient,
+  pctGradientSvg,
+} from '../lib/skillGap'
 import './SkillGap.css'
-
-// Cache AI-generated requirements in localStorage so we don't re-call on every visit
-function getCached(role) {
-  try {
-    const raw = localStorage.getItem(`careerdna:role:${role.toLowerCase().trim()}`)
-    return raw ? JSON.parse(raw) : null
-  } catch { return null }
-}
-function setCache(role, requirements) {
-  try {
-    localStorage.setItem(`careerdna:role:${role.toLowerCase().trim()}`, JSON.stringify(requirements))
-  } catch {}
-}
 
 export default function SkillGap() {
   const { user } = useAuth()
-  const [userSkills, setUserSkills] = useState([])
-  const [roleInput, setRoleInput] = useState('')
+  const [userSkills,   setUserSkills]   = useState([])
+  const [roleInput,    setRoleInput]    = useState('')
   const [analyzedRole, setAnalyzedRole] = useState('')
   const [requirements, setRequirements] = useState([])
-  const [analyzing, setAnalyzing] = useState(false)
-  const [loadingPage, setLoadingPage] = useState(true)
-  const [error, setError] = useState('')
+  const [analyzing,    setAnalyzing]    = useState(false)
+  const [loadingPage,  setLoadingPage]  = useState(true)
+  const [error,        setError]        = useState('')
   const inputRef = useRef(null)
 
   useEffect(() => {
@@ -43,9 +38,8 @@ export default function SkillGap() {
         if (savedRole) {
           setRoleInput(savedRole)
           setAnalyzedRole(savedRole)
-          const cached = getCached(savedRole)
+          const cached = getSkillGapCache(savedRole)
           if (cached) setRequirements(cached)
-          // If no cache, user will see the role pre-filled and can hit Analyze
         }
       } finally {
         setLoadingPage(false)
@@ -63,15 +57,13 @@ export default function SkillGap() {
     setRequirements([])
 
     try {
-      // Check cache first
-      const cached = getCached(role)
-      const reqs = cached ?? await analyzeRoleRequirements(role)
-      if (!cached) setCache(role, reqs)
+      const cached = getSkillGapCache(role)
+      const reqs   = cached ?? await analyzeRoleRequirements(role)
+      if (!cached) setSkillGapCache(role, reqs)
 
       setRequirements(reqs)
       setAnalyzedRole(role)
 
-      // Persist role preference
       await supabase.from('user_preferences').upsert(
         { user_id: user.id, target_role: role },
         { onConflict: 'user_id' }
@@ -83,31 +75,27 @@ export default function SkillGap() {
     }
   }
 
-  // Build a lookup map: lowercase skill name → level
-  const userSkillMap = Object.fromEntries(
-    userSkills.map(s => [s.name.toLowerCase(), s])
-  )
+  // Build lookup structures for individual card display (needs level) and for
+  // calcMatchPct (needs a Set of lowercase names — identical query shape to Dashboard).
+  const userSkillMap   = Object.fromEntries(userSkills.map(s => [s.name.toLowerCase(), s]))
+  const userSkillNames = new Set(userSkills.map(s => s.name.toLowerCase()))
 
-  // Match each required skill against user's skills
+  // Annotate each requirement with whether the user has it (used for card display).
   const gaps = requirements.map(req => {
     const match = userSkillMap[req.name.toLowerCase()]
     return { ...req, have: !!match, level: match?.level ?? 0 }
   })
 
   const essential = gaps.filter(g => g.importance === 'essential')
-  const preferred = gaps.filter(g => g.importance === 'preferred')
+  const preferred  = gaps.filter(g => g.importance === 'preferred')
 
   const essentialHave = essential.filter(g => g.have).length
   const preferredHave = preferred.filter(g => g.have).length
-  const totalHave = essentialHave + preferredHave
-  const total = gaps.length
+  const totalHave     = essentialHave + preferredHave
+  const total         = gaps.length
 
-  // Weight: essential skills count double
-  const weightedScore = essential.length > 0 || preferred.length > 0
-    ? Math.round(
-        ((essentialHave * 2 + preferredHave) / (essential.length * 2 + preferred.length)) * 100
-      )
-    : 0
+  // Use the single shared calcMatchPct — guaranteed identical to Dashboard's calculation.
+  const weightedScore = calcMatchPct(requirements, userSkillNames) ?? 0
 
   const roleChanged = roleInput.trim().toLowerCase() !== analyzedRole.toLowerCase()
 
@@ -250,7 +238,6 @@ export default function SkillGap() {
         </div>
       )}
 
-      {/* Cached role with no requirements loaded (user needs to re-analyze) */}
       {!analyzing && analyzedRole && requirements.length === 0 && !loadingPage && (
         <div className="reanalyze-prompt">
           <p>Click <strong>Analyze Role</strong> to generate requirements for <em>{analyzedRole}</em>.</p>
@@ -278,22 +265,4 @@ function SkillCard({ gap }) {
       </div>
     </div>
   )
-}
-
-function pctColor(pct) {
-  if (pct >= 70) return 'var(--success)'
-  if (pct >= 40) return 'var(--warning)'
-  return 'var(--danger)'
-}
-
-function pctGradient(pct) {
-  if (pct >= 70) return 'linear-gradient(90deg, #4ade80, #22c55e)'
-  if (pct >= 40) return 'linear-gradient(90deg, #fbbf24, #f59e0b)'
-  return 'linear-gradient(90deg, #f87171, #ef4444)'
-}
-
-function pctGradientSvg(pct) {
-  if (pct >= 70) return '#4ade80'
-  if (pct >= 40) return '#fbbf24'
-  return '#f87171'
 }
