@@ -101,22 +101,6 @@ export default function SkillGap() {
     }
   }
 
-  async function handleRefresh() {
-    // Intentional re-analysis: always calls Groq, overwrites stored requirements.
-    if (!analyzedRole) return
-    setError('')
-    setAnalyzing(true)
-    try {
-      setRequirements([])
-      const reqs = await analyzeAndSaveRequirements(user.id, analyzedRole)
-      setRequirements(reqs)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setAnalyzing(false)
-    }
-  }
-
   // Build lookup structures: Map for card display (needs level), Set for calcMatchPct.
   const userSkillMap   = Object.fromEntries(userSkills.map(s => [s.name.toLowerCase(), s]))
   const userSkillNames = new Set(userSkills.map(s => s.name.toLowerCase()))
@@ -187,17 +171,7 @@ export default function SkillGap() {
           <div className="gap-summary-card">
             <div className="gap-summary-left">
 
-              <div className="gap-role-header">
-                <div className="gap-role-name">{analyzedRole}</div>
-                <button
-                  className="gap-refresh-btn"
-                  onClick={handleRefresh}
-                  disabled={analyzing}
-                  title="Force a new AI analysis and overwrite stored requirements"
-                >
-                  ↺ Refresh
-                </button>
-              </div>
+              <div className="gap-role-name">{analyzedRole}</div>
 
               <div className="gap-match-line">
                 <span className="gap-match-pct" style={{ color: pctColor(weightedScore) }}>
