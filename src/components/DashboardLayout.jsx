@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
@@ -41,6 +41,20 @@ export default function DashboardLayout() {
   const [resetSent, setResetSent]         = useState(false)
   const [resetError, setResetError]       = useState('')
   const [nameSuccess, setNameSuccess]     = useState(false)
+  const [mobilePreview, setMobilePreview] = useState(
+    () => localStorage.getItem('cdna_mobile_preview') === 'true'
+  )
+
+  useEffect(() => {
+    const html = document.documentElement
+    if (mobilePreview) {
+      html.classList.add('mobile-preview')
+      localStorage.setItem('cdna_mobile_preview', 'true')
+    } else {
+      html.classList.remove('mobile-preview')
+      localStorage.setItem('cdna_mobile_preview', 'false')
+    }
+  }, [mobilePreview])
 
   async function handleSignOut() {
     await signOut()
@@ -81,6 +95,13 @@ export default function DashboardLayout() {
         <div className="sidebar-header">
           <span className="sidebar-logo-icon">🧬</span>
           <span className="sidebar-logo-text">CareerDNA</span>
+          <button
+            className={`mobile-preview-toggle ${mobilePreview ? 'active' : ''}`}
+            onClick={() => setMobilePreview(v => !v)}
+            title={mobilePreview ? 'Exit mobile preview' : 'Preview mobile layout'}
+          >
+            📱
+          </button>
         </div>
 
         <nav className="sidebar-nav">
@@ -121,6 +142,30 @@ export default function DashboardLayout() {
       <main className="main-content">
         <Outlet />
       </main>
+
+      {/* Mobile-only bottom navigation bar */}
+      <nav className="bottom-nav">
+        <NavLink to="/" end className={({ isActive }) => `bnav-item ${isActive ? 'active' : ''}`}>
+          <span className="bnav-icon">◈</span>
+          <span className="bnav-label">Overview</span>
+        </NavLink>
+        <NavLink to="/journal" className={({ isActive }) => `bnav-item ${isActive ? 'active' : ''}`}>
+          <span className="bnav-icon">✦</span>
+          <span className="bnav-label">Journal</span>
+        </NavLink>
+        <NavLink to="/skills" className={({ isActive }) => `bnav-item ${isActive ? 'active' : ''}`}>
+          <span className="bnav-icon">◉</span>
+          <span className="bnav-label">Skills</span>
+        </NavLink>
+        <NavLink to="/skill-gap" className={({ isActive }) => `bnav-item ${isActive ? 'active' : ''}`}>
+          <span className="bnav-icon">◎</span>
+          <span className="bnav-label">Gap</span>
+        </NavLink>
+        <NavLink to="/interview-prep" className={({ isActive }) => `bnav-item ${isActive ? 'active' : ''}`}>
+          <span className="bnav-icon">◇</span>
+          <span className="bnav-label">Interview</span>
+        </NavLink>
+      </nav>
 
       {/* Edit Profile modal */}
       {showModal && (

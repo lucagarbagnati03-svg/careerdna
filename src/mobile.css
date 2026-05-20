@@ -1,0 +1,417 @@
+/* ═══════════════════════════════════════════════════════════════
+   CareerDNA — Mobile styles (portrait phones, max-width: 768px)
+   Desktop styles are completely unchanged.
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+
+  /* ── Prevent horizontal scroll globally ── */
+  html, body, #root { overflow-x: hidden; max-width: 100vw; }
+
+  /* ──────────────────────────────────────────────
+     LAYOUT
+     Switch from container-scroll (desktop) to
+     natural body scroll (mobile). The desktop
+     pattern locks height at 100vh so the sidebar
+     doesn't scroll; on mobile there is no sidebar
+     so body scrolling is simpler and more reliable,
+     especially on iOS Safari.
+  ────────────────────────────────────────────── */
+  .layout {
+    flex-direction: column;
+    height: auto;           /* remove 100vh constraint */
+    min-height: 100svh;     /* svh = small viewport height, avoids iOS address-bar jump */
+    overflow: visible;      /* remove overflow: hidden that was blocking scroll */
+  }
+
+  .sidebar { display: none; }
+
+  .main-content {
+    flex: none;
+    width: 100%;
+    height: auto;
+    overflow-y: visible;    /* let the body scroll, not the container */
+    overflow-x: hidden;
+    padding-bottom: 80px;   /* always enough space above the 60px bottom nav */
+  }
+
+  /* Extra padding on all page wrappers so nothing hides behind the bottom nav */
+  .page       { padding-bottom: 80px !important; }
+  .dashboard  { padding-bottom: 80px !important; }
+  .ip-page    { padding-bottom: 80px !important; }
+
+  /* ──────────────────────────────────────────────
+     BOTTOM NAV
+  ────────────────────────────────────────────── */
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 60px;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border);
+    z-index: 100;
+    align-items: stretch;
+  }
+
+  .bnav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.15s;
+    padding: 0 4px;
+  }
+
+  .bnav-item.active { color: var(--accent-hover); }
+
+  .bnav-icon { font-size: 18px; line-height: 1; }
+
+  .bnav-label {
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  /* ──────────────────────────────────────────────
+     DASHBOARD
+  ────────────────────────────────────────────── */
+  .dashboard { padding: 20px 16px 24px; max-width: 100%; }
+
+  .db-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .db-title { font-size: 24px; }
+
+  .db-quick-actions { width: 100%; flex-wrap: wrap; }
+
+  .qa-btn {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+    justify-content: center;
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  .db-stats-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .db-stat-value { font-size: 22px; }
+  .db-stat-value.is-text { font-size: 12px; }
+
+  .db-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  /* ──────────────────────────────────────────────
+     SHARED PAGE WRAPPER
+  ────────────────────────────────────────────── */
+  .page { padding: 20px 16px 24px; max-width: 100%; }
+
+  .page-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .page-title { font-size: 22px; }
+
+  /* ──────────────────────────────────────────────
+     SKILLS
+  ────────────────────────────────────────────── */
+  .skill-form { flex-direction: column; }
+
+  .skills-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* ──────────────────────────────────────────────
+     SKILL GAP
+  ────────────────────────────────────────────── */
+  .role-input-card { flex-direction: column; align-items: stretch; }
+
+  .role-select { max-width: 100%; }
+
+  .gap-summary-card { flex-direction: column; }
+
+  .gap-ring-wrap { align-self: center; }
+
+  .gap-grid { grid-template-columns: 1fr; }
+
+  /* ──────────────────────────────────────────────
+     JOURNAL
+  ────────────────────────────────────────────── */
+  .journal-form { padding: 16px; }
+
+  .entry-card { padding: 16px; }
+
+  /* ──────────────────────────────────────────────
+     CV SCANNER
+  ────────────────────────────────────────────── */
+  .cv-tabs { flex-direction: column; }
+
+  .cv-tab { justify-content: center; }
+
+  .results-header { flex-direction: column; align-items: flex-start; }
+
+  .stored-cv-card { padding: 16px; }
+
+  /* ──────────────────────────────────────────────
+     EXPERIENCES
+  ────────────────────────────────────────────── */
+  .exp-form-row { grid-template-columns: 1fr; }
+
+  .timeline-item { gap: 10px; }
+
+  .exp-card { padding: 14px; }
+
+  /* ──────────────────────────────────────────────
+     INTERVIEW PREP
+  ────────────────────────────────────────────── */
+  .ip-page { padding: 16px 14px 24px; max-width: 100%; }
+
+  .ip-mode-tabs { width: 100%; }
+
+  .ip-mode-tab { flex: 1; justify-content: center; padding: 8px 10px; font-size: 13px; }
+
+  .ip-role-bar { flex-wrap: wrap; gap: 8px; }
+
+  .ip-role-chips { flex-wrap: wrap; }
+
+  .ip-analysis-cols { grid-template-columns: 1fr; }
+
+  .ip-readiness-bar-track { max-width: 100%; }
+
+  .ip-section { padding: 16px; }
+
+  .ip-question-card { flex-direction: column; align-items: flex-start; gap: 10px; }
+
+  .ip-practice-btn { align-self: flex-end; }
+
+  .ip-star-tabs { flex-wrap: wrap; }
+
+  .ip-star-tab { flex: 1; min-width: 64px; }
+
+  .ip-report-cols,
+  .ip-report-cols { grid-template-columns: 1fr; }
+
+  .ip-sessions-list .ip-session-header { gap: 8px; }
+
+  /* ──────────────────────────────────────────────
+     LIVE SIMULATION
+     The overlay is position:fixed so it is
+     independent of the page scroll model above.
+  ────────────────────────────────────────────── */
+  .sim-overlay {
+    padding: 12px;
+    /* Allow the overlay itself to scroll if its card somehow overflows */
+    overflow-y: auto;
+    align-items: flex-start;
+    padding-top: 16px;
+  }
+
+  .sim-card {
+    padding: 28px 20px;
+    border-radius: 16px;
+    max-width: 100%;
+    width: 100%;
+    /* Let the card grow naturally inside the scrollable overlay */
+    max-height: none;
+    overflow: visible;
+  }
+
+  /* Report card: switch from internal body scroll to letting the overlay scroll */
+  .sim-report {
+    max-height: none;         /* remove height constraint on mobile */
+    overflow: visible;        /* let the overlay scroll instead */
+  }
+
+  .sim-report-body {
+    overflow-y: visible;      /* no internal scroll — overlay handles it */
+    padding: 24px 20px 12px;
+    flex: none;
+    height: auto;
+  }
+
+  .sim-report-footer {
+    padding: 12px 20px 20px;
+    position: sticky;
+    bottom: 0;                /* sticky footer stays at bottom of viewport as you scroll */
+    background: var(--bg-secondary);
+  }
+
+  .sim-report-cols { grid-template-columns: 1fr; }
+
+  .sim-interview { padding: 16px 0; }
+
+  .sim-question-box { padding: 20px 18px; }
+
+  .sim-question-text { font-size: 16px; }
+
+  .sim-count-row { justify-content: center; }
+
+  .sim-report-actions { flex-direction: column; }
+
+  .sim-report-actions .sim-start-btn,
+  .sim-report-actions .sim-outline-btn { width: 100%; text-align: center; }
+
+  /* Session review — make sure it doesn't clip on mobile */
+  .sim-session-review { max-height: none; }
+
+  /* Hint popup — anchor to bottom-right above everything */
+  .sim-hint-popup {
+    top: auto;
+    bottom: 16px;
+    right: 12px;
+    transform: none;
+    max-width: calc(100vw - 24px);
+  }
+
+  @keyframes sim-hint-slide {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  /* ──────────────────────────────────────────────
+     PROFILE MODAL
+  ────────────────────────────────────────────── */
+  .profile-modal { max-width: 100%; border-radius: 16px 16px 0 0; }
+  .profile-modal-overlay { align-items: flex-end; padding: 0; }
+
+  /* ──────────────────────────────────────────────
+     CONSENT BANNER
+  ────────────────────────────────────────────── */
+  .consent-modal { padding: 24px 18px; border-radius: 16px; }
+  .consent-accept-btn { max-width: 100%; }
+
+  /* ──────────────────────────────────────────────
+     LEGAL PAGES
+  ────────────────────────────────────────────── */
+  .legal-page { padding: 24px 16px 60px; }
+  .legal-title { font-size: 24px; }
+
+  /* ──────────────────────────────────────────────
+     AUTH PAGE
+  ────────────────────────────────────────────── */
+  .auth-card { padding: 28px 20px; }
+
+} /* end @media (max-width: 768px) */
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE PREVIEW MODE — triggered by 📱 toggle button on desktop.
+   Mirrors the key mobile rules above so desktop users can preview
+   the mobile layout without resizing the browser window.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Toggle button — visible only on desktop/tablet */
+.mobile-preview-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  font-size: 14px;
+  background: none;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  margin-left: auto;
+  opacity: 0.5;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.mobile-preview-toggle:hover { opacity: 1; border-color: var(--accent); }
+.mobile-preview-toggle.active {
+  opacity: 1;
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  box-shadow: 0 0 8px rgba(124,106,247,0.3);
+}
+
+/* Hide toggle on actual mobile — media query takes over naturally */
+@media (max-width: 768px) {
+  .mobile-preview-toggle { display: none; }
+}
+
+/* ── Preview mode structural rules ── */
+html.mobile-preview .sidebar { display: none !important; }
+
+html.mobile-preview .layout {
+  flex-direction: column;
+  height: auto;
+  min-height: 100svh;
+  overflow: visible;
+}
+
+html.mobile-preview .main-content {
+  flex: none;
+  width: 100%;
+  height: auto;
+  max-width: 430px;
+  margin: 0 auto;
+  padding-bottom: 80px;
+  overflow-y: visible;
+  overflow-x: hidden;
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.25);
+  position: relative;
+  z-index: 1;
+}
+
+html.mobile-preview .page      { padding-bottom: 80px !important; }
+html.mobile-preview .dashboard { padding-bottom: 80px !important; }
+html.mobile-preview .ip-page   { padding-bottom: 80px !important; }
+
+html.mobile-preview .bottom-nav { display: flex !important; }
+
+html.mobile-preview .dashboard { padding: 20px 16px 24px; max-width: 100%; }
+html.mobile-preview .page      { padding: 20px 16px 24px; max-width: 100%; }
+html.mobile-preview .ip-page   { padding: 16px 14px 24px; max-width: 100%; }
+
+html.mobile-preview .db-hero   { flex-direction: column; align-items: flex-start; gap: 14px; margin-bottom: 20px; }
+html.mobile-preview .db-quick-actions { width: 100%; flex-wrap: wrap; }
+html.mobile-preview .db-stats-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+html.mobile-preview .db-grid   { grid-template-columns: 1fr; }
+
+html.mobile-preview .ip-analysis-cols { grid-template-columns: 1fr; }
+html.mobile-preview .ip-mode-tabs { width: 100%; }
+html.mobile-preview .ip-mode-tab  { flex: 1; justify-content: center; font-size: 13px; }
+html.mobile-preview .ip-question-card { flex-direction: column; align-items: flex-start; gap: 10px; }
+html.mobile-preview .ip-practice-btn  { align-self: flex-end; }
+html.mobile-preview .ip-section { padding: 16px; }
+html.mobile-preview .ip-role-bar { flex-wrap: wrap; }
+
+html.mobile-preview .sim-report-cols { grid-template-columns: 1fr; }
+html.mobile-preview .sim-report-actions { flex-direction: column; }
+html.mobile-preview .sim-card { padding: 28px 20px; border-radius: 16px; max-width: 100%; max-height: none; overflow: visible; }
+html.mobile-preview .sim-report { max-height: none; overflow: visible; }
+html.mobile-preview .sim-report-body { overflow-y: visible; padding: 24px 20px 12px; flex: none; height: auto; }
+html.mobile-preview .sim-report-footer { padding: 12px 20px 20px; position: sticky; bottom: 0; background: var(--bg-secondary); }
+html.mobile-preview .sim-session-review { max-height: none; }
+html.mobile-preview .sim-hint-popup { top: auto; bottom: 16px; right: 12px; transform: none; max-width: calc(430px - 24px); }
+
+html.mobile-preview .exp-form-row { grid-template-columns: 1fr; }
+
+html.mobile-preview .skills-grid { grid-template-columns: repeat(2, 1fr); }
+
+html.mobile-preview .role-input-card { flex-direction: column; align-items: stretch; }
+html.mobile-preview .role-select { max-width: 100%; }
+html.mobile-preview .gap-summary-card { flex-direction: column; }
+html.mobile-preview .gap-grid { grid-template-columns: 1fr; }
+
+html.mobile-preview .cv-tabs { flex-direction: column; }
+html.mobile-preview .page-header-row { flex-direction: column; align-items: flex-start; gap: 12px; }
+
+html.mobile-preview .results-header { flex-direction: column; align-items: flex-start; }

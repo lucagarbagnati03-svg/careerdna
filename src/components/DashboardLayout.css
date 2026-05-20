@@ -342,3 +342,6 @@
   overflow-y: auto;
   background: var(--bg-primary);
 }
+
+/* Bottom nav — hidden on desktop, shown via mobile.css media query */
+.bottom-nav { display: none; }
