@@ -16,11 +16,18 @@ import { analyzeRoleRequirements } from './groq'
  * @returns {Array}        - requirements array from Groq
  */
 export async function analyzeAndSaveRequirements(userId, role) {
+  // Groq failure throws — caller handles the error.
   const reqs = await analyzeRoleRequirements(role)
-  await supabase.from('user_preferences').upsert(
-    { user_id: userId, target_role: role, job_requirements: reqs },
-    { onConflict: 'user_id' }
-  )
+  // DB save is best-effort: if job_requirements column doesn't exist yet (migration
+  // not run) the upsert will fail, but we still return reqs so the UI works this session.
+  try {
+    await supabase.from('user_preferences').upsert(
+      { user_id: userId, target_role: role, job_requirements: reqs },
+      { onConflict: 'user_id' }
+    )
+  } catch (err) {
+    console.warn('[skillGap] job_requirements not saved to DB:', err.message)
+  }
   return reqs
 }
 

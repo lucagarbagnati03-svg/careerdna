@@ -60,16 +60,56 @@ export default function SkillGap() {
 
     try {
       let reqs
+
       if (role === analyzedRole && requirements.length > 0) {
-        // Same role, requirements already loaded from Supabase — skip Groq call.
+        // Requirements already in memory for this exact role — use them.
+        // No DB call, no Groq call. Percentage is guaranteed identical.
         reqs = requirements
       } else {
-        // New role or no requirements stored — generate via Groq and save to Supabase.
-        setRequirements([])
-        reqs = await analyzeAndSaveRequirements(user.id, role)
+        // Requirements not in memory. Check Supabase before calling Groq.
+        const { data: pref } = await supabase
+          .from('user_preferences')
+          .select('target_role, job_requirements')
+          .eq('user_id', user.id)
+          .maybeSingle()
+
+        const dbHasReqs = pref?.target_role === role
+          && Array.isArray(pref?.job_requirements)
+          && pref.job_requirements.length > 0
+
+        if (dbHasReqs) {
+          // Supabase has requirements for this exact role — use them.
+          reqs = pref.job_requirements
+        } else {
+          // No stored requirements. Save target_role first (always safe, column always exists),
+          // then call Groq and save job_requirements.
+          await supabase.from('user_preferences').upsert(
+            { user_id: user.id, target_role: role },
+            { onConflict: 'user_id' }
+          )
+          setRequirements([])
+          reqs = await analyzeAndSaveRequirements(user.id, role)
+        }
       }
+
       setRequirements(reqs)
       setAnalyzedRole(role)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setAnalyzing(false)
+    }
+  }
+
+  async function handleRefresh() {
+    // Intentional re-analysis: always calls Groq, overwrites stored requirements.
+    if (!analyzedRole) return
+    setError('')
+    setAnalyzing(true)
+    try {
+      setRequirements([])
+      const reqs = await analyzeAndSaveRequirements(user.id, analyzedRole)
+      setRequirements(reqs)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -87,17 +127,13 @@ export default function SkillGap() {
     return { ...req, have: !!match, level: match?.level ?? 0 }
   })
 
-  const essential = gaps.filter(g => g.importance === 'essential')
-  const preferred  = gaps.filter(g => g.importance === 'preferred')
-
+  const essential    = gaps.filter(g => g.importance === 'essential')
+  const preferred    = gaps.filter(g => g.importance === 'preferred')
   const essentialHave = essential.filter(g => g.have).length
   const preferredHave = preferred.filter(g => g.have).length
   const totalHave     = essentialHave + preferredHave
   const total         = gaps.length
-
   const weightedScore = calcMatchPct(requirements, userSkillNames) ?? 0
-
-  const roleChanged = roleInput.trim().toLowerCase() !== analyzedRole.toLowerCase()
 
   return (
     <div className="page">
@@ -128,8 +164,6 @@ export default function SkillGap() {
           >
             {analyzing ? (
               <><span className="spinner" /> Analyzing…</>
-            ) : roleChanged && analyzedRole ? (
-              'Re-analyze'
             ) : (
               'Analyze Role'
             )}
@@ -142,7 +176,7 @@ export default function SkillGap() {
       {analyzing && (
         <div className="analyzing-state">
           <span className="analyzing-spinner" />
-          <span>Asking AI to map skills for <strong>{roleInput}</strong>…</span>
+          <span>Asking AI to map skills for <strong>{roleInput || analyzedRole}</strong>…</span>
         </div>
       )}
 
@@ -152,7 +186,19 @@ export default function SkillGap() {
           {/* Summary card */}
           <div className="gap-summary-card">
             <div className="gap-summary-left">
-              <div className="gap-role-name">{analyzedRole}</div>
+
+              <div className="gap-role-header">
+                <div className="gap-role-name">{analyzedRole}</div>
+                <button
+                  className="gap-refresh-btn"
+                  onClick={handleRefresh}
+                  disabled={analyzing}
+                  title="Force a new AI analysis and overwrite stored requirements"
+                >
+                  ↺ Refresh
+                </button>
+              </div>
+
               <div className="gap-match-line">
                 <span className="gap-match-pct" style={{ color: pctColor(weightedScore) }}>
                   {weightedScore}% match
@@ -229,7 +275,7 @@ export default function SkillGap() {
         </>
       )}
 
-      {/* Empty state */}
+      {/* Empty state — no role entered yet */}
       {!analyzing && !analyzedRole && !loadingPage && (
         <div className="empty-state">
           <span>◎</span>
@@ -237,6 +283,7 @@ export default function SkillGap() {
         </div>
       )}
 
+      {/* Role saved but no requirements yet (e.g., first visit after migration) */}
       {!analyzing && analyzedRole && requirements.length === 0 && !loadingPage && (
         <div className="reanalyze-prompt">
           <p>Click <strong>Analyze Role</strong> to generate requirements for <em>{analyzedRole}</em>.</p>
