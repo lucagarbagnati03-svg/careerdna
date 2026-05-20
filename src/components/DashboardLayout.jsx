@@ -41,18 +41,16 @@ export default function DashboardLayout() {
   const [resetSent, setResetSent]         = useState(false)
   const [resetError, setResetError]       = useState('')
   const [nameSuccess, setNameSuccess]     = useState(false)
-  const [mobilePreview, setMobilePreview] = useState(
-    () => localStorage.getItem('cdna_mobile_preview') === 'true'
-  )
+  // Mobile preview is a session-only debug tool — never persisted to localStorage.
+  // Always starts OFF so production users are never affected.
+  const [mobilePreview, setMobilePreview] = useState(false)
 
   useEffect(() => {
     const html = document.documentElement
     if (mobilePreview) {
       html.classList.add('mobile-preview')
-      localStorage.setItem('cdna_mobile_preview', 'true')
     } else {
       html.classList.remove('mobile-preview')
-      localStorage.setItem('cdna_mobile_preview', 'false')
     }
   }, [mobilePreview])
 
