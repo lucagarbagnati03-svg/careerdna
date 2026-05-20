@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useOutletContext } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { displayCategory } from '../lib/categories'
 import './Dashboard.css'
 
-// Reuse the same localStorage cache key format as SkillGap.jsx
 function getCachedRequirements(role) {
   try {
     const raw = localStorage.getItem(`careerdna:role:${role.toLowerCase().trim()}`)
@@ -47,18 +46,28 @@ function truncate(str, n) {
 
 export default function Dashboard() {
   const { user } = useAuth()
-  const navigate = useNavigate()
+  const { openModal } = useOutletContext() ?? {}
+
   const firstName = user?.user_metadata?.full_name
     || user?.user_metadata?.display_name
     || user?.email?.split('@')[0]
     || 'there'
 
-  const [stats,         setStats]         = useState({ journal: '—', skills: '—', experiences: '—' })
-  const [targetRole,    setTargetRole]    = useState(null)   // string | null
-  const [recentEntries, setRecentEntries] = useState([])
-  const [topSkills,     setTopSkills]     = useState([])
-  const [gapPct,        setGapPct]        = useState(null)   // number | null
-  const [loading,       setLoading]       = useState(true)
+  const [isMobile,        setIsMobile]        = useState(() => window.innerWidth < 768)
+  const [showAllActivity, setShowAllActivity] = useState(false)
+  const [showAllSkills,   setShowAllSkills]   = useState(false)
+  const [stats,           setStats]           = useState({ journal: '—', skills: '—', experiences: '—' })
+  const [targetRole,      setTargetRole]      = useState(null)
+  const [recentEntries,   setRecentEntries]   = useState([])
+  const [topSkills,       setTopSkills]       = useState([])
+  const [gapPct,          setGapPct]          = useState(null)
+  const [loading,         setLoading]         = useState(true)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   useEffect(() => {
     if (user) load()
@@ -81,9 +90,9 @@ export default function Dashboard() {
         supabase.from('experiences').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
         supabase.from('user_preferences').select('target_role').eq('user_id', user.id).maybeSingle(),
         supabase.from('journal_entries').select('id, title, content, created_at')
-          .eq('user_id', user.id).order('created_at', { ascending: false }).limit(3),
+          .eq('user_id', user.id).order('created_at', { ascending: false }).limit(10),
         supabase.from('skills').select('name, category, level')
-          .eq('user_id', user.id).order('level', { ascending: false }).limit(5),
+          .eq('user_id', user.id).order('level', { ascending: false }).limit(10),
         supabase.from('skills').select('name').eq('user_id', user.id),
       ])
 
@@ -95,9 +104,9 @@ export default function Dashboard() {
       setTargetRole(role)
 
       if (role) {
-        const reqs      = getCachedRequirements(role)
-        const nameSet   = new Set((allSkillNames ?? []).map(s => s.name.toLowerCase()))
-        const pct       = reqs ? calcMatchPct(reqs, nameSet) : null
+        const reqs    = getCachedRequirements(role)
+        const nameSet = new Set((allSkillNames ?? []).map(s => s.name.toLowerCase()))
+        const pct     = reqs ? calcMatchPct(reqs, nameSet) : null
         setGapPct(pct)
       }
     } finally {
@@ -118,15 +127,30 @@ export default function Dashboard() {
     },
   ]
 
+  // Desktop: always slice to original limits. Mobile: controlled by show-all toggles.
+  const visibleEntries = isMobile
+    ? (showAllActivity ? recentEntries : recentEntries.slice(0, 3))
+    : recentEntries.slice(0, 3)
+
+  const visibleSkills = isMobile
+    ? (showAllSkills ? topSkills : topSkills.slice(0, 3))
+    : topSkills.slice(0, 5)
+
   return (
     <div className="dashboard">
 
       {/* ── Hero header ── */}
       <div className="db-hero">
         <div className="db-hero-left">
-          <p className="db-greeting">{greeting()}</p>
-          <h1 className="db-title">{firstName}</h1>
-          <p className="db-subtitle">Here's what's happening with your career profile.</p>
+          <span className="db-mobile-brand-icon">🧬</span>
+          <div className="db-hero-text">
+            <p className="db-greeting">{greeting()}</p>
+            <h1 className="db-title">
+              {firstName}
+              <button className="db-edit-name-btn" onClick={openModal} title="Edit profile">✎</button>
+            </h1>
+            <p className="db-subtitle">Here's what's happening with your career profile.</p>
+          </div>
         </div>
         <div className="db-quick-actions">
           <Link to="/journal"        className="qa-btn primary">+ Log Today</Link>
@@ -171,24 +195,31 @@ export default function Dashboard() {
                 <Link to="/journal" className="db-empty-cta">Write your first entry →</Link>
               </div>
             ) : (
-              <div className="db-activity-list">
-                {recentEntries.map(entry => (
-                  <Link key={entry.id} to="/journal" className="db-activity-item">
-                    <div className="db-activity-dot" />
-                    <div className="db-activity-body">
-                      <div className="db-activity-top">
-                        <span className="db-activity-title">
-                          {entry.title || 'Untitled Entry'}
-                        </span>
-                        <span className="db-activity-date">{fmtDate(entry.created_at)}</span>
+              <>
+                <div className="db-activity-list">
+                  {visibleEntries.map(entry => (
+                    <Link key={entry.id} to="/journal" className="db-activity-item">
+                      <div className="db-activity-dot" />
+                      <div className="db-activity-body">
+                        <div className="db-activity-top">
+                          <span className="db-activity-title">
+                            {entry.title || 'Untitled Entry'}
+                          </span>
+                          <span className="db-activity-date">{fmtDate(entry.created_at)}</span>
+                        </div>
+                        <p className="db-activity-preview">
+                          {truncate(entry.content, 120)}
+                        </p>
                       </div>
-                      <p className="db-activity-preview">
-                        {truncate(entry.content, 120)}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+                    </Link>
+                  ))}
+                </div>
+                {isMobile && recentEntries.length > 3 && (
+                  <button className="db-show-more-btn" onClick={() => setShowAllActivity(v => !v)}>
+                    {showAllActivity ? 'Show less' : `Show ${recentEntries.length - 3} more`}
+                  </button>
+                )}
+              </>
             )}
           </div>
 
@@ -214,26 +245,33 @@ export default function Dashboard() {
                 <Link to="/skills" className="db-empty-cta">Add your first skill →</Link>
               </div>
             ) : (
-              <div className="db-skills-list">
-                {topSkills.map((skill, i) => (
-                  <div key={skill.name} className="db-skill-row">
-                    <div className="db-skill-rank">#{i + 1}</div>
-                    <div className="db-skill-info">
-                      <div className="db-skill-top">
-                        <span className="db-skill-name">{skill.name}</span>
-                        <span className="db-skill-level">Lv {skill.level}</span>
+              <>
+                <div className="db-skills-list">
+                  {visibleSkills.map((skill, i) => (
+                    <div key={skill.name} className="db-skill-row">
+                      <div className="db-skill-rank">#{i + 1}</div>
+                      <div className="db-skill-info">
+                        <div className="db-skill-top">
+                          <span className="db-skill-name">{skill.name}</span>
+                          <span className="db-skill-level">Lv {skill.level}</span>
+                        </div>
+                        <div className="db-skill-bar-track">
+                          <div
+                            className="db-skill-bar-fill"
+                            style={{ width: `${(skill.level / 5) * 100}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="db-skill-bar-track">
-                        <div
-                          className="db-skill-bar-fill"
-                          style={{ width: `${(skill.level / 5) * 100}%` }}
-                        />
-                      </div>
+                      <span className="db-skill-cat">{displayCategory(skill.category)}</span>
                     </div>
-                    <span className="db-skill-cat">{displayCategory(skill.category)}</span>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+                {isMobile && topSkills.length > 3 && (
+                  <button className="db-show-more-btn" onClick={() => setShowAllSkills(v => !v)}>
+                    {showAllSkills ? 'Show less' : `Show ${topSkills.length - 3} more`}
+                  </button>
+                )}
+              </>
             )}
           </div>
 

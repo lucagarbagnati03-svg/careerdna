@@ -19,7 +19,7 @@ export default function Journal() {
   const [entryDate, setEntryDate] = useState(todayISO)
   // Mobile tab: 'journal' | 'experiences' (desktop always shows journal)
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768)
-  const [mobileTab, setMobileTab] = useState('journal')
+  const [activeTab, setMobileTab] = useState('journal')
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768)
@@ -130,7 +130,7 @@ export default function Journal() {
   }
 
   // If on mobile and Experiences tab is active, render Experiences directly
-  if (isMobile && mobileTab === 'experiences') {
+  if (isMobile && activeTab === 'experiences') {
     return (
       <div className="page">
         <div className="journal-mobile-tabs">

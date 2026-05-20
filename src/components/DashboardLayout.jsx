@@ -129,7 +129,7 @@ export default function DashboardLayout() {
       </aside>
 
       <main className="main-content">
-        <Outlet />
+        <Outlet context={{ openModal }} />
       </main>
 
       {/* Mobile-only bottom navigation bar */}

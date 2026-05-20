@@ -129,10 +129,12 @@
   }
 
   /* ──────────────────────────────────────────────
-     JOURNAL — mobile tab switcher
+     JOURNAL — FIX 6: mobile tab switcher (full-width pill)
   ────────────────────────────────────────────── */
   .journal-mobile-tabs {
     display: flex;
+    width: 100%;
+    box-sizing: border-box;
     background: var(--bg-secondary);
     border: 1px solid var(--border);
     border-radius: 12px;
@@ -143,7 +145,7 @@
 
   .jmt-tab {
     flex: 1;
-    padding: 9px 8px;
+    padding: 10px 8px;
     border-radius: 9px;
     border: none;
     background: none;
@@ -151,35 +153,53 @@
     font-weight: 600;
     color: var(--text-muted);
     cursor: pointer;
+    text-align: center;
     transition: all 0.15s;
+    white-space: nowrap;
   }
 
   .jmt-tab.active {
     background: var(--bg-card);
     color: var(--text-primary);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 
   /* ──────────────────────────────────────────────
-     SKILLS — mobile chip category selector
+     SKILLS — FIX 5: form inputs + chip selector
   ────────────────────────────────────────────── */
-  .skill-select { display: none; }   /* hide standard select on mobile */
+  .skill-select { display: none; }
+
+  .skill-input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .level-picker {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .skill-form .btn-primary {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
 
   .skill-cat-chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 7px;
+    gap: 8px;
     width: 100%;
   }
 
   .skill-cat-chip {
     flex: 0 1 auto;
-    padding: 7px 12px;
+    padding: 8px 14px;
     border-radius: 99px;
     border: 1.5px solid var(--border-light);
     background: var(--bg-card);
     color: var(--text-secondary);
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.15s;
@@ -195,13 +215,56 @@
     background: var(--accent-dim);
     border-color: var(--accent);
     color: var(--accent-hover);
-    box-shadow: 0 0 0 3px rgba(124,106,247,0.12);
+    box-shadow: 0 0 0 3px rgba(124, 106, 247, 0.12);
   }
 
   /* ──────────────────────────────────────────────
      DASHBOARD — fix overflow on activity + skills
   ────────────────────────────────────────────── */
   .dashboard { padding: 20px 16px 24px; max-width: 100%; }
+
+  /* FIX 1 — logo to the left of greeting */
+  .db-hero-left {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+  }
+
+  .db-mobile-brand-icon {
+    display: block;
+    font-size: 36px;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .db-hero-text { flex: 1; min-width: 0; }
+
+  /* FIX 2 — pencil edit button next to name */
+  .db-edit-name-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    font-size: 15px;
+    color: var(--text-muted);
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    vertical-align: middle;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+
+  .db-edit-name-btn:hover {
+    color: var(--accent-hover);
+    border-color: var(--accent);
+    background: var(--accent-dim);
+  }
 
   .db-hero {
     flex-direction: column;
@@ -237,18 +300,62 @@
     gap: 12px;
   }
 
-  /* Prevent activity row title from overflowing */
-  .db-activity-item { overflow: hidden; }
-  .db-activity-body { min-width: 0; overflow: hidden; }
-  .db-activity-top  { flex-wrap: wrap; gap: 4px; }
-  .db-activity-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: calc(100% - 80px); }
-  .db-activity-date  { flex-shrink: 0; }
+  /* FIX 3 — activity list wrapping + show-more */
+  .db-activity-list { overflow-x: hidden; }
 
-  /* Skills section */
+  .db-activity-item { overflow: hidden; }
+
+  .db-activity-body { min-width: 0; overflow: hidden; }
+
+  .db-activity-top  { flex-wrap: wrap; gap: 4px; }
+
+  .db-activity-title {
+    white-space: normal;
+    word-break: break-word;
+    overflow: hidden;
+    max-width: 100%;
+  }
+
+  .db-activity-date { flex-shrink: 0; }
+
+  .db-activity-preview {
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  /* FIX 4 — skills list wrapping + show-more */
+  .db-skills-list { overflow-x: hidden; }
+
   .db-skill-row  { flex-wrap: nowrap; overflow: hidden; }
   .db-skill-info { min-width: 0; overflow: hidden; }
-  .db-skill-name { overflow: hidden; text-overflow: ellipsis; }
-  .db-skill-cat  { display: none; } /* too cramped on mobile */
+
+  .db-skill-name {
+    white-space: normal;
+    word-break: break-word;
+    overflow: hidden;
+    text-overflow: unset;
+  }
+
+  .db-skill-cat { display: none; }
+
+  /* Show more button (FIX 3 & 4) */
+  .db-show-more-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-hover);
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-top: 4px;
+    opacity: 0.85;
+    transition: opacity 0.15s;
+  }
+
+  .db-show-more-btn:hover { opacity: 1; }
 
   /* Skill gap card */
   .db-gap-no-analysis { flex-wrap: wrap; gap: 8px; }
