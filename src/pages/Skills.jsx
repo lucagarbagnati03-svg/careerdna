@@ -2,16 +2,26 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { CATEGORIES, orderedCategories, displayCategory } from '../lib/categories'
+import CVScanner from './CVScanner'
 import './Skills.css'
 
 export default function Skills() {
   const { user } = useAuth()
-  const [skills, setSkills] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [skills,    setSkills]    = useState([])
+  const [loading,   setLoading]   = useState(true)
   const [skillName, setSkillName] = useState('')
-  const [category, setCategory] = useState('Technical')
-  const [level, setLevel] = useState(3)
-  const [saving, setSaving] = useState(false)
+  const [category,  setCategory]  = useState('Technical')
+  const [level,     setLevel]     = useState(3)
+  const [saving,    setSaving]    = useState(false)
+
+  const [isMobile,       setIsMobile]       = useState(() => window.innerWidth < 768)
+  const [activeSkillTab, setActiveSkillTab] = useState('skills')
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   useEffect(() => {
     if (user) loadSkills()
@@ -52,13 +62,36 @@ export default function Skills() {
     setSkills(prev => prev.filter(s => s.id !== id))
   }
 
-  const cats   = orderedCategories(skills)
+  const cats    = orderedCategories(skills)
   const grouped = Object.fromEntries(
     cats.map(cat => [cat, skills.filter(s => displayCategory(s.category) === cat)])
   )
 
+  // Mobile CV Scanner tab — render full CVScanner inside the tab shell
+  if (isMobile && activeSkillTab === 'cv') {
+    return (
+      <div className="page">
+        <div className="skills-mobile-tabs">
+          <button className="smt-tab" onClick={() => setActiveSkillTab('skills')}>◉ My Skills</button>
+          <button className="smt-tab active">▤ CV Scanner</button>
+        </div>
+        <div className="skills-cv-tab-content">
+          <CVScanner />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="page">
+      {/* Mobile-only tab switcher — hidden on desktop via CSS */}
+      {isMobile && (
+        <div className="skills-mobile-tabs">
+          <button className="smt-tab active">◉ My Skills</button>
+          <button className="smt-tab" onClick={() => setActiveSkillTab('cv')}>▤ CV Scanner</button>
+        </div>
+      )}
+
       <div className="page-header">
         <h1 className="page-title">My Skills</h1>
         <p className="page-subtitle">Track your competencies and proficiency levels.</p>
@@ -95,6 +128,7 @@ export default function Skills() {
             </button>
           ))}
         </div>
+
         <div className="level-picker">
           <span className="level-label">Level: <strong>{level}</strong>/5</span>
           <input

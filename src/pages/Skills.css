@@ -1,5 +1,8 @@
 @import './Journal.css';
 
+/* Mobile tab switcher — hidden on desktop, mobile.css reveals it */
+.skills-mobile-tabs { display: none; }
+
 .skill-form {
   background: var(--bg-card);
   border: 1px solid var(--border);

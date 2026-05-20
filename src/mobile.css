@@ -356,6 +356,49 @@
   /* ──────────────────────────────────────────────
      SKILLS
   ────────────────────────────────────────────── */
+
+  /* Tab switcher: My Skills | CV Scanner */
+  .skills-mobile-tabs {
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 16px;
+    gap: 4px;
+  }
+
+  .smt-tab {
+    flex: 1;
+    padding: 10px 8px;
+    border-radius: 9px;
+    border: none;
+    background: none;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .smt-tab.active {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  /* CVScanner is embedded inside a .page wrapper on the Skills tab.
+     Remove inner .page padding so content isn't double-indented —
+     the outer .page already provides the 16px horizontal padding. */
+  .skills-cv-tab-content > .page {
+    padding: 0 !important;
+    max-width: 100%;
+  }
+
   .skill-form { flex-direction: column; }
 
   .skills-grid { grid-template-columns: repeat(2, 1fr); }
@@ -390,6 +433,33 @@
   .results-header { flex-direction: column; align-items: flex-start; }
 
   .stored-cv-card { padding: 16px; }
+
+  /* Zero horizontal overflow — all containers full-width */
+  .scan-results,
+  .cv-skills-section,
+  .stored-cv-card,
+  .cv-disclaimer,
+  .drop-zone,
+  .page-header-row {
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  /* Text wraps correctly — no content escaping its container */
+  .cv-text-preview,
+  .results-group-title,
+  .result-tag-name,
+  .drop-text,
+  .drop-hint,
+  .cv-disclaimer p,
+  .replace-banner {
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  /* Tags wrap onto new lines instead of overflowing */
+  .results-tags { flex-wrap: wrap; }
 
   /* ──────────────────────────────────────────────
      EXPERIENCES
