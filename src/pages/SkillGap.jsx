@@ -1,11 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
-import { analyzeRoleRequirements } from '../lib/groq'
 import { displayCategory } from '../lib/categories'
 import {
-  getSkillGapCache,
-  setSkillGapCache,
+  analyzeAndSaveRequirements,
   calcMatchPct,
   pctColor,
   pctGradient,
@@ -30,16 +28,21 @@ export default function SkillGap() {
       try {
         const [{ data: skillsData }, { data: prefData }] = await Promise.all([
           supabase.from('skills').select('name, level, category').eq('user_id', user.id),
-          supabase.from('user_preferences').select('target_role').eq('user_id', user.id).maybeSingle(),
+          supabase.from('user_preferences')
+            .select('target_role, job_requirements')
+            .eq('user_id', user.id)
+            .maybeSingle(),
         ])
         setUserSkills(skillsData ?? [])
 
         const savedRole = prefData?.target_role ?? ''
+        const savedReqs = Array.isArray(prefData?.job_requirements) && prefData.job_requirements.length > 0
+          ? prefData.job_requirements : null
+
         if (savedRole) {
           setRoleInput(savedRole)
           setAnalyzedRole(savedRole)
-          const cached = getSkillGapCache(savedRole)
-          if (cached) setRequirements(cached)
+          if (savedReqs) setRequirements(savedReqs)
         }
       } finally {
         setLoadingPage(false)
@@ -54,20 +57,19 @@ export default function SkillGap() {
     if (!role) return
     setError('')
     setAnalyzing(true)
-    setRequirements([])
 
     try {
-      const cached = getSkillGapCache(role)
-      const reqs   = cached ?? await analyzeRoleRequirements(role)
-      if (!cached) setSkillGapCache(role, reqs)
-
+      let reqs
+      if (role === analyzedRole && requirements.length > 0) {
+        // Same role, requirements already loaded from Supabase — skip Groq call.
+        reqs = requirements
+      } else {
+        // New role or no requirements stored — generate via Groq and save to Supabase.
+        setRequirements([])
+        reqs = await analyzeAndSaveRequirements(user.id, role)
+      }
       setRequirements(reqs)
       setAnalyzedRole(role)
-
-      await supabase.from('user_preferences').upsert(
-        { user_id: user.id, target_role: role },
-        { onConflict: 'user_id' }
-      )
     } catch (err) {
       setError(err.message)
     } finally {
@@ -75,12 +77,11 @@ export default function SkillGap() {
     }
   }
 
-  // Build lookup structures for individual card display (needs level) and for
-  // calcMatchPct (needs a Set of lowercase names — identical query shape to Dashboard).
+  // Build lookup structures: Map for card display (needs level), Set for calcMatchPct.
   const userSkillMap   = Object.fromEntries(userSkills.map(s => [s.name.toLowerCase(), s]))
   const userSkillNames = new Set(userSkills.map(s => s.name.toLowerCase()))
 
-  // Annotate each requirement with whether the user has it (used for card display).
+  // Annotate each requirement with whether the user has it (for individual card display).
   const gaps = requirements.map(req => {
     const match = userSkillMap[req.name.toLowerCase()]
     return { ...req, have: !!match, level: match?.level ?? 0 }
@@ -94,16 +95,7 @@ export default function SkillGap() {
   const totalHave     = essentialHave + preferredHave
   const total         = gaps.length
 
-  // Use the single shared calcMatchPct — guaranteed identical to Dashboard's calculation.
   const weightedScore = calcMatchPct(requirements, userSkillNames) ?? 0
-
-  // DEBUG — remove after confirming data matches Dashboard.jsx
-  if (requirements.length > 0 && userSkills.length > 0) {
-    console.log('[SkillGap] analyzedRole:', analyzedRole)
-    console.log('[SkillGap] requirements count:', requirements.length, requirements)
-    console.log('[SkillGap] userSkills count:', userSkills.length, userSkills.map(s => s.name))
-    console.log('[SkillGap] weightedScore:', weightedScore)
-  }
 
   const roleChanged = roleInput.trim().toLowerCase() !== analyzedRole.toLowerCase()
 
@@ -170,7 +162,6 @@ export default function SkillGap() {
                 </span>
               </div>
 
-              {/* Progress bar */}
               <div className="gap-bar-track">
                 <div
                   className="gap-bar-fill"

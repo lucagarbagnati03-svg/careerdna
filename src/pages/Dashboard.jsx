@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { displayCategory } from '../lib/categories'
-import { getSkillGapCache, calcMatchPct, pctColor } from '../lib/skillGap'
+import { calcMatchPct, pctColor } from '../lib/skillGap'
 import './Dashboard.css'
 
 function greeting() {
@@ -65,7 +65,7 @@ export default function Dashboard() {
         supabase.from('journal_entries').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
         supabase.from('skills').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
         supabase.from('experiences').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
-        supabase.from('user_preferences').select('target_role').eq('user_id', user.id).maybeSingle(),
+        supabase.from('user_preferences').select('target_role, job_requirements').eq('user_id', user.id).maybeSingle(),
         supabase.from('journal_entries').select('id, title, content, created_at')
           .eq('user_id', user.id).order('created_at', { ascending: false }).limit(10),
         supabase.from('skills').select('name, category, level')
@@ -79,18 +79,13 @@ export default function Dashboard() {
       setTopSkills(skills ?? [])
 
       const role = pref?.target_role ?? null
+      const reqs = Array.isArray(pref?.job_requirements) && pref.job_requirements.length > 0
+        ? pref.job_requirements : null
       setTargetRole(role)
 
-      if (role) {
-        const reqs           = getSkillGapCache(role)
+      if (role && reqs) {
         const userSkillNames = new Set((allSkills ?? []).map(s => s.name.toLowerCase()))
-        const pct            = reqs ? calcMatchPct(reqs, userSkillNames) : null
-        // DEBUG — remove after confirming data matches SkillGap.jsx
-        console.log('[Dashboard] role:', role)
-        console.log('[Dashboard] requirements count:', reqs?.length ?? 0, reqs)
-        console.log('[Dashboard] allSkills count:', allSkills?.length ?? 0, allSkills?.map(s => s.name))
-        console.log('[Dashboard] gapPct:', pct)
-        setGapPct(pct)
+        setGapPct(calcMatchPct(reqs, userSkillNames))
       }
     } finally {
       setLoading(false)

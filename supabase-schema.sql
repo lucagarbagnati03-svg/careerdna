@@ -49,6 +49,10 @@ alter table skills add column if not exists source text;
 -- Replaces the old single-role columns (interview_analysis, interview_questions, analysis_role, readiness_score)
 alter table user_preferences add column if not exists role_data jsonb default '{}';
 
+-- Job requirements for the current target role (stored server-side so all devices share identical data).
+-- Eliminates the per-device localStorage divergence that caused different gap % on mobile vs desktop.
+alter table user_preferences add column if not exists job_requirements jsonb;
+
 -- Past experiences
 create table if not exists experiences (
   id uuid primary key default gen_random_uuid(),

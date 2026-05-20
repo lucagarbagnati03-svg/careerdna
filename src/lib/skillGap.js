@@ -1,29 +1,35 @@
 // ─── Skill Gap shared utilities ────────────────────────────────────────────
-// Single source of truth for skill-gap percentage calculation and localStorage
-// caching. Import from here in every component — never duplicate this logic.
+// Single source of truth for skill-gap percentage calculation.
+// Requirements are persisted in Supabase (user_preferences.job_requirements)
+// so every device always reads the same data — no localStorage, no divergence.
 
-export function getSkillGapCache(role) {
-  try {
-    const raw = localStorage.getItem(`careerdna:role:${role.toLowerCase().trim()}`)
-    return raw ? JSON.parse(raw) : null
-  } catch { return null }
-}
+import { supabase } from './supabase'
+import { analyzeRoleRequirements } from './groq'
 
-export function setSkillGapCache(role, requirements) {
-  try {
-    localStorage.setItem(
-      `careerdna:role:${role.toLowerCase().trim()}`,
-      JSON.stringify(requirements)
-    )
-  } catch {}
+/**
+ * Call Groq to generate job requirements for `role`, immediately persist
+ * them to user_preferences.job_requirements, and return the array.
+ * This is the only place that writes requirements to the database.
+ *
+ * @param {string} userId  - auth user id
+ * @param {string} role    - already normalised (lowercase, trimmed)
+ * @returns {Array}        - requirements array from Groq
+ */
+export async function analyzeAndSaveRequirements(userId, role) {
+  const reqs = await analyzeRoleRequirements(role)
+  await supabase.from('user_preferences').upsert(
+    { user_id: userId, target_role: role, job_requirements: reqs },
+    { onConflict: 'user_id' }
+  )
+  return reqs
 }
 
 /**
  * Calculate the weighted match percentage between a set of role requirements
  * and the skills a user actually has.
  *
- * @param {Array}  requirements  - Array of { name, importance } from Groq.
- *                                 importance must be 'essential' | 'preferred'.
+ * @param {Array}  requirements   - Array of { name, importance } from Groq.
+ *                                  importance must be 'essential' | 'preferred'.
  * @param {Set}    userSkillNames - Set of lowercase skill names from the DB.
  * @returns {number|null} 0-100 rounded integer, or null if no requirements.
  *
