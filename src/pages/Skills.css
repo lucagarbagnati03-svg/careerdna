@@ -44,6 +44,9 @@
   cursor: pointer;
 }
 
+/* Chip selector — hidden on desktop, shown on mobile via mobile.css */
+.skill-cat-chips { display: none; }
+
 .level-picker {
   display: flex;
   flex-direction: column;

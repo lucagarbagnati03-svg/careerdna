@@ -73,6 +73,7 @@ export default function Skills() {
           onChange={e => setSkillName(e.target.value)}
           required
         />
+        {/* Desktop: standard select */}
         <select
           className="skill-select"
           value={category}
@@ -80,6 +81,20 @@ export default function Skills() {
         >
           {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
+
+        {/* Mobile: tappable chip selector */}
+        <div className="skill-cat-chips">
+          {CATEGORIES.map(c => (
+            <button
+              key={c}
+              type="button"
+              className={`skill-cat-chip ${category === c ? 'active' : ''}`}
+              onClick={() => setCategory(c)}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
         <div className="level-picker">
           <span className="level-label">Level: <strong>{level}</strong>/5</span>
           <input

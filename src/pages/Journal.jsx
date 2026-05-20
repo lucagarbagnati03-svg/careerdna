@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { extractSkillsFromText } from '../lib/groq'
 import DatePicker from '../components/DatePicker'
+import Experiences from './Experiences'
 import './Journal.css'
 
 function todayISO() {
@@ -16,6 +17,15 @@ export default function Journal() {
   const [text, setText] = useState('')
   const [title, setTitle] = useState('')
   const [entryDate, setEntryDate] = useState(todayISO)
+  // Mobile tab: 'journal' | 'experiences' (desktop always shows journal)
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768)
+  const [mobileTab, setMobileTab] = useState('journal')
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768)
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -119,8 +129,27 @@ export default function Journal() {
     })
   }
 
+  // If on mobile and Experiences tab is active, render Experiences directly
+  if (isMobile && mobileTab === 'experiences') {
+    return (
+      <div className="page">
+        <div className="journal-mobile-tabs">
+          <button className="jmt-tab" onClick={() => setMobileTab('journal')}>✦ Journal</button>
+          <button className="jmt-tab active">◑ Experiences</button>
+        </div>
+        <Experiences />
+      </div>
+    )
+  }
+
   return (
     <div className="page">
+      {isMobile && (
+        <div className="journal-mobile-tabs">
+          <button className="jmt-tab active">✦ Journal</button>
+          <button className="jmt-tab" onClick={() => setMobileTab('experiences')}>◑ Experiences</button>
+        </div>
+      )}
       <div className="page-header">
         <h1 className="page-title">Daily Journal</h1>
         <p className="page-subtitle">Document your work episodes and achievements.</p>

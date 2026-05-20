@@ -91,6 +91,17 @@ export default function DashboardLayout() {
 
   return (
     <div className="layout">
+      {/* Mobile-only top bar — hidden on desktop via CSS */}
+      <div className="mobile-topbar">
+        <div className="mobile-topbar-brand">
+          <span className="mobile-topbar-icon">🧬</span>
+          <span className="mobile-topbar-name">CareerDNA</span>
+        </div>
+        <button className="mobile-topbar-avatar" onClick={openModal} title="Profile">
+          {initial}
+        </button>
+      </div>
+
       <aside className="sidebar">
         <div className="sidebar-header">
           <span className="sidebar-logo-icon">🧬</span>

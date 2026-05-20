@@ -48,6 +48,9 @@
   color: var(--text-muted);
 }
 
+/* Mobile tab switcher — hidden on desktop (mobile.css shows it) */
+.journal-mobile-tabs { display: none; }
+
 .journal-date-row {
   display: flex;
   flex-direction: column;
