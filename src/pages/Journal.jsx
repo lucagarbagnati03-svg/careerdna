@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { extractSkillsFromText } from '../lib/groq'
@@ -11,26 +11,50 @@ function todayISO() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
+// Inline mic SVG — no dependency, scales with font-size
+function MicIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+      <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+    </svg>
+  )
+}
+
 export default function Journal() {
   const { user } = useAuth()
-  const [entries, setEntries] = useState([])
-  const [text, setText] = useState('')
-  const [title, setTitle] = useState('')
+  const [entries,   setEntries]   = useState([])
+  const [text,      setText]      = useState('')
+  const [title,     setTitle]     = useState('')
   const [entryDate, setEntryDate] = useState(todayISO)
-  // Mobile tab: 'journal' | 'experiences' (desktop always shows journal)
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768)
+  const [isMobile,  setIsMobile]  = useState(() => window.innerWidth < 768)
   const [activeTab, setMobileTab] = useState('journal')
+  const [loading,   setLoading]   = useState(true)
+  const [loadError, setLoadError] = useState('')
+  const [saving,    setSaving]    = useState(false)
+  const [error,     setError]     = useState('')
+  const [extracting, setExtracting] = useState({})
+
+  // Voice dictation
+  const recognitionRef    = useRef(null)  // SpeechRecognition instance
+  const baseTextRef       = useRef('')    // snapshot of text when recording started
+  const [listening,       setListening]       = useState(false)
+  const [speechSupported, setSpeechSupported] = useState(false)
+
+  useEffect(() => {
+    setSpeechSupported(!!(window.SpeechRecognition || window.webkitSpeechRecognition))
+  }, [])
+
+  // Stop and release recognition on unmount
+  useEffect(() => {
+    return () => { recognitionRef.current?.abort() }
+  }, [])
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768)
     window.addEventListener('resize', check)
     return () => window.removeEventListener('resize', check)
   }, [])
-  const [loading, setLoading] = useState(true)
-  const [loadError, setLoadError] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-  const [extracting, setExtracting] = useState({})
 
   useEffect(() => {
     if (user) loadEntries()
@@ -122,14 +146,64 @@ export default function Journal() {
 
   function formatDate(iso) {
     if (!iso) return ''
-    // Parse YYYY-MM-DD as local date to avoid UTC offset shifting the day
     const [y, m, d] = iso.split('-')
     return new Date(Number(y), Number(m) - 1, Number(d)).toLocaleDateString('en-US', {
       month: 'long', day: 'numeric', year: 'numeric',
     })
   }
 
-  // If on mobile and Experiences tab is active, render Experiences directly
+  // ── Voice dictation ────────────────────────────────────────────────────────
+
+  function startListening() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SR) return
+
+    const recognition       = new SR()
+    recognition.continuous    = true
+    recognition.interimResults = true
+    recognition.lang          = navigator.language
+
+    // Snapshot existing textarea content so new speech is always appended
+    baseTextRef.current = text
+
+    recognition.onresult = (event) => {
+      let finalTranscript   = ''
+      let interimTranscript = ''
+      for (let i = 0; i < event.results.length; i++) {
+        const t = event.results[i][0].transcript
+        if (event.results[i].isFinal) finalTranscript   += t
+        else                           interimTranscript += t
+      }
+      const dictated = finalTranscript + interimTranscript
+      const base     = baseTextRef.current
+      const sep      = base.length > 0 && dictated.length > 0 ? ' ' : ''
+      setText(base + sep + dictated)
+    }
+
+    recognition.onend   = () => setListening(false)
+    recognition.onerror = (e) => {
+      if (e.error !== 'aborted') console.warn('Speech recognition error:', e.error)
+      setListening(false)
+    }
+
+    recognitionRef.current = recognition
+    recognition.start()
+    setListening(true)
+  }
+
+  function stopListening() {
+    recognitionRef.current?.stop()
+    recognitionRef.current = null
+    setListening(false)
+  }
+
+  function toggleListening() {
+    if (listening) stopListening()
+    else startListening()
+  }
+
+  // ── Render ─────────────────────────────────────────────────────────────────
+
   if (isMobile && activeTab === 'experiences') {
     return (
       <div className="page">
@@ -169,14 +243,29 @@ export default function Journal() {
           <DatePicker value={entryDate} onChange={setEntryDate} required />
         </div>
 
-        <textarea
-          className="journal-textarea"
-          placeholder="What did you work on? What did you learn? Any wins or challenges?"
-          value={text}
-          onChange={e => setText(e.target.value)}
-          rows={5}
-          required
-        />
+        {/* Textarea wrapped for mic button positioning */}
+        <div className="journal-textarea-wrap">
+          <textarea
+            className="journal-textarea"
+            placeholder="What did you work on? What did you learn? Any wins or challenges?"
+            value={text}
+            onChange={e => setText(e.target.value)}
+            rows={5}
+            required
+          />
+          {speechSupported && (
+            <button
+              type="button"
+              className={`mic-btn ${listening ? 'listening' : ''}`}
+              onClick={toggleListening}
+              title={listening ? 'Stop dictation' : 'Dictate with voice'}
+              aria-label={listening ? 'Stop voice dictation' : 'Start voice dictation'}
+            >
+              <MicIcon />
+            </button>
+          )}
+        </div>
+
         {error && <div className="error-msg">{error}</div>}
         <button type="submit" className="btn-primary" disabled={saving || !text.trim() || !entryDate}>
           {saving ? 'Saving…' : '+ Add Entry'}
