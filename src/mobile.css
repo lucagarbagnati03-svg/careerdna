@@ -270,6 +270,18 @@
   .db-stat-value { font-size: 22px; }
   .db-stat-value.is-text { font-size: 12px; }
 
+  /* Align numbers consistently across all four stat cards */
+  .db-stat-card {
+    align-items: center;   /* center icon / value / label on the horizontal axis */
+    text-align: center;
+  }
+
+  .db-stat-value {
+    width: 100%;
+    text-align: center;
+    line-height: 1;        /* same line-height for every number regardless of digit count */
+  }
+
   .db-grid {
     grid-template-columns: 1fr;
     gap: 12px;
