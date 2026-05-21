@@ -36,10 +36,12 @@ export default function Journal() {
   const [extracting, setExtracting] = useState({})
 
   // Voice dictation
-  const recognitionRef    = useRef(null)  // SpeechRecognition instance
-  const baseTextRef       = useRef('')    // snapshot of text when recording started
+  const recognitionRef    = useRef(null)   // SpeechRecognition instance
+  const baseTextRef       = useRef('')     // snapshot of text when recording started
+  const listeningRef      = useRef(false)  // ref copy of listening — safe inside onend callback
   const [listening,       setListening]       = useState(false)
   const [speechSupported, setSpeechSupported] = useState(false)
+  const [micUsed,         setMicUsed]         = useState(false) // one-time per entry
 
   useEffect(() => {
     setSpeechSupported(!!(window.SpeechRecognition || window.webkitSpeechRecognition))
@@ -100,6 +102,7 @@ export default function Journal() {
       setText('')
       setTitle('')
       setEntryDate(todayISO())
+      setMicUsed(false)   // new entry — mic available again
       await loadEntries()
     }
     setSaving(false)
@@ -158,43 +161,56 @@ export default function Journal() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SR) return
 
-    const recognition       = new SR()
-    recognition.continuous    = true
+    listeningRef.current = true
+
+    const recognition      = new SR()
+    recognition.continuous     = true
     recognition.interimResults = true
-    recognition.lang          = navigator.language
+    recognition.lang           = navigator.language
 
     // Snapshot existing textarea content so new speech is always appended
     baseTextRef.current = text
 
     recognition.onresult = (event) => {
-      let finalTranscript   = ''
-      let interimTranscript = ''
+      let final = '', interim = ''
       for (let i = 0; i < event.results.length; i++) {
-        const t = event.results[i][0].transcript
-        if (event.results[i].isFinal) finalTranscript   += t
-        else                           interimTranscript += t
+        // Trailing space after each final chunk (matches LiveSimulation pattern —
+        // fixes word-boundary gaps between recognition segments)
+        if (event.results[i].isFinal) final   += event.results[i][0].transcript + ' '
+        else                          interim += event.results[i][0].transcript
       }
-      const dictated = finalTranscript + interimTranscript
-      const base     = baseTextRef.current
-      const sep      = base.length > 0 && dictated.length > 0 ? ' ' : ''
+      const dictated = (final + interim).trim()
+      const base = baseTextRef.current
+      const sep  = base.length > 0 && dictated.length > 0 ? ' ' : ''
       setText(base + sep + dictated)
     }
 
-    recognition.onend   = () => setListening(false)
     recognition.onerror = (e) => {
-      if (e.error !== 'aborted') console.warn('Speech recognition error:', e.error)
-      setListening(false)
+      // Suppress no-speech (expected silence) — same as LiveSimulation
+      if (e.error !== 'no-speech') console.warn('Speech recognition error:', e.error)
+    }
+
+    // Auto-restart when recognition stops unexpectedly (Chrome 60s hard limit).
+    // Only restarts while listeningRef is true — stopListening() sets it false first.
+    recognition.onend = () => {
+      if (listeningRef.current) {
+        try { recognition.start() } catch {}
+      } else {
+        setListening(false)
+      }
     }
 
     recognitionRef.current = recognition
-    recognition.start()
+    try { recognition.start() } catch {}
     setListening(true)
   }
 
   function stopListening() {
+    listeningRef.current = false           // must be set before .stop() so onend doesn't restart
     recognitionRef.current?.stop()
     recognitionRef.current = null
     setListening(false)
+    setMicUsed(true)                       // hide mic button — one-time use per entry
   }
 
   function toggleListening() {
@@ -252,8 +268,9 @@ export default function Journal() {
             onChange={e => setText(e.target.value)}
             rows={5}
             required
+            disabled={listening}
           />
-          {speechSupported && (
+          {speechSupported && !micUsed && (
             <button
               type="button"
               className={`mic-btn ${listening ? 'listening' : ''}`}

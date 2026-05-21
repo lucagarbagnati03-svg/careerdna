@@ -90,6 +90,12 @@
   color: var(--text-muted);
 }
 
+.journal-textarea:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+  border-color: var(--border);
+}
+
 /* ── Microphone button ── */
 .mic-btn {
   position: absolute;
