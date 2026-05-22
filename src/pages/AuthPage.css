@@ -111,6 +111,40 @@
   transition: border-color 0.2s;
 }
 
+/* ── Password visibility toggle ── */
+.auth-password-wrap {
+  position: relative;
+}
+
+.auth-password-wrap input {
+  padding-right: 40px; /* room for the eye button */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.auth-eye-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.auth-eye-btn:hover {
+  color: var(--text-secondary);
+}
+
 .auth-field input:focus {
   border-color: var(--accent);
 }
