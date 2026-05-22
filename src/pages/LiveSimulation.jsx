@@ -189,35 +189,70 @@ export default function LiveSimulation({ profile, activeRole, onBack, onSessionS
       // Non-critical — proceed without dedup; no error shown to user
     }
 
-    // Generate questions — this is the only call that can abort the start flow
-    try {
-      const qs = await generateSimulationQuestions(profile, count, activeRole, previousQuestions)
-      questionsRef.current  = qs
-      answersRef.current    = new Array(qs.length).fill('')
-      qIdxRef.current       = 0
-      setQuestions(qs)
-      setQIdx(0)
-      setTranscript('')
-      setAnswers(new Array(qs.length).fill(''))
-      setPhase('interview')
-      speakQuestion(qs[0])
-    } catch (err) {
-      const raw = err?.message ?? ''
+    // FIX 4: check API key before any network call
+    if (!import.meta.env.VITE_GROQ_API_KEY) {
+      setError('AI service not configured. Missing API key.')
+      setPhase('setup')
+      return
+    }
+
+    // FIX 3: retry up to 3 times with exponential backoff (2 s then 4 s) before giving up
+    const MAX_ATTEMPTS = 3
+    let lastErr = null
+    let qs = null
+
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+      if (attempt > 0) {
+        await new Promise(r => setTimeout(r, 2000 * attempt)) // 2 s, then 4 s
+      }
+      try {
+        qs = await generateSimulationQuestions(profile, count, activeRole, previousQuestions)
+        lastErr = null
+        break
+      } catch (err) {
+        lastErr = err
+        // FIX 1: log full error details on every failed attempt
+        console.error(`[LiveSimulation] Attempt ${attempt + 1}/${MAX_ATTEMPTS} failed:`, err)
+        console.error('[LiveSimulation] Error details:', err.message, 'status:', err.status)
+      }
+    }
+
+    if (lastErr) {
+      // FIX 2: classify by HTTP status (attached by groqJSON) then fall back to message content
+      const raw    = lastErr?.message ?? ''
+      const status = lastErr?.status
+
       let friendly
-      if (raw.toLowerCase().includes('fetch') || raw.toLowerCase().includes('network')) {
-        friendly = 'Network error — check your internet connection and try again.'
-      } else if (raw.toLowerCase().includes('rate limit') || raw.toLowerCase().includes('429')) {
-        friendly = 'The AI is busy right now. Wait a few seconds, then press Retry.'
+      if (raw.includes('Missing API key') || raw.includes('not configured')) {
+        friendly = 'AI service not configured. Missing API key.'
+      } else if (status === 429 || raw.toLowerCase().includes('rate limit')) {
+        friendly = 'Rate limit exceeded. Please wait a few minutes and try again.'
+      } else if (status === 401 || status === 403) {
+        friendly = 'API authentication failed. Please contact support.'
+      } else if (raw.toLowerCase().includes('fetch') || raw.toLowerCase().includes('network') || raw.toLowerCase().includes('failed to fetch')) {
+        friendly = 'Unable to connect to AI service. Check your internet and try again.'
       } else if (raw.toLowerCase().includes('model') || raw.toLowerCase().includes('decommissioned')) {
         friendly = 'AI model error — please try again.'
-      } else if (raw.toLowerCase().includes('api key') || raw.toLowerCase().includes('unauthorized')) {
-        friendly = 'API key error — check your Groq API key in settings.'
       } else {
-        friendly = `Could not generate interview questions. ${raw ? '(' + raw + ')' : 'Please try again.'}`
+        // Surface the actual API error message so nothing is hidden from the user
+        friendly = raw || 'Could not generate interview questions. Please try again.'
       }
+
       setError(friendly)
       setPhase('setup')
+      return
     }
+
+    // Success — start the interview
+    questionsRef.current  = qs
+    answersRef.current    = new Array(qs.length).fill('')
+    qIdxRef.current       = 0
+    setQuestions(qs)
+    setQIdx(0)
+    setTranscript('')
+    setAnswers(new Array(qs.length).fill(''))
+    setPhase('interview')
+    speakQuestion(qs[0])
   }
 
   // ── Speak a question via TTS ────────────────────────────────────────────────

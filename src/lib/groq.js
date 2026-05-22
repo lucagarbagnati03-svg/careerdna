@@ -4,6 +4,11 @@ const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY
 export const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 async function groqJSON(messages, maxTokens = 1024, temperature = 0.3, _attempt = 0) {
+  // FIX 4: fail fast with a clear message if the key is not configured
+  if (!GROQ_API_KEY) {
+    throw Object.assign(new Error('AI service not configured. Missing API key.'), { status: 0 })
+  }
+
   const body = { model: 'llama-3.3-70b-versatile', messages, temperature, max_tokens: maxTokens }
 
   const res = await fetch(GROQ_API_URL, {
@@ -12,7 +17,7 @@ async function groqJSON(messages, maxTokens = 1024, temperature = 0.3, _attempt 
     body: JSON.stringify(body),
   })
 
-  // Rate limit — wait 6 s and retry once
+  // Rate limit — wait 6 s and retry once internally
   if (res.status === 429 && _attempt === 0) {
     await sleep(6000)
     return groqJSON(messages, maxTokens, temperature, 1)
@@ -20,10 +25,11 @@ async function groqJSON(messages, maxTokens = 1024, temperature = 0.3, _attempt 
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
-    const msg = err?.error?.message ?? `Groq API error ${res.status}`
-    // Surface a friendlier message for persistent rate limits
-    if (res.status === 429) throw new Error('Rate limit reached. Please wait a moment and try again.')
-    throw new Error(msg)
+    const msg = res.status === 429
+      ? 'Rate limit reached. Please wait a moment and try again.'
+      : (err?.error?.message ?? `Groq API error ${res.status}`)
+    // Attach HTTP status to the error so callers can branch on it without string parsing
+    throw Object.assign(new Error(msg), { status: res.status })
   }
 
   const data = await res.json()
