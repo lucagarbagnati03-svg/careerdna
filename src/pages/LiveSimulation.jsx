@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
-import { analyzeSimulation } from '../lib/groq'
+// analyzeSimulation removed — now called via /api/analyze-simulation to avoid CORS
 import './LiveSimulation.css'
 
 // ── Browser capability check ──────────────────────────────────────────────────
@@ -400,6 +400,38 @@ export default function LiveSimulation({ profile, activeRole, onBack, onSessionS
     finishInterview()
   }
 
+  // ── Shared helper: call /api/analyze-simulation with retry ──────────────────
+  async function analyzeViaAPI(qas, role) {
+    const MAX_ATTEMPTS = 3
+    let lastErr = null
+
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+      if (attempt > 0) {
+        await new Promise(r => setTimeout(r, 2000 * attempt)) // 2 s, then 4 s
+      }
+      try {
+        const apiRes = await fetch('/api/analyze-simulation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ questionsAndAnswers: qas, targetRole: role }),
+        })
+        const payload = await apiRes.json()
+        if (!apiRes.ok) {
+          throw Object.assign(
+            new Error(payload.error ?? `Server error ${apiRes.status}`),
+            { status: payload.status ?? apiRes.status }
+          )
+        }
+        return payload
+      } catch (err) {
+        lastErr = err
+        console.error(`[LiveSimulation] analyzeViaAPI attempt ${attempt + 1}/${MAX_ATTEMPTS} failed:`, err)
+        console.error('[LiveSimulation] Error details:', err.message, 'status:', err.status)
+      }
+    }
+    throw lastErr
+  }
+
   // ── Analyze + save ──────────────────────────────────────────────────────────
   async function finishInterview() {
     setMode('idle')
@@ -417,14 +449,14 @@ export default function LiveSimulation({ profile, activeRole, onBack, onSessionS
     }))
     setSessionQA(qas)   // store for in-session review
 
-    // ── Step 1: Groq analysis ──────────────────────────────────────────────
+    // ── Step 1: Groq analysis (via serverless proxy to avoid CORS) ───────────
     let result
     try {
-      result = await analyzeSimulation(qas, role)
-      console.log('[LiveSimulation] Groq result:', result)
+      result = await analyzeViaAPI(qas, role)
+      console.log('[LiveSimulation] Analysis result:', result)
       setReport(result)
     } catch (err) {
-      console.error('[LiveSimulation] Groq analysis failed:', err)
+      console.error('[LiveSimulation] Analysis failed:', err)
       setError('AI analysis failed: ' + err.message)
       setPhase('report')
       return
@@ -498,7 +530,7 @@ export default function LiveSimulation({ profile, activeRole, onBack, onSessionS
     setRecalculating(true)
     const role = (activeRole ?? '').trim() || null
     try {
-      const newReport = await analyzeSimulation(sessionQA, role)
+      const newReport = await analyzeViaAPI(sessionQA, role)
       setReport(newReport)
       if (savedSessionId) {
         await supabase.from('simulation_sessions')
