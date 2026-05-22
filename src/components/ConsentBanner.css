@@ -14,7 +14,7 @@
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 20px;
-  padding: 36px 40px;
+  padding: 24px;
   width: 100%;
   max-width: 520px;
   max-height: 90vh;        /* never taller than the viewport */
@@ -22,7 +22,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 24px;               /* uniform rhythm matching outer padding */
   text-align: center;
   box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
 }
@@ -30,10 +30,13 @@
 .consent-logo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
-.consent-logo-icon { font-size: 28px; }
+.consent-logo-icon {
+  font-size: 28px;
+  line-height: 1; /* prevent emoji vertical-metrics from shifting alignment */
+}
 
 .consent-logo-name {
   font-size: 22px;
@@ -161,21 +164,21 @@
 
 .consent-nda p { margin-bottom: 8px; }
 
-.consent-nda ol {
+.consent-nda ul {
   margin: 6px 0 0 16px;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.consent-nda li { list-style: decimal; }
+.consent-nda li { list-style: disc; }
 .consent-nda strong { color: var(--text-primary); }
 
 /* ── Policy links ── */
 .consent-links {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 0;           /* spacing handled by margin on the dot */
   font-size: 13px;
 }
 
@@ -187,7 +190,11 @@
 }
 
 .consent-links a:hover { opacity: 0.75; }
-.consent-dot { color: var(--text-muted); }
+
+.consent-dot {
+  color: var(--text-muted);
+  margin: 0 8px;    /* equal spacing on both sides of the separator */
+}
 
 /* ── Explicit consent checkbox ── */
 .consent-checkbox-label {
