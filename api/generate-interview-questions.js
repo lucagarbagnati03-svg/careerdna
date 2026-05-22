@@ -1,3 +1,4 @@
+// Interview questions generation API - Updated with env vars
 // Serverless function — runs on Vercel's Node.js runtime, never in the browser.
 // Proxies the Groq API call so CORS restrictions don't apply.
 // Requires: GROQ_API_KEY set in Vercel project environment variables (Settings → Environment Variables).
