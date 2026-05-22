@@ -1,6 +1,29 @@
 import { useState, useEffect, useRef } from 'react'
 import './ConsentBanner.css'
 
+function WarningIcon() {
+  return (
+    <svg
+      width="18" height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }}
+    >
+      <path
+        d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+        fill="rgba(251,191,36,0.18)"
+        stroke="#fbbf24"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <line x1="12" y1="9" x2="12" y2="13" stroke="#fbbf24" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="12" y1="17" x2="12.01" y2="17" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  )
+}
+
 const CONSENT_KEY = 'cdna_consent_v1'
 
 export default function ConsentBanner() {
@@ -92,7 +115,10 @@ export default function ConsentBanner() {
             ref={ndaRef}
             onScroll={e => handleScroll(e, setNdaRead)}
           >
-            <div className="consent-nda-header">⚠ Data Sensitivity &amp; Non-Disclosure Notice</div>
+            <div className="consent-nda-header">
+              <WarningIcon />
+              <span>Data Sensitivity &amp; Non-Disclosure Notice</span>
+            </div>
             <p>By using CareerDNA's recording and analysis services, you acknowledge and agree to the following terms regarding data sensitivity and confidentiality:</p>
             <ol>
               <li><strong>User Responsibility:</strong> You are solely responsible for the content of your voice and text recordings. CareerDNA is designed to capture professional achievements and skills, not trade secrets or proprietary corporate data.</li>

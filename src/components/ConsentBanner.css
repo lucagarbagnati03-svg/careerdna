@@ -85,14 +85,10 @@
   right: 0;
   height: 52px;
   background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
-  border-radius: 0 0 12px 12px;
+  border-radius: 0 0 8px 8px;
   pointer-events: none;
   transition: opacity 0.35s;
   z-index: 1;
-}
-
-.consent-card-wrap--nda::after {
-  border-radius: 0 0 10px 10px;
 }
 
 .consent-card-wrap.read::after {
@@ -103,8 +99,8 @@
 .consent-summary {
   background: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px 18px 20px; /* extra bottom so text clears the gradient */
+  border-radius: 8px;
+  padding: 16px 16px 20px; /* extra bottom so text clears the gradient */
   max-height: 200px;
   overflow-y: scroll;      /* always show scrollbar so it's obvious */
   text-align: left;
@@ -135,13 +131,13 @@
 /* ── NDA / Data Sensitivity notice ── */
 .consent-nda {
   width: 100%;
-  background: rgba(251, 191, 36, 0.07);
-  border: 1px solid rgba(251, 191, 36, 0.3);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
   border-left: 4px solid var(--warning);
-  border-radius: 10px;
-  padding: 14px 16px 20px; /* extra bottom so text clears the gradient */
+  border-radius: 8px;
+  padding: 16px 16px 20px; /* extra bottom so text clears the gradient */
   text-align: left;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-secondary);
   line-height: 1.6;
   max-height: 200px;
@@ -154,6 +150,9 @@
 .consent-nda::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 2px; }
 
 .consent-nda-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 13px;
   font-weight: 700;
   color: var(--warning);
@@ -181,7 +180,7 @@
 }
 
 .consent-links a {
-  color: var(--accent-hover);
+  color: #c4b5fd;  /* light lavender — ~7:1 contrast on dark bg, passes WCAG AA */
   text-decoration: underline;
   text-decoration-style: dotted;
   transition: opacity 0.15s;
