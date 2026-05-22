@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
-import { generateSimulationQuestions, analyzeSimulation } from '../lib/groq'
+import { analyzeSimulation } from '../lib/groq'
 import './LiveSimulation.css'
 
 // ── Browser capability check ──────────────────────────────────────────────────
@@ -189,14 +189,9 @@ export default function LiveSimulation({ profile, activeRole, onBack, onSessionS
       // Non-critical — proceed without dedup; no error shown to user
     }
 
-    // FIX 4: check API key before any network call
-    if (!import.meta.env.VITE_GROQ_API_KEY) {
-      setError('AI service not configured. Missing API key.')
-      setPhase('setup')
-      return
-    }
-
-    // FIX 3: retry up to 3 times with exponential backoff (2 s then 4 s) before giving up
+    // Retry up to 3 times with exponential backoff (2 s then 4 s) before giving up.
+    // Question generation goes through /api/generate-interview-questions (server-side)
+    // to avoid the CORS restriction on direct browser → Groq API calls.
     const MAX_ATTEMPTS = 3
     let lastErr = null
     let qs = null
@@ -206,12 +201,36 @@ export default function LiveSimulation({ profile, activeRole, onBack, onSessionS
         await new Promise(r => setTimeout(r, 2000 * attempt)) // 2 s, then 4 s
       }
       try {
-        qs = await generateSimulationQuestions(profile, count, activeRole, previousQuestions)
+        const apiRes = await fetch('/api/generate-interview-questions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            activeRole,
+            count,
+            skills:           profile?.skills       ?? [],
+            experiences:      profile?.experiences  ?? [],
+            previousQuestions,
+          }),
+        })
+
+        const payload = await apiRes.json()
+
+        if (!apiRes.ok) {
+          throw Object.assign(
+            new Error(payload.error ?? `Server error ${apiRes.status}`),
+            { status: payload.status ?? apiRes.status }
+          )
+        }
+
+        qs = payload.questions
+        if (!Array.isArray(qs) || qs.length === 0) {
+          throw new Error('Invalid questions format from server')
+        }
+
         lastErr = null
         break
       } catch (err) {
         lastErr = err
-        // FIX 1: log full error details on every failed attempt
         console.error(`[LiveSimulation] Attempt ${attempt + 1}/${MAX_ATTEMPTS} failed:`, err)
         console.error('[LiveSimulation] Error details:', err.message, 'status:', err.status)
       }
