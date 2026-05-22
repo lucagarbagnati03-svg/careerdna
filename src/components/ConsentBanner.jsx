@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import './ConsentBanner.css'
 
 const CONSENT_KEY = 'cdna_consent_v1'
@@ -8,12 +8,40 @@ export default function ConsentBanner() {
     try { return !localStorage.getItem(CONSENT_KEY) } catch { return false }
   })
 
+  const [summaryRead, setSummaryRead] = useState(false)
+  const [ndaRead,     setNdaRead]     = useState(false)
+  const [checked,     setChecked]     = useState(false)
+
+  const summaryRef = useRef(null)
+  const ndaRef     = useRef(null)
+
+  // If content fits without scrolling (rare), mark as read immediately
+  useEffect(() => {
+    if (!visible) return
+    const autoMark = (ref, setter) => {
+      const el = ref.current
+      if (el && el.scrollHeight <= el.clientHeight + 10) setter(true)
+    }
+    autoMark(summaryRef, setSummaryRead)
+    autoMark(ndaRef,     setNdaRead)
+  }, [visible])
+
   if (!visible) return null
 
   function accept() {
     try { localStorage.setItem(CONSENT_KEY, 'true') } catch {}
     setVisible(false)
   }
+
+  function handleScroll(e, setter) {
+    const el = e.currentTarget
+    // 20px threshold so the last line doesn't have to be pixel-perfect
+    if (el.scrollHeight - el.scrollTop - el.clientHeight <= 20) {
+      setter(true)
+    }
+  }
+
+  const canAccept = summaryRead && ndaRead && checked
 
   return (
     <div className="consent-overlay">
@@ -27,28 +55,52 @@ export default function ConsentBanner() {
           Before you continue, please review and accept our policies
         </p>
 
-        <div className="consent-summary">
-          <p>CareerDNA collects and processes the following personal data to provide its services:</p>
-          <ul>
-            <li><strong>Account email address</strong> — used for authentication and account management</li>
-            <li><strong>CV / Resume text</strong> — extracted from uploaded PDFs and stored to build your skills profile</li>
-            <li><strong>Journal entries</strong> — text you write to document your daily work experiences</li>
-            <li><strong>Skills, past experiences and preferences</strong> — manually entered or AI-extracted profile data</li>
-            <li><strong>Voice transcripts (text only)</strong> — during Live Simulation your speech is transcribed locally in your browser using the Web Speech API; only the resulting text is saved to our servers — no audio is ever recorded or transmitted</li>
-          </ul>
-          <p>Your data is stored in Supabase (EU-West region, Ireland) and processed by Groq AI for skill extraction and interview analysis. It is <strong>never used to train AI models</strong>.</p>
-          <p>Under GDPR and the Swiss nLPD you have the right to access, correct, export, or delete your data at any time. See our Privacy Policy for full details.</p>
+        {/* ── Data Processing Summary ── */}
+        <div className="consent-scroll-hint-row">
+          <span className={`consent-scroll-hint ${summaryRead ? 'done' : ''}`}>
+            {summaryRead ? '✓ Read' : '↓ Scroll to read more'}
+          </span>
+        </div>
+        <div className={`consent-card-wrap ${summaryRead ? 'read' : ''}`}>
+          <div
+            className="consent-summary"
+            ref={summaryRef}
+            onScroll={e => handleScroll(e, setSummaryRead)}
+          >
+            <p>CareerDNA collects and processes the following personal data to provide its services:</p>
+            <ul>
+              <li><strong>Account email address</strong> — used for authentication and account management</li>
+              <li><strong>CV / Resume text</strong> — extracted from uploaded PDFs and stored to build your skills profile</li>
+              <li><strong>Journal entries</strong> — text you write to document your daily work experiences</li>
+              <li><strong>Skills, past experiences and preferences</strong> — manually entered or AI-extracted profile data</li>
+              <li><strong>Voice transcripts (text only)</strong> — during Live Simulation your speech is transcribed locally in your browser using the Web Speech API; only the resulting text is saved to our servers — no audio is ever recorded or transmitted</li>
+            </ul>
+            <p>Your data is stored in Supabase (EU-West region, Ireland) and processed by Groq AI for skill extraction and interview analysis. It is <strong>never used to train AI models</strong>.</p>
+            <p>Under GDPR and the Swiss nLPD you have the right to access, correct, export, or delete your data at any time. See our Privacy Policy for full details.</p>
+          </div>
         </div>
 
-        <div className="consent-nda">
-          <div className="consent-nda-header">⚠ Data Sensitivity &amp; Non-Disclosure Notice</div>
-          <p>By using CareerDNA's recording and analysis services, you acknowledge and agree to the following terms regarding data sensitivity and confidentiality:</p>
-          <ol>
-            <li><strong>User Responsibility:</strong> You are solely responsible for the content of your voice and text recordings. CareerDNA is designed to capture professional achievements and skills, not trade secrets or proprietary corporate data.</li>
-            <li><strong>Confidentiality &amp; NDAs:</strong> If your employment is subject to a Non-Disclosure Agreement (NDA) or any confidentiality obligation, you must ensure that your inputs do not violate such agreements. We strictly advise you to describe your activities in general, non-proprietary terms (e.g., focus on the process and results rather than specific client names, secret formulas, or unreleased product details).</li>
-            <li><strong>Indemnification:</strong> CareerDNA shall not be held liable for any unauthorized disclosure of third-party confidential information resulting from your recordings. You agree to indemnify and hold CareerDNA harmless against any legal claims arising from a breach of your professional confidentiality obligations.</li>
-            <li><strong>Privacy Commitment:</strong> While we employ a Privacy-First architecture (utilizing local transcription and sovereign AI models), no system is entirely immune to risk. Please exercise professional discretion in every interaction with the platform.</li>
-          </ol>
+        {/* ── NDA / Data Sensitivity notice ── */}
+        <div className="consent-scroll-hint-row">
+          <span className={`consent-scroll-hint ${ndaRead ? 'done' : ''}`}>
+            {ndaRead ? '✓ Read' : '↓ Scroll to read more'}
+          </span>
+        </div>
+        <div className={`consent-card-wrap consent-card-wrap--nda ${ndaRead ? 'read' : ''}`}>
+          <div
+            className="consent-nda"
+            ref={ndaRef}
+            onScroll={e => handleScroll(e, setNdaRead)}
+          >
+            <div className="consent-nda-header">⚠ Data Sensitivity &amp; Non-Disclosure Notice</div>
+            <p>By using CareerDNA's recording and analysis services, you acknowledge and agree to the following terms regarding data sensitivity and confidentiality:</p>
+            <ol>
+              <li><strong>User Responsibility:</strong> You are solely responsible for the content of your voice and text recordings. CareerDNA is designed to capture professional achievements and skills, not trade secrets or proprietary corporate data.</li>
+              <li><strong>Confidentiality &amp; NDAs:</strong> If your employment is subject to a Non-Disclosure Agreement (NDA) or any confidentiality obligation, you must ensure that your inputs do not violate such agreements. We strictly advise you to describe your activities in general, non-proprietary terms (e.g., focus on the process and results rather than specific client names, secret formulas, or unreleased product details).</li>
+              <li><strong>Indemnification:</strong> CareerDNA shall not be held liable for any unauthorized disclosure of third-party confidential information resulting from your recordings. You agree to indemnify and hold CareerDNA harmless against any legal claims arising from a breach of your professional confidentiality obligations.</li>
+              <li><strong>Privacy Commitment:</strong> While we employ a Privacy-First architecture (utilizing local transcription and sovereign AI models), no system is entirely immune to risk. Please exercise professional discretion in every interaction with the platform.</li>
+            </ol>
+          </div>
         </div>
 
         <div className="consent-links">
@@ -57,7 +109,23 @@ export default function ConsentBanner() {
           <a href="/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a>
         </div>
 
-        <button className="consent-accept-btn" onClick={accept}>
+        {/* ── Explicit consent checkbox ── */}
+        <label className="consent-checkbox-label">
+          <input
+            type="checkbox"
+            className="consent-checkbox"
+            checked={checked}
+            onChange={e => setChecked(e.target.checked)}
+          />
+          <span>I have read and agree to the Privacy Policy and Terms of Service</span>
+        </label>
+
+        <button
+          className="consent-accept-btn"
+          onClick={accept}
+          disabled={!canAccept}
+          title={!canAccept ? 'Please scroll through both sections and check the box' : ''}
+        >
           I Accept &amp; Continue
         </button>
       </div>
