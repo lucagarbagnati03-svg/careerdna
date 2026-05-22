@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const apiKey = process.env.GROQ_API_KEY
+  const apiKey = process.env.GROQ_API_KEY || process.env.VITE_GROQ_API_KEY
   if (!apiKey) {
     console.error('[API] GROQ_API_KEY is not set in environment variables')
     return res.status(500).json({ error: 'AI service not configured. Missing API key.' })
