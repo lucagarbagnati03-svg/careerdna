@@ -1,0 +1,2675 @@
+🔍 Analyzing screenshots with Claude Vision...
+
+📸 Analyzing: 01-homepage-desktop.png
+(node:40999) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+# CareerDNA Login Screen - UI/UX QA Analysis
+
+## Critical Issues
+
+### 1. No Password Visibility Toggle
+**Location:** Password field (right side)
+**Severity:** Critical
+**Issue:** No show/hide password button. Users cannot verify their input, leading to failed login attempts and frustration.
+
+---
+
+### 2. No "Forgot Password" Link
+**Location:** Below password field / above Sign In button
+**Severity:** Critical
+**Issue:** Complete absence of password recovery option. This is a fundamental authentication requirement.
+
+---
+
+## High Issues
+
+### 3. No Form Validation Feedback
+**Location:** Email & Password fields
+**Severity:** High
+**Issue:** No visible error states, helper text, or validation indicators shown. Users receive no feedback guidance.
+
+---
+
+### 4. Insufficient Color Contrast - Subtitle Text
+**Location:** "Your AI-powered career memory" tagline
+**Severity:** High
+**Issue:** Light gray text on dark background likely **fails WCAG AA contrast ratio (4.5:1)** requirement. Appears approximately 3:1 or less.
+
+---
+
+### 5. Tab Switcher Active State Ambiguity
+**Location:** Sign In / Sign Up toggle
+**Severity:** High
+**Issue:**
+- "Sign In" active state uses only a subtle lighter background — **insufficient differentiation**
+- No border, underline, or strong visual indicator
+- Users may not clearly understand which mode is active
+
+---
+
+## Medium Issues
+
+### 6. Inconsistent Input Field Styling
+**Location:** Email field vs Password field
+**Severity:** Medium
+**Issue:** Email field appears to have a **visible colored border/highlight** (teal/cyan tint) while Password field appears differently styled — inconsistent focus/default states.
+
+---
+
+### 7. No "Remember Me" Option
+**Location:** Below password field
+**Severity:** Medium
+**Issue:** Missing standard authentication convenience feature, forcing users to re-login every session.
+
+---
+
+### 8. Sign In Button Gradient Direction
+**Location:** Primary CTA button
+**Severity:** Medium
+**Issue:** Purple gradient button uses a **flat/uniform color** rather than matching the brand gradient seen in the logo, creating visual inconsistency with brand identity.
+
+---
+
+### 9. Missing OAuth/SSO Options
+**Location:** Below Sign In button
+**Severity:** Medium
+**Issue:** No Google/LinkedIn sign-in options — particularly relevant for a **career platform** where LinkedIn integration would be expected.
+
+---
+
+### 10. Card Container — Bottom Padding Inconsistency
+**Location:** Inside login card, below Sign In button
+**Severity:** Medium
+**Issue:** Spacing below the Sign In button appears **tighter** than the top padding of the card, creating visual imbalance.
+
+```
+Top padding:    ~32px ✓
+Bottom padding: ~20px ✗  (appears clipped)
+```
+
+---
+
+## Low Issues
+
+### 11. Logo Emoji Rendering
+**Location:** Top-left of card header
+**Severity:** Low
+**Issue:** Rocket emoji 🚀 used as logo — **not a proper SVG/PNG asset**. Renders inconsistently across OS/browsers (Windows vs macOS vs mobile).
+
+---
+
+### 12. No Loading State on Submit
+**Location:** Sign In button
+**Severity:** Low
+**Issue:** No spinner or disabled state visible — unclear if async submission feedback exists.
+
+---
+
+### 13. Input Placeholder Text Contrast
+**Location:** Email field placeholder "you@example.com"
+**Severity:** Low
+**Issue:** Placeholder text may not meet **WCAG AA 3:1 contrast ratio** for placeholder text on the dark input background.
+
+---
+
+### 14. No Terms of Service / Privacy Policy
+**Location:** Bottom of card
+**Severity:** Low
+**Issue:** Missing legal compliance links, which are typically required for authenticated products.
+
+---
+
+## Summary Table
+
+| # | Issue | Location | Severity |
+|---|-------|----------|----------|
+| 1 | No password visibility toggle | Password field | 🔴 Critical |
+| 2 | No forgot password link | Form area | 🔴 Critical |
+| 3 | No form validation feedback | Input fields | 🟠 High |
+| 4 | Poor subtitle contrast | Tagline text | 🟠 High |
+| 5 | Ambiguous active tab state | Toggle switcher | 🟠 High |
+| 6 | Inconsistent field styling | Input fields | 🟡 Medium |
+| 7 | No remember me option | Form area | 🟡 Medium |
+| 8 | Button gradient inconsistency | CTA button | 🟡 Medium |
+| 9 | Missing OAuth options | Form area | 🟡 Medium |
+| 10 | Uneven card padding | Card container | 🟡 Medium |
+| 11 | Emoji logo rendering | Card header | 🔵 Low |
+| 12 | No loading state | Submit button | 🔵 Low |
+| 13 | Placeholder contrast | Input fields | 🔵 Low |
+| 14 | Missing legal links | Card footer | 🔵 Low |
+
+**Total: 2 Critical | 3 High | 5 Medium | 4 Low**
+
+================================================================================
+
+📸 Analyzing: 01-homepage.png
+# CareerDNA UI/UX QA Analysis
+
+## 🔴 Critical Issues
+
+### 1. Content Cutoff / Truncated Text
+**Location:** Bottom of the yellow "Data Sensitivity & Non-Disclosure Notice" section
+**Issue:** Item #2 "Confidentiality & NDA..." is visibly cut off mid-sentence. Users cannot read complete policy terms they're being asked to accept — this is a **legal/compliance risk** in addition to a UI bug.
+**Severity:** CRITICAL
+
+---
+
+## 🟠 High Issues
+
+### 2. No Visible Scroll Indicator
+**Location:** Inside the policy content boxes
+**Issue:** The scrollable area has no scrollbar, scroll hint, fade gradient, or "scroll to continue" affordance. Users may not realize content is scrollable before clicking "I Accept & Continue."
+**Severity:** HIGH
+
+### 3. Accept Button Accessible Before Full Content Review
+**Location:** "I Accept & Continue" button at bottom
+**Issue:** The button is fully active and clickable without requiring the user to scroll to the bottom of the policy. This is a **legal compliance issue** (GDPR/informed consent).
+**Severity:** HIGH
+
+### 4. Bottom Card Hard Edge Clipping
+**Location:** Yellow notice box bottom edge
+**Issue:** Content abruptly clips at the card boundary with no fade/gradient, giving no visual indication that more content exists below. Combined with issue #2, users will miss critical policy terms.
+**Severity:** HIGH
+
+---
+
+## 🟡 Medium Issues
+
+### 5. Inconsistent Card Border Treatment
+**Location:** White/gray card (data collection) vs. yellow card (sensitivity notice)
+**Issue:** The first card has a subtle border with uniform padding. The yellow card has a left accent border only on one side. The visual language is inconsistent — unclear if this is intentional hierarchy or a bug.
+**Severity:** MEDIUM
+
+### 6. Insufficient Contrast — Body Text in Yellow Box
+**Location:** Yellow/amber notice box, paragraph text
+**Issue:** The gray body text (`#9CA3AF` approx) against the dark amber background likely **fails WCAG AA contrast ratio** (4.5:1 minimum). The yellow heading passes, but the body copy is borderline.
+**Severity:** MEDIUM
+
+### 7. Footer Link Area Spacing
+**Location:** "Privacy Policy · Terms of Service" links
+**Issue:** The separator dot `·` and link spacing appears cramped. Touch target size for mobile may be below the recommended **44×44px minimum** (WCAG 2.5.5).
+**Severity:** MEDIUM
+
+### 8. Inconsistent Font Weight Hierarchy
+**Location:** Yellow box numbered list
+**Issue:** "User Responsibility:" is bold, but the colon placement and spacing before the description text is inconsistent with standard typographic list formatting. Creates minor readability friction.
+**Severity:** MEDIUM
+
+### 9. Modal Overflows Viewport Top
+**Location:** Top of the entire modal card
+**Issue:** The card appears to be cut off at the very top edge of the viewport with minimal or zero top margin, suggesting possible overflow on smaller screens.
+**Severity:** MEDIUM
+
+---
+
+## 🔵 Low Issues
+
+### 10. Logo/Icon Alignment
+**Location:** CareerDNA header — rocket emoji + wordmark
+**Issue:** The emoji icon and "CareerDNA" text appear slightly baseline-misaligned. The icon sits marginally higher than optical center relative to the text cap height.
+**Severity:** LOW
+
+### 11. Bullet Point Indentation Inconsistency
+**Location:** First card (numbered list) vs. second card (bullet list)
+**Issue:** The first content card uses bullet points while the yellow card uses numbered lists. The left-indent depth differs between the two cards, causing misaligned visual rhythm.
+**Severity:** LOW
+
+### 12. Button Gradient Direction
+**Location:** "I Accept & Continue" button
+**Issue:** The purple-to-blue gradient is purely horizontal (left→right). Combined with the full-width button, it creates a flat, banner-like appearance. A subtle radial or angled gradient would feel more polished.
+**Severity:** LOW
+
+### 13. No Keyboard Focus Styles Visible
+**Location:** All interactive elements (links, button)
+**Issue:** No visible focus ring or focus indicator is shown. If CSS `outline: none` is applied without a custom focus style, this **fails WCAG 2.4.7** (Focus Visible).
+**Severity:** LOW *(escalates to HIGH for accessibility compliance)*
+
+### 14. Missing Close/Dismiss Option
+**Location:** Modal — top right corner
+**Issue:** There is no ✕ close button. While intentional for forced consent flows, it may frustrate users and should at minimum have a "Cancel / Go Back" option.
+**Severity:** LOW
+
+---
+
+## 📊 Summary Table
+
+| # | Issue | Location | Severity |
+|---|-------|----------|----------|
+| 1 | Content cut off mid-sentence | Yellow box bottom | 🔴 Critical |
+| 2 | No scroll affordance/indicator | Scrollable cards | 🟠 High |
+| 3 | Accept before full read | CTA button | 🟠 High |
+| 4 | Hard clip — hidden content | Yellow card edge | 🟠 High |
+| 5 | Inconsistent card borders | Both cards | 🟡 Medium |
+| 6 | Low contrast body text | Yellow box | 🟡 Medium |
+| 7 | Small touch targets (links) | Footer links | 🟡 Medium |
+| 8 | Typography inconsistency | Numbered list | 🟡 Medium |
+| 9 | Modal top overflow | Header area | 🟡 Medium |
+| 10 | Logo misalignment | Header | 🔵 Low |
+| 11 | List indent inconsistency | Both cards | 🔵 Low |
+| 12 | Button gradient quality | CTA button | 🔵 Low |
+| 13 | Missing focus styles | All interactive | 🔵 Low* |
+| 14 | No dismiss/cancel option | Modal | 🔵 Low |
+
+---
+
+**Most Urgent Fix:** Issue #1 + #3 combined — users are accepting legally binding terms they **cannot fully read**. This is both a UX failure and a potential legal liability.
+
+================================================================================
+
+📸 Analyzing: 02-journal.png
+# CareerDNA UI/UX QA Analysis
+
+## 🔴 Critical Issues
+
+### 1. Content Cutoff / Text Truncation
+**Location:** Bottom of the scrollable policy card (Data Sensitivity section)
+**Issue:** Item #2 "Confidentiality & NDA" is visibly cut mid-sentence at the bottom of the scroll container with no visual scroll indicator (scrollbar, fade gradient, or "scroll to read more" affordance)
+**Impact:** Users cannot confirm they've read full terms before accepting — potential legal/compliance risk
+**Severity:** CRITICAL
+
+---
+
+## 🟠 High Issues
+
+### 2. No Scroll Indicator on Policy Container
+**Location:** The dark scrollable box containing policy items
+**Issue:** There is no visible scrollbar, fade-out gradient, or scroll cue to indicate the content is scrollable. Users may not realize there's hidden content below
+**Severity:** HIGH
+
+### 3. "I Accept & Continue" Button — Premature Acceptance Risk
+**Location:** Bottom CTA button
+**Issue:** The button is fully visible and clickable BEFORE the user has scrolled to the bottom and read all terms. No checkbox confirmation, no scroll-lock enforcement
+**Severity:** HIGH (Legal/Compliance)
+
+### 4. Missing Checkbox / Explicit Consent Mechanism
+**Location:** Below policy content, above CTA button
+**Issue:** There is no "I have read and agree to..." checkbox. A single button accepting all policies without explicit acknowledgment is a GDPR/consent best practice violation
+**Severity:** HIGH
+
+---
+
+## 🟡 Medium Issues
+
+### 5. Inconsistent Card Styling
+**Location:** Two content cards (white-border card vs. yellow-border card)
+**Issue:** The first policy card has a subtle border with no accent color, while the second uses a yellow/amber left border. The visual hierarchy implies the second is more important, but both contain critical information
+**Severity:** MEDIUM
+
+### 6. Spacing Inconsistency Between Cards
+**Location:** Gap between the two scrollable content cards
+**Issue:** The gap between the first card (personal data collection) and second card (Data Sensitivity notice) appears tighter than the gap between the header text and first card — inconsistent vertical rhythm
+**Severity:** MEDIUM
+
+### 7. Warning Icon Alignment
+**Location:** "⚠️ Data Sensitivity & Non-Disclosure Notice" header
+**Issue:** The warning emoji icon appears to sit slightly lower than the text baseline — optical misalignment with the bold title text
+**Severity:** MEDIUM
+
+### 8. Outer Container Top Clipping
+**Location:** Very top of the modal/card container
+**Issue:** The container appears to be clipped at the top edge of the viewport with no top margin/padding visible, suggesting potential overflow beyond the safe area on smaller devices
+**Severity:** MEDIUM
+
+### 9. Bottom Safe Area / Button Overlap Risk
+**Location:** "I Accept & Continue" button
+**Issue:** The button sits very close to the bottom of the viewport with minimal padding below it — on mobile devices with home indicator bars (iOS/Android gesture nav), the button may overlap or be partially obscured
+**Severity:** MEDIUM
+
+---
+
+## 🔵 Low Issues
+
+### 10. Link Styling Inconsistency
+**Location:** "Privacy Policy · Terms of Service" footer links
+**Issue:** Links use a muted purple/violet color that has **low contrast** against the dark background — likely fails WCAG AA contrast ratio (4.5:1 minimum for normal text)
+**Severity:** LOW–MEDIUM (Accessibility)
+
+### 11. Bullet Point Indentation Inconsistency
+**Location:** First card — bulleted list vs. second card — numbered list
+**Issue:** Numbered list items in the second card have slightly different left-padding compared to the bullet list in the first card, creating visual inconsistency
+**Severity:** LOW
+
+### 12. Typography Weight Inconsistency
+**Location:** Bullet point labels (bold) vs. body text
+**Issue:** Bold labels (e.g., **Account email address**, **CV / Resume text**) use what appears to be a heavier weight than the surrounding em-dash descriptions, but the weight jump feels inconsistent with the second card's bold labels
+**Severity:** LOW
+
+### 13. Dot Separator Accessibility
+**Location:** "Privacy Policy · Terms of Service"
+**Issue:** The `·` middle dot separator between links is a purely decorative character with no semantic meaning and may be read aloud by screen readers
+**Severity:** LOW
+
+### 14. No Focus State Visible on CTA
+**Location:** "I Accept & Continue" button
+**Issue:** Cannot confirm from static screenshot, but gradient buttons frequently lack visible `:focus-visible` outlines, which is an accessibility concern for keyboard users
+**Severity:** LOW
+
+---
+
+## 📊 Summary Table
+
+| # | Issue | Location | Severity |
+|---|-------|----------|----------|
+| 1 | Content cutoff mid-sentence | Policy card bottom | 🔴 Critical |
+| 2 | No scroll indicator | Scrollable container | 🟠 High |
+| 3 | CTA accessible before reading | Accept button | 🟠 High |
+| 4 | Missing explicit consent checkbox | Pre-CTA area | 🟠 High |
+| 5 | Inconsistent card styling | Both cards | 🟡 Medium |
+| 6 | Inconsistent vertical spacing | Between cards | 🟡 Medium |
+| 7 | Icon/text baseline misalignment | Warning header | 🟡 Medium |
+| 8 | Container top clipping | Modal top edge | 🟡 Medium |
+| 9 | Button bottom safe area risk | CTA button | 🟡 Medium |
+| 10 | Low contrast footer links | Footer | 🔵 Low |
+| 11 | List indentation inconsistency | Both lists | 🔵 Low |
+| 12 | Typography weight inconsistency | Bold labels | 🔵 Low |
+| 13 | Dot separator screen reader issue | Footer | 🔵 Low |
+| 14 | Missing focus state on CTA | Accept button | 🔵 Low |
+
+---
+
+**Total Issues Found: 14**
+**Critical: 1 | High: 3 | Medium: 5 | Low: 5**
+
+================================================================================
+
+📸 Analyzing: 02-login-desktop.png
+# CareerDNA UI/UX QA Analysis
+
+## 🔴 Critical Issues
+
+### 1. No Password Visibility Toggle
+**Location:** Password field
+**Issue:** No show/hide password button. Users cannot verify their input, leading to login failures.
+**Severity:** Critical — directly impacts core authentication flow
+
+---
+
+## 🟠 High Issues
+
+### 2. No "Forgot Password" Link
+**Location:** Below password field / above Sign In button
+**Issue:** Completely absent. Standard authentication pattern requires password recovery option.
+**Severity:** High — blocks users who forget credentials
+
+### 3. Missing Form Validation Indicators
+**Location:** Email & Password fields
+**Issue:** No inline validation, no error states visible, no success states. Zero feedback mechanism shown.
+**Severity:** High — users get no guidance on input errors
+
+### 4. No OAuth / Social Sign-In Options
+**Location:** Form area
+**Issue:** Modern auth flows typically include Google/LinkedIn (especially relevant for a career app). Creates unnecessary friction.
+**Severity:** High — LinkedIn is practically mandatory for a career platform
+
+---
+
+## 🟡 Medium Issues
+
+### 5. Inconsistent Spacing Between Form Elements
+**Location:** Between Password field and Sign In button
+**Issue:** Gap appears tighter (~8px) compared to Email→Password spacing (~16px). Inconsistent vertical rhythm.
+**Severity:** Medium
+
+```
+Email Label
+[Email Field]     ← ~16px gap
+Password Label
+[Password Field]  ← ~8px gap (too tight)
+[Sign In Button]
+```
+
+### 6. Tab Switcher Active State Contrast
+**Location:** Sign In / Sign Up toggle
+**Issue:** "Sign In" active state uses a slightly lighter background but the contrast differentiation is weak. Could confuse users about which tab is active.
+**Severity:** Medium
+
+### 7. No Loading/Disabled State on Sign In Button
+**Location:** Sign In button
+**Issue:** No visible loading state (spinner) for async authentication. Button appears identical pre/post click.
+**Severity:** Medium — users may click multiple times
+
+### 8. Button Gradient Feels Disconnected
+**Location:** Sign In CTA button
+**Issue:** Purple/pink gradient button doesn't match the subtle dark UI aesthetic of the card. The logo uses similar colors but the button intensity feels jarring.
+**Severity:** Medium — brand consistency issue
+
+### 9. Missing "Remember Me" Option
+**Location:** Below password field
+**Issue:** No persistent session option, forcing re-authentication on every visit.
+**Severity:** Medium — UX friction
+
+---
+
+## 🔵 Low Issues
+
+### 10. Logo Emoji Rendering Inconsistency
+**Location:** Header — rocket emoji 🚀
+**Issue:** Emoji rendering varies by OS/browser. Should be replaced with an SVG icon for consistent cross-platform display.
+**Severity:** Low
+
+### 11. Subtitle Text Contrast
+**Location:** "Your AI-powered career memory" tagline
+**Issue:** Light gray text on dark background — likely fails WCAG AA contrast ratio (4.5:1 minimum). Appears ~3:1.
+**Severity:** Low-Medium (Accessibility)
+
+### 12. No Accessible Labels / ARIA
+**Location:** Form fields
+**Issue:** Visual labels present but no confirmation of `aria-label` or `for`/`id` pairing visible. Screen reader accessibility unclear.
+**Severity:** Low-Medium (Accessibility)
+
+### 13. Card Has No Visible Focus Ring Style Defined
+**Location:** Interactive elements
+**Issue:** No visible focus indicators shown for keyboard navigation.
+**Severity:** Low-Medium (Accessibility)
+
+### 14. Placeholder Text as Sole Input Hint
+**Location:** Email field
+**Issue:** `you@example.com` placeholder disappears on focus/type. No persistent helper text for format guidance.
+**Severity:** Low
+
+### 15. No Terms of Service / Privacy Policy Link
+**Location:** Bottom of card
+**Issue:** Absent entirely. Legally problematic for a platform handling career/personal data.
+**Severity:** Low (Legal risk)
+
+---
+
+## 📊 Summary Table
+
+| # | Issue | Location | Severity |
+|---|-------|----------|----------|
+| 1 | No password visibility toggle | Password field | 🔴 Critical |
+| 2 | No forgot password link | Form | 🟠 High |
+| 3 | No form validation states | Fields | 🟠 High |
+| 4 | No social sign-in | Form | 🟠 High |
+| 5 | Inconsistent spacing | Field gaps | 🟡 Medium |
+| 6 | Weak tab active state | Toggle | 🟡 Medium |
+| 7 | No loading state on CTA | Button | 🟡 Medium |
+| 8 | Button style inconsistency | CTA | 🟡 Medium |
+| 9 | No Remember Me | Form | 🟡 Medium |
+| 10 | Emoji logo inconsistency | Header | 🔵 Low |
+| 11 | Subtitle contrast fail | Tagline | 🔵 Low |
+| 12 | Missing ARIA labels | Inputs | 🔵 Low |
+| 13 | No focus ring styles | All interactives | 🔵 Low |
+| 14 | Placeholder-only hints | Email field | 🔵 Low |
+| 15 | No legal links | Card footer | 🔵 Low |
+
+**Total: 3 Critical/High | 5 Medium | 6 Low**
+
+================================================================================
+
+📸 Analyzing: 03-signup-desktop.png
+# CareerDNA UI/UX QA Analysis
+
+## Critical Issues
+
+### 1. No Form Validation Feedback Indicators
+**Location:** Email & Password fields
+**Severity:** Critical
+**Issue:** No visible error states, success states, or validation indicators exist. Users receive zero feedback on input validity before submission.
+
+---
+
+## High Severity Issues
+
+### 2. Missing "Confirm Password" Field
+**Location:** Sign Up form
+**Severity:** High
+**Issue:** Standard account creation requires password confirmation field. Its absence risks account lockout due to typos. This is a fundamental UX pattern violation for registration flows.
+
+### 3. Password Field Has No Visibility Toggle
+**Location:** Password input field
+**Severity:** High
+**Issue:** No show/hide password icon (eye icon). Users cannot verify their password input, increasing error probability during account creation.
+
+### 4. No Password Strength Indicator
+**Location:** Below password field
+**Severity:** High
+**Issue:** Sign Up flows should communicate password requirements and strength. Completely absent here, creating security and usability concerns.
+
+---
+
+## Medium Severity Issues
+
+### 5. Insufficient Color Contrast — Subtitle Text
+**Location:** "Your AI-powered career memory" subtitle
+**Severity:** Medium
+**Issue:** Light gray text on dark background likely **fails WCAG AA contrast ratio (4.5:1)** requirement. Appears approximately 3:1 or lower.
+
+```
+Estimated: ~#6B7280 on ~#1a1a2e = ~3.5:1 (FAIL for normal text)
+```
+
+### 6. Tab Indicator Ambiguity
+**Location:** Sign In / Sign Up toggle
+**Severity:** Medium
+**Issue:** The active state differentiation is subtle — only a slightly lighter background on "Sign Up." No clear visual affordance (underline, bold text, distinct color) indicating which tab is selected. Fails accessibility guidelines for active states.
+
+### 7. No "Sign In with Google/OAuth" Options
+**Location:** Form area
+**Severity:** Medium
+**Issue:** Modern auth flows typically include SSO options. While not a bug per se, the absence creates friction and is a notable UX gap for a career platform.
+
+### 8. Missing Terms of Service / Privacy Policy Links
+**Location:** Below "Create Account" button
+**Severity:** Medium
+**Issue:** Legally and ethically, account creation should reference ToS/Privacy Policy. Completely absent — potential legal compliance issue (GDPR, CCPA).
+
+### 9. No "Forgot Password" Link
+**Location:** Sign In tab (contextually)
+**Severity:** Medium
+**Issue:** While on Sign Up tab, the Sign In form presumably also lacks this critical recovery option.
+
+---
+
+## Low Severity Issues
+
+### 10. Rocket Emoji as Logo
+**Location:** Header — logo area
+**Severity:** Low
+**Issue:** Using an emoji (🚀) as a brand logo is unprofessional and renders inconsistently across operating systems/browsers. Should be an SVG icon.
+
+### 11. Button Gradient Direction Inconsistency
+**Location:** "Create Account" button
+**Severity:** Low
+**Issue:** The gradient transitions from purple→pink (left→right). While aesthetic, it doesn't align with the brand purple used in the logo/title, creating a subtle brand inconsistency.
+
+### 12. Excessive Dead Space
+**Location:** Overall page layout
+**Severity:** Low
+**Issue:** The card is floating in a vast black void. No background texture, gradient, or visual interest. Creates a stark, unpolished appearance, particularly on large displays.
+
+### 13. Input Field Border Contrast
+**Location:** Email & Password input fields
+**Severity:** Low
+**Issue:** Input field borders are barely visible against the dark card background, making field boundaries hard to distinguish for users with visual impairments.
+
+### 14. No Loading/Disabled State on CTA
+**Location:** "Create Account" button
+**Severity:** Low
+**Issue:** No visible loading state design exists for post-submission. Button likely remains static during async operations, risking duplicate submissions.
+
+### 15. Card Has No Max-Width Consideration on Mobile
+**Location:** Overall card
+**Severity:** Low
+**Issue:** Cannot confirm responsiveness from static screenshot, but the card appears to have fixed width without apparent mobile breakpoint handling.
+
+---
+
+## Summary Table
+
+| # | Issue | Severity | WCAG Impact |
+|---|-------|----------|-------------|
+| 1 | No validation feedback | Critical | Yes |
+| 2 | Missing confirm password | High | No |
+| 3 | No password visibility toggle | High | Yes |
+| 4 | No password strength meter | High | No |
+| 5 | Low contrast subtitle | Medium | Yes |
+| 6 | Unclear active tab state | Medium | Yes |
+| 7 | No OAuth options | Medium | No |
+| 8 | Missing ToS/Privacy links | Medium | Legal |
+| 9 | No forgot password | Medium | No |
+| 10 | Emoji logo | Low | No |
+| 11 | Button gradient inconsistency | Low | No |
+| 12 | Empty background | Low | No |
+| 13 | Input border contrast | Low | Yes |
+| 14 | No button loading state | Low | No |
+| 15 | Mobile responsiveness unknown | Low | No |
+
+**WCAG Violations Identified: 4 confirmed, 2 probable**
+
+================================================================================
+
+📸 Analyzing: 03-skills.png
+# CareerDNA UI/UX QA Analysis
+
+## 🔴 Critical Issues
+
+### 1. Content Cutoff / Truncation
+**Location:** Data Sensitivity section, item #2 ("Confidentiality & NDA...")
+**Issue:** The second numbered item is visibly cut off mid-sentence at the bottom of the scrollable card. Users cannot read complete policy terms they're being asked to accept.
+**Severity:** CRITICAL — Legal/consent issue. Users are accepting terms they literally cannot read.
+
+---
+
+## 🟠 High Issues
+
+### 2. No Scroll Indicator / Progress Hint
+**Location:** Data Sensitivity yellow card
+**Issue:** No visual cue (scrollbar, fade gradient, "scroll to read more" hint) indicating the content is scrollable. Users may not realize there's more content below.
+**Severity:** HIGH — Directly impacts informed consent flow.
+
+### 3. Insufficient Card Height for Critical Legal Content
+**Location:** Yellow warning card
+**Issue:** The card viewport is too small relative to content volume. Legal/NDA terms require full visibility before acceptance.
+**Severity:** HIGH — UX and legal compliance risk.
+
+---
+
+## 🟡 Medium Issues
+
+### 4. Bottom Content Obscured by Fixed Footer
+**Location:** Footer area (Privacy Policy · Terms of Service + CTA button)
+**Issue:** The fixed bottom bar overlaps scrollable content. No sufficient padding/margin separates the last visible content from the footer overlay.
+**Severity:** MEDIUM
+
+### 5. Inconsistent Card Styling
+**Location:** White card vs. Yellow card
+**Issue:** 
+- White card has visible border/stroke
+- Yellow card has left accent border only
+- Inconsistent border radius treatment between the two cards
+**Severity:** MEDIUM — Design system inconsistency
+
+### 6. Typography Hierarchy Inconsistency
+**Location:** Yellow card header
+**Issue:** "⚠️ Data Sensitivity & Non-Disclosure Notice" uses yellow/amber color but the body text drops to low-contrast gray, creating an uneven visual weight hierarchy.
+**Severity:** MEDIUM
+
+### 7. Warning Icon Alignment
+**Location:** Yellow card title row
+**Issue:** The ⚠️ emoji icon appears to sit slightly lower than the text baseline, causing misalignment with the heading text.
+**Severity:** MEDIUM
+
+---
+
+## 🔵 Low Issues
+
+### 8. Excessive Outer Dark Border/Shadow
+**Location:** Entire modal container
+**Issue:** The modal has a very dark outer frame that bleeds into the black background — unclear if intentional or a rendering artifact. No clear drop shadow definition.
+**Severity:** LOW
+
+### 9. "I Accept & Continue" Button — No Disabled State
+**Location:** CTA button
+**Issue:** Button appears fully active without requiring users to scroll through/acknowledge all terms. Best practice is to disable until full content is viewed.
+**Severity:** LOW–MEDIUM (UX best practice violation)
+
+### 10. Link Styling Inconsistency
+**Location:** Footer — "Privacy Policy · Terms of Service"
+**Issue:** Both links use purple underline but the separator dot (·) appears unstyled/gray, creating a minor visual inconsistency.
+**Severity:** LOW
+
+### 11. Lack of Close/Dismiss Option
+**Location:** Modal header area
+**Issue:** No ✕ close button visible. If this is a modal, users have no escape route other than accepting.
+**Severity:** LOW (may be intentional for consent gates)
+
+### 12. Logo Icon Sizing
+**Location:** Header
+**Issue:** The rocket/DNA emoji logo appears slightly small relative to the "CareerDNA" wordmark, creating slight visual imbalance.
+**Severity:** LOW
+
+---
+
+## 📊 Summary Table
+
+| # | Issue | Location | Severity |
+|---|-------|----------|----------|
+| 1 | Content cutoff mid-sentence | NDA item #2 | 🔴 Critical |
+| 2 | No scroll indicator | Yellow card | 🟠 High |
+| 3 | Card too small for legal content | Yellow card | 🟠 High |
+| 4 | Footer overlaps content | Bottom area | 🟡 Medium |
+| 5 | Inconsistent card styling | Both cards | 🟡 Medium |
+| 6 | Typography hierarchy | Yellow card | 🟡 Medium |
+| 7 | Icon baseline misalignment | Warning icon | 🟡 Medium |
+| 8 | Modal border rendering | Container | 🔵 Low |
+| 9 | Button not gated on scroll | CTA | 🔵 Low |
+| 10 | Link separator styling | Footer | 🔵 Low |
+| 11 | No dismiss/close button | Modal | 🔵 Low |
+| 12 | Logo size imbalance | Header | 🔵 Low |
+
+---
+
+## 🏆 Top Priority Fixes
+1. **Expand yellow card height** or make it properly scrollable with visible indicators
+2. **Ensure full NDA text is readable** before accept button is enabled
+3. **Add scroll-to-enable** on the CTA button for legal compliance
+
+================================================================================
+
+📸 Analyzing: 04-mobile-overview.png
+# CareerDNA UI/UX QA Analysis
+
+## 🔴 Critical Issues
+
+### 1. Content Cutoff - CV/Resume Text Bullet Point
+**Location:** First policy card, second bullet point
+**Issue:** "...stored to build your" is cut off mid-sentence. The complete description is not visible and there's no scroll indicator
+**Severity:** Critical — users cannot read full data collection disclosure before consenting
+
+### 2. Content Cutoff - Data Sensitivity Section
+**Location:** Yellow warning box, Item #1 "User Responsibility"
+**Issue:** Text cuts off at "CareerDNA is designed..." — critical legal/consent content is hidden with no clear scroll affordance
+**Severity:** Critical — legal compliance risk; users accepting incomplete terms
+
+---
+
+## 🟠 High Issues
+
+### 3. No Scroll Indicator / Progress Hint
+**Location:** Both scrollable cards
+**Issue:** No scrollbar, fade gradient, or "scroll to read more" affordance on either truncated card. Users may not realize content continues
+**Severity:** High — discoverability failure on consent screen
+
+### 4. Missing Checkbox / Explicit Consent Mechanism
+**Location:** Bottom CTA area
+**Issue:** Single "I Accept & Continue" button with no individual checkboxes for Privacy Policy vs. Terms of Service vs. Data Sensitivity notice
+**Severity:** High — GDPR/privacy law typically requires granular, informed consent per policy type
+
+### 5. Overlapping Card Boundary
+**Location:** Junction between first policy card and yellow warning box
+**Issue:** The yellow warning box appears to visually collide/overlap with the first card's bottom edge with insufficient separation (~4px gap)
+**Severity:** High — visual hierarchy breakdown
+
+---
+
+## 🟡 Medium Issues
+
+### 6. Inconsistent Card Styling
+**Location:** First card vs. yellow warning card
+**Issue:** 
+- First card: subtle border, dark bg
+- Second card: yellow/amber border, different background tone
+- No design system consistency; feels like two different components
+**Severity:** Medium
+
+### 7. Privacy Policy & Terms Links Placement
+**Location:** Below yellow card, above CTA button
+**Issue:** Links appear "floating" between cards and CTA with inconsistent spacing — unclear if they belong to the yellow card or are standalone footer elements
+**Severity:** Medium
+
+### 8. Yellow Warning Box Left Border
+**Location:** Left edge of Data Sensitivity card
+**Issue:** Has a left accent border (yellow) but the first card has no equivalent treatment — inconsistent component language
+**Severity:** Medium
+
+### 9. Warning Icon Alignment
+**Location:** "⚠️ Data Sensitivity & Non-Disclosure Notice" header
+**Issue:** Warning emoji icon appears slightly baseline-misaligned with the heading text
+**Severity:** Medium
+
+### 10. CTA Button Gradient Direction
+**Location:** "I Accept & Continue" button
+**Issue:** Gradient shifts purple→lighter purple without clear design intent; on a dark background this reduces perceived contrast at the lighter end
+**Severity:** Medium
+
+---
+
+## 🔵 Low Issues
+
+### 11. Logo/Icon Inconsistency
+**Location:** Header — DNA emoji + "CareerDNA" text
+**Issue:** Using a system emoji (🧬) alongside styled typography feels inconsistent; emoji renders differently across OS/devices
+**Severity:** Low
+
+### 12. Header Text Contrast
+**Location:** Subtitle "Before you continue, please review..."
+**Issue:** Gray text on dark gray background — contrast ratio likely fails WCAG AA (4.5:1 minimum)
+**Severity:** Low–Medium *(borderline accessibility violation)*
+
+### 13. Bullet Point Inconsistency
+**Location:** First policy card
+**Issue:** Uses `•` bullets while the yellow card uses numbered list `1.` — mixed list conventions without clear hierarchy reason
+**Severity:** Low
+
+### 14. Bottom Safe Area
+**Location:** Below CTA button
+**Issue:** Very minimal padding below the "I Accept & Continue" button — on devices with home indicators (iPhone notch-era), button may feel cramped against system UI
+**Severity:** Low
+
+### 15. Link Styling Inconsistency
+**Location:** "Privacy Policy · Terms of Service"
+**Issue:** Both links appear identical in weight/color with only an underline differentiating them from body text — insufficient visual affordance
+**Severity:** Low
+
+---
+
+## 📊 Summary Table
+
+| Severity | Count |
+|----------|-------|
+| 🔴 Critical | 2 |
+| 🟠 High | 3 |
+| 🟡 Medium | 5 |
+| 🔵 Low | 5 |
+| **Total** | **15** |
+
+---
+
+## ✅ Top Priority Fixes
+1. Add **fade/gradient scroll affordance** + ensure full legal text is readable before acceptance
+2. Implement **granular consent checkboxes** per policy document
+3. Fix **card spacing** to establish clear visual separation
+4. Audit **text contrast ratios** against WCAG AA standards
+
+================================================================================
+
+📸 Analyzing: 04-overview-desktop.png
+# CareerDNA UI/UX QA Audit Report
+
+---
+
+## CRITICAL ISSUES
+
+### 1. Skill Gap Progress Bar — Severe Misrepresentation
+**Location:** Skill Gap card, bottom right
+**Issue:** The progress bar fill appears to show ~45-50% visually, but the label reads **42%**. The golden fill segment doesn't proportionally match the stated percentage — the bar appears longer than 42% of the total track.
+**Severity:** Critical — misleads users about actual progress data.
+
+---
+
+## HIGH SEVERITY ISSUES
+
+### 2. Username Truncation in Bottom Navigation
+**Location:** Bottom-left user profile area
+**Issue:** Username displays as **"lucagarbag..."** — text is being cut off with an ellipsis. The sidebar is wide enough that this shouldn't be necessary, or the truncation threshold is too aggressive.
+**Severity:** High — poor personalization UX, user can't see their own full username.
+
+### 3. Stat Cards — Inconsistent Icon/Symbol Language
+**Location:** Four metric cards in the top stats row
+**Issue:** 
+- Card 1 uses a **"+"** symbol
+- Card 2 uses a **filled circle**
+- Card 3 uses a **half-circle**
+- Card 4 uses an **outline circle**
+No visual legend or explanation. The iconography appears to be a progression system but is completely unexplained and inconsistent in style.
+**Severity:** High — confusing visual hierarchy, no accessible meaning.
+
+### 4. Top Skills Ranking — All Skills at Max Level
+**Location:** Top Skills card, right panel
+**Issue:** All 5 skills show **"Lv 5"** with fully filled purple bars. If every tracked skill is maxed, this widget provides **zero actionable information**. Either the level system is broken/inflated, or the display logic isn't filtering meaningfully.
+**Severity:** High — renders the widget useless for decision-making.
+
+### 5. Skill Gap vs. Skills Tracked Contradiction
+**Location:** Stats row (50 Skills Tracked) vs. Skill Gap card (42% match)
+**Issue:** With 50 skills tracked and all visible skills at Level 5, a 42% profile match is logically inconsistent and creates **cognitive dissonance** for the user. No explanation bridges these data points.
+**Severity:** High — erodes trust in the platform's data integrity.
+
+---
+
+## MEDIUM SEVERITY ISSUES
+
+### 6. Journal Entry Descriptions — Abrupt Text Cutoff
+**Location:** Recent Journal Activity card, all three entries
+**Issue:** All descriptions end mid-sentence with **"severa..."**, **"re..."**, and **"e..."** — the truncation is cutting off at inconsistent character counts, with some cuts extremely abrupt (single letter **"e..."**).
+**Severity:** Medium — inconsistent truncation length looks broken, especially the single-character truncations.
+
+### 7. Date Alignment — All Entries Show Same Date
+**Location:** Journal Activity card, date column
+**Issue:** All three journal entries show **"May 13, 2026"** — while this could be accurate, combined with different narrative tones ("Today," "2 hours ago"), it creates timeline confusion. "2 hours ago" and "Today" shouldn't read identically in the timestamp.
+**Severity:** Medium — temporal UX inconsistency.
+
+### 8. Missing Visual Separator — Skill Gap Card
+**Location:** Skill Gap card
+**Issue:** The progress bar background track has **very low contrast** against the dark card background, making it nearly invisible. The unfilled portion of the bar is barely distinguishable.
+**Severity:** Medium — accessibility concern, WCAG contrast failure likely.
+
+### 9. Button Hierarchy Inconsistency
+**Location:** Top action buttons (+ Log Today, View Skills, Practice Interview)
+**Issue:** 
+- **"+ Log Today"** has a purple gradient fill
+- **"View Skills"** and **"Practice Interview"** have dark/outline styling
+The hierarchy implies Log Today is the primary CTA, but **"Practice Interview"** (a premium feature likely) has no visual differentiation from "View Skills." No secondary/tertiary button hierarchy beyond the first button.
+**Severity:** Medium — unclear action hierarchy.
+
+### 10. Sidebar Navigation — No Active State for Sub-items
+**Location:** Left sidebar, Skills and Career sections
+**Issue:** "Overview" has a clear active/highlighted state (purple background), but sub-items like **My Skills, CV Scanner, Skill Gap, Interview Prep** have no hover states visible and inconsistent icon styles (circles, squares, diamonds) without a design rationale.
+**Severity:** Medium — inconsistent iconography system.
+
+### 11. "View all →" and "All skills →" Link Styling
+**Location:** Journal Activity and Top Skills card headers
+**Issue:** These CTAs use **different label conventions** ("View all →" vs "All skills →") for the same interaction pattern. Should be standardized. Arrow styling also differs slightly.
+**Severity:** Medium — inconsistent micro-copy.
+
+---
+
+## LOW SEVERITY ISSUES
+
+### 12. Greeting Logic
+**Location:** Top of main content, "GOOD EVENING"
+**Issue:** The screenshot shows **"GOOD EVENING"** — if this is a static/demo state, it's fine, but if dynamic, the all-caps label with no icon feels visually disconnected from the warm personalized tone of "Here's what's happening with your career profile."
+**Severity:** Low — tonal inconsistency.
+
+### 13. Card Heights — Inconsistent in Stats Row
+**Location:** Four metric cards
+**Issue:** All four cards appear equal height, but Card 4 (Target Role) contains a **text label + sub-label** while Cards 1-3 contain **number + sub-label**. The purple-tinted text for "front office manager" in Card 4 looks visually heavier and mismatched against the numeric style of other cards.
+**Severity:** Low — minor visual inconsistency.
+
+### 14. Missing Empty State Handling
+**Location:** Overall dashboard
+**Issue:** With only **6 journal entries** and **1 experience**, the dashboard doesn't guide the user toward filling gaps. No onboarding nudges, completion indicators, or "add more" prompts beyond the "+ Log Today" button.
+**Severity:** Low — missed UX opportunity.
+
+### 15. "Analyze →" CTA — Ambiguous
+**Location:** Skill Gap card header
+**Issue:** The **"Analyze →"** link is the only actionable item in the Skill Gap card besides the data display, but it's styled identically to "All skills →" and "View all →" despite being a more complex action. No visual distinction for the depth of action.
+**Severity:** Low — CTA weight inconsistency.
+
+---
+
+## SUMMARY TABLE
+
+| # | Issue | Location | Severity |
+|---|-------|----------|----------|
+| 1 | Progress bar ≠ 42% | Skill Gap card | 🔴 Critical |
+| 2 | Username truncated | Bottom sidebar | 🟠 High |
+| 3 | Unexplained icon system | Stats cards | 🟠 High |
+| 4 | All skills maxed = no insight | Top Skills | 🟠 High |
+| 5 | Skills/Gap data contradiction | Cross-card | 🟠 High |
+| 6 | Inconsistent text truncation | Journal entries | 🟡 Medium |
+| 7 | Timestamp vs. relative time | Journal entries | 🟡 Medium |
+| 8 | Low contrast progress track | Skill Gap bar | 🟡 Medium |
+| 9 | Button hierarchy unclear | Action buttons | 🟡 Medium |
+| 10 | Inconsistent sidebar icons | Left nav | 🟡 Medium |
+| 11 | Inconsistent CTA labels | Card headers | 🟡 Medium |
+| 12 | Greeting tone mismatch | Page header | 🟢 Low |
+| 13 | Card style inconsistency | Stats row | 🟢 Low |
+| 14 | No onboarding nudges | Dashboard | 🟢 Low |
+| 15 | Ambiguous Analyze CTA | Skill Gap card | 🟢 Low |
+
+---
+
+**Total Issues Found: 15** (1 Critical, 4 High, 6 Medium, 4 Low)
+
+================================================================================
+
+📸 Analyzing: 05-overview-mobile.png
+# CareerDNA App - UI/UX QA Analysis
+
+---
+
+## 🔴 CRITICAL Issues
+
+### 1. Bottom Navigation Bar - Text Truncation
+**Location:** Bottom nav bar
+**Issue:** "INTERVIEW" label appears cramped/tight against the edge of the screen with insufficient padding on the right side. Risk of cutoff on smaller screens.
+**Severity:** Critical
+
+---
+
+## 🟠 HIGH Issues
+
+### 2. Journal Entry Card - Text Cutoff
+**Location:** Recent Journal Activity section, second entry
+**Issue:** "The Rain-Ready Wedding Pivot, Grandhotel Giessbach" entry is **cut off mid-card** with no visible truncation indicator (...) and no bottom padding — the card bleeds into the navigation bar area, suggesting a scroll container height miscalculation.
+**Severity:** High
+
+### 3. Inconsistent Button Heights
+**Location:** Action buttons row ("+ Log Today", "View Skills", "Practice Interview")
+**Issue:** "Practice Interview" button **wraps to two lines** while the other two buttons are single-line. This creates unequal button heights, breaking visual rhythm. All three should be uniform height.
+**Severity:** High
+
+### 4. Card Grid Misalignment
+**Location:** Stats cards (2×2 grid)
+**Issue:** The bottom-left card ("1 Experiences") appears **slightly taller** than its sibling cards, creating an uneven grid baseline. Inconsistent card heights suggest no fixed height constraint is set.
+**Severity:** High
+
+---
+
+## 🟡 MEDIUM Issues
+
+### 5. Inconsistent Icon Visual Weight
+**Location:** Stats cards icons
+**Issue:** The four icons used across the stat cards have **noticeably different visual weights and styles**:
+- Top-left: Star/sparkle (outline, small)
+- Top-right: Filled circle with ring (heavy)
+- Bottom-left: Half-filled circle (medium)
+- Bottom-right: Double-ring circle (light outline)
+
+No consistent icon system is being followed.
+**Severity:** Medium
+
+### 6. Typography Inconsistency — "Target Role" Card
+**Location:** Bottom-right stat card
+**Issue:** "front office manager" is rendered in **purple/accent color** while all other stat values (6, 50, 1) are also purple — however "front office manager" uses a **different font weight** (appears bold/semibold) compared to the numeric values which appear in a heavier display weight. The hierarchy feels inconsistent.
+**Severity:** Medium
+
+### 7. Section Header Spacing Inconsistency
+**Location:** "RECENT JOURNAL ACTIVITY" section
+**Issue:** The spacing between the stats grid and the journal section header appears **tighter** than the spacing between other sections above it (buttons → cards). Inconsistent vertical rhythm throughout the page.
+**Severity:** Medium
+
+### 8. "View all →" Link Alignment
+**Location:** Recent Journal Activity header row
+**Issue:** The "View all →" text and the section title "RECENT JOURNAL ACTIVITY" appear to be on the same baseline, but the arrow character (→) is a **plain Unicode character** rather than a proper icon, which may render inconsistently across devices/fonts.
+**Severity:** Medium
+
+### 9. Bottom Navigation - Active State Inconsistency
+**Location:** Bottom navigation bar
+**Issue:** "OVERVIEW" is the active tab with a **diamond/gem icon filled in purple**, but the active state indicator style doesn't clearly differentiate from inactive states at a glance. The icon style for OVERVIEW (diamond) is decorative while others (JOURNAL, SKILLS, GAP, INTERVIEW) use simpler geometric icons — no consistent icon family.
+**Severity:** Medium
+
+### 10. Journal Entry Bullet Points
+**Location:** Recent Journal Activity list
+**Issue:** Bullet indicators are **solid purple circles** that appear oversized relative to the text size, creating visual imbalance. They also appear to be vertically aligned to the **top** of multi-line titles rather than centered.
+**Severity:** Medium
+
+---
+
+## 🔵 LOW Issues
+
+### 11. Username Capitalization
+**Location:** Page header, greeting section
+**Issue:** Username displays as "Lucagarba" — appears to be a **raw username** (no space between "Luca" and "garba") rather than a formatted display name. Either name parsing is broken or no display name was set and validation is missing.
+**Severity:** Low
+
+### 12. "front office manager" — Lowercase Inconsistency
+**Location:** Target Role stat card
+**Issue:** "front office manager" is displayed in **all lowercase**, while every other label/value in the app follows Title Case or UPPER CASE conventions. This is either a data formatting issue or a missing text-transform CSS rule.
+**Severity:** Low
+
+### 13. Journal Date Format
+**Location:** Concierge Train journal entry
+**Issue:** Date "May 13, 2026" — the **future date** (2026) may indicate a test/dummy data issue or a date parsing bug if the app is being used in the present day.
+**Severity:** Low
+
+### 14. Greeting "GOOD EVENING" — Hardcoded or Logic Issue
+**Location:** Top of dashboard
+**Issue:** "GOOD EVENING" — if this is **time-based logic**, it cannot be verified from a static screenshot, but should be flagged for QA testing across time zones and edge cases (midnight boundary).
+**Severity:** Low
+
+### 15. Card Background Contrast
+**Location:** All stat cards
+**Issue:** The card background (#1e1b2e approximately) vs the page background (#13111e approximately) has **very low contrast difference**, making card boundaries difficult to perceive for users with low vision or on low-quality displays.
+**Severity:** Low
+
+### 16. Missing Streak/Progress Indicator
+**Location:** Dashboard overview
+**Issue:** For a career-tracking app, there is **no visible streak, completion percentage, or progress bar** on the overview — while this may be a product decision, the "6 Journal Entries" and "50 Skills Tracked" stats have no context (out of what total? What's the goal?). This is a UX completeness issue.
+**Severity:** Low
+
+---
+
+## 📊 Summary Table
+
+| # | Issue | Location | Severity |
+|---|-------|----------|----------|
+| 1 | Nav label truncation risk | Bottom nav | 🔴 Critical |
+| 2 | Second journal card cut off | Journal section | 🟠 High |
+| 3 | Inconsistent button heights | Action buttons | 🟠 High |
+| 4 | Uneven card grid heights | Stats grid | 🟠 High |
+| 5 | Inconsistent icon styles | Stat card icons | 🟡 Medium |
+| 6 | Font weight inconsistency | Target Role card | 🟡 Medium |
+| 7 | Vertical spacing inconsistency | Section gaps | 🟡 Medium |
+| 8 | Unicode arrow in link | View all → | 🟡 Medium |
+| 9 | Nav active state clarity | Bottom nav | 🟡 Medium |
+| 10 | Bullet point sizing/alignment | Journal list | 🟡 Medium |
+| 11 | Username parsing broken | Header | 🔵 Low |
+| 12 | Lowercase text inconsistency | Target Role | 🔵 Low |
+| 13 | Future date in content | Journal entry | 🔵 Low |
+| 14 | Time-based greeting logic | Header | 🔵 Low |
+| 15 | Low card/bg contrast | Stat cards | 🔵 Low |
+| 16 | Missing progress context | Stats | 🔵 Low |
+
+---
+
+**Total Issues Found: 16**
+- 🔴 Critical: 1
+- 🟠 High: 3
+- 🟡 Medium: 6
+- 🔵 Low: 6
+
+================================================================================
+
+📸 Analyzing: 06-journal-desktop.png
+# CareerDNA UI/UX QA Analysis
+
+## Critical Issues
+
+### 1. Date Selector Inconsistency
+**Location:** Episode date row
+**Issue:** The three date dropdowns (day/month/year) have **inconsistent widths** — the day selector is noticeably narrower than month, which is narrower than year. They should follow logical proportional sizing but currently appear arbitrarily sized.
+**Severity:** Critical
+
+---
+
+## High Issues
+
+### 2. Textarea Placeholder Text Contrast
+**Location:** Main journal entry textarea
+**Issue:** The placeholder text "What did you work on? What did you learn? Any wins or challenges?" appears very low contrast against the dark background — likely **failing WCAG AA 4.5:1 contrast ratio** for placeholder text.
+**Severity:** High
+
+### 3. Microphone Button Overlapping Resize Handle
+**Location:** Bottom-right corner of textarea
+**Issue:** The microphone icon button is positioned **directly on top of the textarea resize handle** (bottom-right corner). This makes the resize handle inaccessible and creates interaction conflicts.
+**Severity:** High
+
+### 4. Entry Title Field Missing Label
+**Location:** Top of entry form
+**Issue:** The "Entry title (optional)" field uses **placeholder-only labeling** with no persistent visible label. When a user starts typing, context is completely lost — accessibility failure for screen readers and usability.
+**Severity:** High
+
+---
+
+## Medium Issues
+
+### 5. "Past Entries" Section Header Spacing
+**Location:** Between "+ Add Entry" button and "Past Entries" heading
+**Issue:** There is **insufficient vertical spacing** between the form card bottom edge and the "Past Entries" section header. The visual hierarchy separation feels cramped.
+**Severity:** Medium
+
+### 6. Entry Card Title Truncation Risk
+**Location:** Second entry card — "Hotel Portrait (Guest Assistant Intern), Last minute reservation"
+**Issue:** The title is **very long and risks truncation** on smaller viewports. No visible truncation strategy (ellipsis or wrapping limit) appears to be implemented consistently across cards. First card has a short title; second is significantly longer — no visual consistency.
+**Severity:** Medium
+
+### 7. "+ Extract Skills" Button Inconsistent Positioning
+**Location:** Both entry cards
+**Issue:** The "+ Extract Skills" button appears to be **left-aligned within the card** but the card content uses full-width layout. The button lacks visual weight/hierarchy context — unclear if it's a primary or secondary action. No right-side counterpart or alignment anchor.
+**Severity:** Medium
+
+### 8. Close (×) Button Hit Target
+**Location:** Top-right of each entry card
+**Issue:** The × dismiss button appears **very small** (likely under 24×24px). This fails the **WCAG 2.5.5 target size** minimum of 44×44px for touch accessibility.
+**Severity:** Medium
+
+### 9. Inconsistent Icon Styles in Sidebar
+**Location:** Left navigation sidebar
+**Issue:** Sidebar navigation icons are **visually inconsistent** — some appear as geometric shapes (diamond, circle), others as more complex icons. The "Daily Journal" active item uses a ✦ sparkle while others use circles/diamonds — no coherent icon system.
+**Severity:** Medium
+
+### 10. Active Nav Item vs. Inactive Contrast
+**Location:** Left sidebar
+**Issue:** "Daily Journal" has a purple highlight background, but the **contrast between active and hover states** is unclear. Other items have no hover state indicator visible, creating uncertain interactive affordance.
+**Severity:** Medium
+
+---
+
+## Low Issues
+
+### 11. User Avatar Missing
+**Location:** Bottom-left user profile section
+**Issue:** The user avatar shows only an **"L" initial in a colored circle** — no fallback image state is defined. The circle color (purple gradient) doesn't match the app's overall color system coherently.
+**Severity:** Low
+
+### 12. Refresh/Sync Icon Next to Username
+**Location:** Bottom-left, next to "lucagarbag..."
+**Issue:** There's a small **circular arrow icon** whose purpose is unclear — no tooltip, no label. Ambiguous affordance.
+**Severity:** Low
+
+### 13. Username Text Truncation
+**Location:** Bottom-left profile section
+**Issue:** Username "lucagarbag..." is **visibly truncated with ellipsis** but no tooltip or full-name reveal mechanism appears to exist on hover.
+**Severity:** Low
+
+### 14. Card Date Text Contrast
+**Location:** Entry cards — "May 13, 2026"
+**Issue:** The date text appears in a **muted gray** that may not meet WCAG AA 4.5:1 contrast ratio against the dark card background.
+**Severity:** Low
+
+### 15. Vertical Rhythm Inconsistency
+**Location:** Sidebar section headers ("MAIN", "SKILLS", "CAREER")
+**Issue:** Section headers use **all-caps small text** as dividers, but the spacing above/below each group appears inconsistent — "SKILLS" and "CAREER" groups have different perceived padding from their headers.
+**Severity:** Low
+
+### 16. Form Card Border Visibility
+**Location:** Main journal entry form
+**Issue:** The form container has a **subtle border that barely differentiates** it from the page background — could cause confusion about where interactive areas begin/end, especially for low-vision users.
+**Severity:** Low
+
+---
+
+## Summary Table
+
+| # | Issue | Location | Severity |
+|---|-------|----------|----------|
+| 1 | Inconsistent date dropdown widths | Date selectors | Critical |
+| 2 | Low contrast placeholder text | Textarea | High |
+| 3 | Mic button overlaps resize handle | Textarea corner | High |
+| 4 | Missing persistent form label | Title field | High |
+| 5 | Insufficient section spacing | Form/entries gap | Medium |
+| 6 | Long title truncation risk | Entry card 2 | Medium |
+| 7 | Extract Skills button alignment | Both cards | Medium |
+| 8 | Small close button hit target | Card × buttons | Medium |
+| 9 | Inconsistent sidebar icons | Nav sidebar | Medium |
+| 10 | Unclear hover/active states | Nav sidebar | Medium |
+| 11 | Avatar fallback state | Bottom-left | Low |
+| 12 | Ambiguous sync icon | Bottom-left | Low |
+| 13 | Username truncation no tooltip | Bottom-left | Low |
+| 14 | Date text low contrast | Entry cards | Low |
+| 15 | Inconsistent sidebar spacing | Nav groups | Low |
+| 16 | Weak form card border | Entry form | Low |
+
+================================================================================
+
+📸 Analyzing: 07-journal-mobile.png
+# CareerDNA UI/UX QA Audit
+
+## Critical Issues
+
+### 1. Text Cutoff in Past Entries Card
+**Location:** "Emergency Airport Driver" entry at bottom
+**Issue:** Entry text "During my concierge shift, a guest had an" is abruptly cut off mid-sentence with no visual indicator (ellipsis, fade, "read more") that content continues
+**Severity:** Critical — content is inaccessible/incomplete
+
+---
+
+## High Issues
+
+### 2. Date Picker Year Shows Future Date (2026)
+**Location:** Episode date dropdowns
+**Issue:** Default year is 2026, which may be intentional but if current date is 2025, this is a logic/default state bug. No validation preventing future dates for journal entries (which should be historical)
+**Severity:** High
+
+### 3. Bottom Navigation Active State Inconsistency
+**Location:** Bottom navigation bar
+**Issue:** "JOURNAL" shows a filled/star icon and purple text indicating active state, but icon styles are **inconsistent** across tabs:
+- OVERVIEW: Diamond/filled shape
+- JOURNAL: Star (different style entirely)
+- SKILLS: Circle filled
+- GAP: Circle outline
+- INTERVIEW: Diamond outline
+No unified icon design language
+**Severity:** High
+
+### 4. Right Edge Content Clipping
+**Location:** Right side of main content area (~top third)
+**Issue:** Visible scroll indicator/element clipping on the right edge of the journal card — suggests content overflow or a partially visible UI element
+**Severity:** High
+
+---
+
+## Medium Issues
+
+### 5. Inconsistent Border Radius
+**Location:** Comparing the tab switcher vs. input fields vs. entry cards
+**Issue:**
+- Tab switcher: Large pill radius (~50px)
+- Input fields: Medium radius (~8px)
+- Past Entry card: Medium radius
+- "Add Entry" button: Large pill radius
+No consistent border-radius token applied
+**Severity:** Medium
+
+### 6. "Add Entry" Button Width Inconsistency
+**Location:** Journal entry form, bottom
+**Issue:** Button does **not** stretch full width like the input fields above it — creates visual imbalance. Width appears ~50% of container while all inputs are 100% width
+**Severity:** Medium
+
+### 7. Journal/Experiences Tab Contrast
+**Location:** Top tab switcher
+**Issue:** "Experiences" tab text is low contrast gray against dark background — may fail **WCAG AA** contrast ratio (4.5:1 requirement for normal text)
+**Severity:** Medium
+
+### 8. Placeholder Text Contrast
+**Location:** Main text area, entry title field
+**Issue:** Placeholder text ("What did you work on?...", "Entry title (optional)") appears very low contrast against the dark card background — likely fails WCAG AA accessibility standards
+**Severity:** Medium
+
+### 9. Microphone Icon Positioning
+**Location:** Bottom-right of text area
+**Issue:** Mic button overlaps the resize handle of the textarea — both are positioned in the bottom-right corner, creating a functional conflict and visual clutter
+**Severity:** Medium
+
+### 10. "Past Entries" Section Header Spacing
+**Location:** Between "+ Add Entry" button and "Past Entries" heading
+**Issue:** Inconsistent vertical spacing — gap between the form card and "Past Entries" label appears tighter than the spacing used elsewhere in the layout
+**Severity:** Medium
+
+---
+
+## Low Issues
+
+### 11. User Avatar Initial Ambiguity
+**Location:** Top-right avatar circle
+**Issue:** Single letter "L" gives no tooltip, name, or accessibility label on what appears to be a tappable element — no visual affordance that it's interactive
+**Severity:** Low
+
+### 12. "✦ Journal" Decorative Icon Inconsistency
+**Location:** Tab switcher active state & page title area
+**Issue:** The sparkle/star icon (✦) appears before "Journal" in the tab but not reflected in the page title "Daily Journal" — inconsistent decorative usage
+**Severity:** Low
+
+### 13. Episode Date Label Alignment
+**Location:** Date picker section
+**Issue:** "Episode date" label has no consistent spacing relationship to the dropdowns below compared to other label-to-input relationships in the form
+**Severity:** Low
+
+### 14. Past Entry Card Delete Button
+**Location:** "×" button on Emergency Airport Driver card
+**Issue:** The × dismiss/delete button has no visible hit target boundary, hover state, or confirmation pattern — destructive action with no safeguard
+**Severity:** Low — but UX risk
+
+### 15. App Logo Accessibility
+**Location:** Top-left header
+**Issue:** Logo image likely has no alt text, and "CareerDNA" branding link has no visible focus state indicator
+**Severity:** Low
+
+---
+
+## Summary Table
+
+| Severity | Count |
+|----------|-------|
+| Critical | 1 |
+| High | 3 |
+| Medium | 6 |
+| Low | 5 |
+| **Total** | **15** |
+
+---
+
+## Top Recommendations
+1. Fix text truncation with proper expand/collapse pattern
+2. Standardize icon system across bottom nav
+3. Run WCAG contrast audit on all placeholder/inactive text
+4. Add safeguard to destructive delete action
+5. Establish consistent design tokens for radius, spacing, and button sizing
+
+================================================================================
+
+📸 Analyzing: 08-experiences-mobile.png
+# CareerDNA App - UI/UX QA Analysis
+
+## 🔴 CRITICAL Issues
+
+### 1. Text Cutoff at Bottom of Experience Card
+**Location:** Experience card description, bottom edge
+**Issue:** The description text is abruptly cut off mid-sentence ("Coordinated with internal departments to deliver...") with no visual indication of truncation (no fade, ellipsis, or "read more" affordance)
+**Impact:** User cannot see complete job description
+
+---
+
+## 🟠 HIGH Issues
+
+### 2. Timeline Dot Misalignment
+**Location:** Purple circle dot (left side, ~619px vertical)
+**Issue:** The purple timeline indicator dot is **vertically misaligned** — positioned above the card rather than aligned with the card header/title
+**Expected:** Should align with the card's top edge or title
+
+### 3. Card Overlapping Navigation Bar
+**Location:** Bottom of screen where card meets bottom nav
+**Issue:** The experience card content flows directly into the bottom navigation bar without a safe area buffer, creating a **collision zone** between scrollable content and fixed navigation
+
+---
+
+## 🟡 MEDIUM Issues
+
+### 4. Inconsistent Tab Styling
+**Location:** Journal/Experiences toggle tabs
+**Issue:** 
+- "Experiences" tab has a **filled/active dark background**
+- "Journal" tab appears as plain text with a `+` icon
+- The active state contrast difference is subtle and unclear which is truly "selected"
+
+### 5. Badge Placement Ambiguity
+**Location:** "2mo" duration badge, top-right of card
+**Issue:** The badge floats with **insufficient margin** from the `×` close button — touch targets are dangerously close (~8px apart), risking accidental dismissal
+
+### 6. Close Button (×) Touch Target Too Small
+**Location:** Top-right of experience card
+**Issue:** The `×` button appears to be **~20×20px**, well below the recommended **44×44px** minimum touch target (WCAG 2.5.5 / Apple HIG)
+
+### 7. Inconsistent Icon Styles in Bottom Nav
+**Location:** Bottom navigation bar
+**Issue:** Navigation icons use **mixed visual styles**:
+- "Overview" = diamond/filled
+- "Journal" = star/sparkle
+- "Skills" = circle with dot
+- "Gap" = circle outline
+- "Interview" = diamond outline
+Mixed filled/outline/unique shapes lack visual cohesion
+
+---
+
+## 🔵 LOW Issues
+
+### 8. Company Name Color Inconsistency
+**Location:** "Casa Cipriani" link text
+**Issue:** Uses **bright purple (#7B5CF6 range)** which works, but differs slightly from the button purple — minor brand color inconsistency
+
+### 9. Insufficient Bottom Padding on Scrollable Content
+**Location:** Scroll container
+**Issue:** No **bottom padding/margin** to account for the fixed navigation bar height (~60px), causing last content to hide behind nav
+
+### 10. "Add Experience" Button Border Radius Inconsistency
+**Location:** "+ Add Experience" button vs. tab pills
+**Issue:** Button uses **fully rounded** pill shape, while the tab selector uses a **slightly less rounded** rectangle — minor radius inconsistency
+
+### 11. Low Contrast on Subtitle Text
+**Location:** "Document your work history. AI extracts skills automatically."
+**Issue:** Gray text on dark background may **fail WCAG AA** (4.5:1 contrast ratio) for body text — needs contrast audit
+
+### 12. Date Text Contrast
+**Location:** "Apr 2025 — Jun 2025"
+**Issue:** Muted gray on dark card background — likely **below WCAG AA threshold** for normal-sized text
+
+### 13. Missing Scroll Indicator
+**Location:** Experience card
+**Issue:** No scrollbar or visual affordance to indicate the card content **is scrollable**, creating discoverability problem
+
+---
+
+## 📊 Summary Table
+
+| Severity | Count | Issues |
+|----------|-------|--------|
+| 🔴 Critical | 1 | Text cutoff |
+| 🟠 High | 2 | Misalignment, nav collision |
+| 🟡 Medium | 4 | Tab styling, touch targets, badge |
+| 🔵 Low | 6 | Contrast, spacing, consistency |
+| **Total** | **13** | |
+
+---
+
+## 🔧 Top 3 Priority Fixes
+1. **Add "Read More" expansion** or scrollable card for description text
+2. **Fix bottom safe area** padding to prevent nav bar overlap
+3. **Increase touch targets** for `×` button to minimum 44×44px
+
+================================================================================
+
+📸 Analyzing: 09-skills-myskills-desktop.png
+# CareerDNA "My Skills" - Visual QA Audit Report
+
+---
+
+## 🔴 CRITICAL Issues
+
+### 1. Skill Name Input Field — Text Placeholder Cutoff
+**Location:** Add Skill form, first input field
+**Issue:** Placeholder text "Skill name (e.g. React, SQL, Leadershi**p**" is visibly truncated — the word "Leadership" is cut off
+**Impact:** Users can't read the full hint, reducing discoverability
+**Severity:** Critical (UX clarity)
+
+---
+
+## 🟠 HIGH Issues
+
+### 2. Progress Bar — "Economics of Public Policy" Incomplete Fill
+**Location:** Technical section, second card
+**Issue:** Progress bar appears significantly shorter/thinner than other Level 1/5 cards like "Innovating with AI" — inconsistent bar rendering at same level value
+**Severity:** High
+
+### 3. Card Height Inconsistency — "Economics of Public Policy"
+**Location:** Technical section, second card
+**Issue:** This card is visibly **taller** than adjacent cards (Innovating with AI, Administration) due to two-line title wrapping, causing **uneven row height** across the grid
+**Severity:** High — breaks visual grid rhythm
+
+### 4. Progress Bar Color Inconsistency — Administration
+**Location:** Technical section, third card
+**Issue:** Administration at Level 3/5 shows a progress bar that appears **brighter/different purple tone** compared to other cards — possible gradient mismatch
+**Severity:** High
+
+---
+
+## 🟡 MEDIUM Issues
+
+### 5. Inconsistent Progress Bar Widths Across Same Levels
+**Location:** Soft Skills section
+**Issue:** Multiple skills share "Level 4/5" but their progress bars show **slightly different fill lengths**:
+- Crisis Management vs. Leadership vs. Discretion bars appear unequal
+**Severity:** Medium — suggests bar width calculation bug
+
+### 6. Missing Visual Hierarchy Between Sections
+**Location:** Between "TECHNICAL" and "SOFT SKILLS" section headers
+**Issue:** Section labels ("TECHNICAL", "SOFT SKILLS") use identical typography/weight to each other but have **no visual separator or increased spacing** — sections blur together
+**Severity:** Medium
+
+### 7. Level Slider — No Min/Max Labels
+**Location:** Add Skill form, Level slider (shows "Level: 3/5")
+**Issue:** Slider has **no visible 1 and 5 endpoint labels** — users can't gauge range without trial interaction
+**Severity:** Medium (Accessibility/Usability)
+
+### 8. "× Close" Button Tap Target Size
+**Location:** All skill cards, top-right × button
+**Issue:** The × dismiss buttons appear very small (~16px), likely **below the 44×44px minimum touch target** recommended by WCAG 2.5.5
+**Severity:** Medium (Accessibility)
+
+### 9. Add Skill Form — Inconsistent Input Field Styles
+**Location:** Add Skill form
+**Issue:** The text input has a **visible border/outline style** while the dropdown selector appears slightly different in background tone — inconsistent form element styling language
+**Severity:** Medium
+
+### 10. Statistics Card — Isolated in Row
+**Location:** Technical section, second row
+**Issue:** "Statistics" card sits **alone in a 3-column grid row**, spanning only 1/3 width — creates large empty whitespace to the right, looking unfinished
+**Severity:** Medium — suggests either missing cards or layout should adapt
+
+---
+
+## 🔵 LOW Issues
+
+### 11. Sidebar Active State Glow Bleed
+**Location:** Left sidebar, "My Skills" nav item
+**Issue:** The purple highlight/glow on the active "My Skills" item appears to have **slightly uneven left-edge padding**, with the glow bleeding toward the sidebar edge unevenly
+**Severity:** Low
+
+### 12. Category Dropdown Default Value Semantics
+**Location:** Add Skill form, dropdown showing "Technical"
+**Issue:** It's unclear if "Technical" is a **default/selected state or placeholder** — no visual differentiation (e.g., italics or dimmed text for placeholder vs. selected value)
+**Severity:** Low
+
+### 13. User Avatar Contrast
+**Location:** Bottom-left, user profile area
+**Issue:** The "L" avatar circle uses a **dark purple on dark background** — insufficient contrast ratio, potentially failing WCAG AA (4.5:1 requirement)
+**Severity:** Low (Accessibility)
+
+### 14. Inconsistent Card Border Radius Perception
+**Location:** All skill cards
+**Issue:** Cards appear to use consistent border-radius but under close inspection the **Add Skill form container** has a slightly different perceived radius than the skill cards below
+**Severity:** Low
+
+### 15. No Empty State for Technical Section Gaps
+**Location:** Technical section grid
+**Issue:** No placeholder/ghost cards or messaging to indicate users could **add more technical skills** to fill the empty grid space
+**Severity:** Low (UX guidance)
+
+---
+
+## 📊 Summary Table
+
+| Severity | Count |
+|----------|-------|
+| 🔴 Critical | 1 |
+| 🟠 High | 3 |
+| 🟡 Medium | 6 |
+| 🔵 Low | 5 |
+| **Total** | **15** |
+
+---
+
+## Top 3 Priority Fixes
+1. **Fix placeholder text truncation** in skill name input
+2. **Normalize progress bar widths** by level value (rendering bug)
+3. **Equalize card heights** or use CSS Grid `align-items: start` to prevent tall cards distorting rows
+
+================================================================================
+
+📸 Analyzing: 10-skills-myskills-mobile.png
+# CareerDNA App - UI/UX QA Analysis
+
+## 🔴 CRITICAL Issues
+
+### 1. Skill Cards Missing Category Tags
+**Location:** Bottom skill cards ("Innovating with AI", "Economics of Public Policy")
+**Issue:** Cards show "Level 1/5" but have NO category indicator despite being under "TECHNICAL" section. If skills span multiple categories, users can't identify category at a glance.
+**Severity:** Critical - Core functionality obscured
+
+---
+
+## 🟠 HIGH Issues
+
+### 2. Progress Bar Truncation on Skill Cards
+**Location:** Both skill cards at bottom
+**Issue:** Purple progress bars appear extremely short (≈15-20% width) and seem cut off rather than representing intentional Level 1/5 = 20% fill. Visual representation is ambiguous vs. broken.
+**Severity:** High
+
+### 3. "Economics of Public Policy" Text Overflow Risk
+**Location:** Right skill card, title area
+**Issue:** Three-word title wraps to 3 lines, consuming disproportionate card space and pushing level indicator awkwardly. Card height appears inconsistent with left card.
+**Severity:** High
+
+### 4. Category Filter Buttons - Inconsistent Visual Hierarchy
+**Location:** Skill category selector area
+**Issue:** "Technical" has a visible purple border (selected state) but remaining buttons have nearly identical dark styling making the **unselected vs selected states barely distinguishable**. Contrast ratio likely fails WCAG AA.
+**Severity:** High - Accessibility violation
+
+---
+
+## 🟡 MEDIUM Issues
+
+### 5. Inconsistent Button Border Radius
+**Location:** Category filter buttons
+**Issue:** 
+- "Technical" → pill/fully rounded
+- "Soft Skills" → pill/fully rounded  
+- "Domain Knowledge", "Languages" → slightly less rounded
+- "Tools & Software", "Certifications", "Other" → noticeably more squared
+**Three different border-radius values** used inconsistently.
+**Severity:** Medium
+
+### 6. Slider Position vs. Level Value Mismatch
+**Location:** Level slider "3/5"
+**Issue:** Slider thumb appears positioned at approximately **55-60%** of track, but Level 3/5 = **60%** — marginally acceptable but the track fill/color behind slider is missing, making it hard to read position.
+**Severity:** Medium
+
+### 7. Bottom Navigation Active State Inconsistency
+**Location:** Bottom nav bar
+**Issue:** "SKILLS" icon uses a **filled circle** indicator while other nav items (OVERVIEW, JOURNAL, GAP, INTERVIEW) use **outline diamond/circle shapes**. Icon style language is inconsistent — mixing filled and outlined icons.
+**Severity:** Medium
+
+### 8. Section Header Spacing
+**Location:** "TECHNICAL" section label
+**Issue:** Insufficient vertical spacing between the "+ Add Skill" button card and the "TECHNICAL" section header. The gap (~16px) feels cramped relative to the card's internal padding.
+**Severity:** Medium
+
+### 9. Skill Input Field Placeholder Contrast
+**Location:** Search/input field "Skill name (e.g. React, SQL, Leadership)"
+**Issue:** Placeholder text appears very low contrast against dark background. Likely **fails WCAG AA minimum 4.5:1 ratio** for placeholder text.
+**Severity:** Medium - Accessibility
+
+---
+
+## 🔵 LOW Issues
+
+### 10. Category Grid Layout Irregularity
+**Location:** Category button grid
+```
+[Technical]        [Soft Skills]
+[Domain Knowledge] [Languages]
+[Tools & Software] [Certifications]
+[Other]            ← orphaned
+```
+**Issue:** "Other" is orphaned on its own row but significantly narrower than full-width, left-aligned with no visual balance. Should either be full-width or centered.
+**Severity:** Low
+
+### 11. User Avatar Initials Ambiguity
+**Location:** Top-right avatar circle "L"
+**Issue:** Single letter provides minimal identification. No tooltip or accessible label visible. Fails basic accessibility for screen readers.
+**Severity:** Low
+
+### 12. CV Scanner Tab Icon Rendering
+**Location:** Tab switcher, "CV Scanner" option
+**Issue:** The icon preceding "CV Scanner" appears small/pixelated at this resolution — possible SVG rendering issue at small sizes.
+**Severity:** Low
+
+### 13. Skill Cards - Missing Hover/Focus States Visible
+**Location:** Skill cards
+**Issue:** No visible interactive affordance (no border, no shadow depth change visible). Cards with ❌ delete buttons should indicate interactivity more clearly.
+**Severity:** Low
+
+### 14. "+" Add Skill Button Icon Spacing
+**Location:** "+ Add Skill" CTA button
+**Issue:** The "+" character and "Add Skill" text have inconsistent spacing — "+" appears tightly coupled without proper icon-to-text spacing convention.
+**Severity:** Low
+
+---
+
+## 📊 Summary Table
+
+| Severity | Count | Items |
+|----------|-------|-------|
+| 🔴 Critical | 1 | Missing category on cards |
+| 🟠 High | 3 | Progress bars, text overflow, contrast |
+| 🟡 Medium | 5 | Border radius, slider, nav icons, spacing, a11y |
+| 🔵 Low | 5 | Grid orphan, avatar, icon render, affordance, spacing |
+| **Total** | **14** | |
+
+---
+
+## 🎯 Priority Fixes Recommended
+1. Fix WCAG contrast on category buttons and input placeholder
+2. Standardize border-radius tokens across all button components
+3. Add track fill color to level slider
+4. Fix card height consistency for varying title lengths
+5. Reconcile bottom nav icon style system (all filled OR all outlined)
+
+================================================================================
+
+📸 Analyzing: 11-skills-cvscanner-desktop.png
+# CareerDNA CV Scanner - UI/UX QA Audit
+
+---
+
+## 🔴 CRITICAL Issues
+
+### 1. CV Preview Text Truncation
+**Location:** CV preview card (dark code-block area)
+**Issue:** The CV text content is abruptly cut off at the bottom with no visual indicator (fade, "show more", or scroll). The text ends mid-sentence: *"Dining room"*
+**Impact:** User cannot verify if their CV was correctly parsed
+
+---
+
+## 🟠 HIGH Severity Issues
+
+### 2. Severely Under-Extracted Skills (Core Feature Failure)
+**Location:** "Skills extracted from CV" section
+**Issue:** Only **2 skills** extracted ("Economics of Public Policy", "Innovating with AI") from a hospitality CV that clearly contains:
+- Table service
+- Mise en place
+- Chef de Rang / Commis de Rang
+- Luxury standards
+- Multiple positions/dates
+
+These 2 skills also appear **mismatched** to the CV content (they sound academic, not hospitality-related), suggesting AI extraction is either broken or mapping to wrong skill library entries.
+
+### 3. "Last Scan Results - 3 new" Badge Mismatch
+**Location:** Tab bar, second tab
+**Issue:** Badge shows **"3 new"** but the My CV tab only shows **2 skills**. Numerical inconsistency creates user confusion about what "3 new" refers to.
+
+---
+
+## 🟡 MEDIUM Severity Issues
+
+### 4. Skill Category Mislabeling
+**Location:** Skills section, category header
+**Issue:** Both extracted skills are labeled under **"TECHNICAL"** category. Hospitality/service skills and policy/AI courses are not technical skills — wrong taxonomy applied.
+
+### 5. CV Tab Indicator Ambiguity
+**Location:** "My CV 2" tab label
+**Issue:** The number **"2"** next to "My CV" has no tooltip or legend explaining what it represents (2 CVs uploaded? 2 versions? 2 skills?). Inconsistent badge styling compared to the green "3 new" badge.
+
+### 6. Inactive Tab Contrast
+**Location:** Tab bar — "Last Scan Results" tab
+**Issue:** The unselected tab text has very low contrast against the dark background, likely **failing WCAG AA** (4.5:1 ratio) for normal text accessibility standards.
+
+### 7. Empty State — No Visual Guidance
+**Location:** Bottom 60% of the page
+**Issue:** Large empty white space below the 2 skill tags with no:
+- CTA to add more skills manually
+- Explanation of why few skills were found
+- Suggestion to improve CV for better extraction
+
+---
+
+## 🔵 LOW Severity Issues
+
+### 8. Skill Tag Level Label Inconsistency
+**Location:** Skill tags ("Lv 1" badges)
+**Issue:** "Lv 1" uses abbreviated label with no tooltip explaining the leveling system. New users won't understand the scale (1-5? 1-10?).
+
+### 9. Upload Timestamp Precision Overkill
+**Location:** CV card subtitle
+**Issue:** *"Uploaded May 11, 2026 at 08:15 PM"* — showing seconds-level timestamp is unnecessary and adds visual noise. Relative time ("2 days ago") would be more user-friendly.
+
+### 10. Sidebar Icon Inconsistency
+**Location:** Left navigation panel
+**Issue:** Icons are visually inconsistent — mixing filled circles, outlined diamonds, half-filled circles, and square icons with no clear visual hierarchy or system (e.g., active vs inactive states use different icon styles).
+
+### 11. "Replace CV" Button Placement
+**Location:** Top right of header
+**Issue:** Primary destructive action ("Replace CV") is placed prominently without a secondary confirmation affordance visible. Risk of accidental CV replacement.
+
+### 12. CV Filename Display
+**Location:** CV card header
+**Issue:** `Garbagnati Luca_CV EU.pdf` — underscore in filename renders awkwardly. Should be sanitized/formatted for display (e.g., "Garbagnati Luca - CV EU").
+
+### 13. Section Header Capitalization
+**Location:** "TECHNICAL" label, "MAIN", "SKILLS", "CAREER" sidebar labels
+**Issue:** Inconsistent use of ALL CAPS for section headers vs. mixed case for other elements. No clear typographic hierarchy rule being applied consistently.
+
+---
+
+## ♿ ACCESSIBILITY Issues Summary
+
+| Issue | WCAG Criterion | Level |
+|-------|---------------|-------|
+| Low contrast inactive tab | 1.4.3 Contrast | AA Fail |
+| No alt text on CV preview | 1.1.1 Non-text Content | A Fail |
+| "Lv 1" unexplained abbreviation | 3.1.4 Abbreviations | AAA |
+| No focus indicators visible | 2.4.7 Focus Visible | AA |
+
+---
+
+## 📋 Priority Fix Order
+
+1. **Fix AI skill extraction** — core feature is broken
+2. **Resolve "3 new" vs "2 skills" count mismatch**
+3. **Add empty state UX** with guidance
+4. **Fix contrast** on inactive elements
+5. **Add CV preview scroll/expand** functionality
+
+================================================================================
+
+📸 Analyzing: 12-skills-cvscanner-mobile.png
+# CareerDNA UI/UX QA Analysis
+
+## 🔴 CRITICAL Issues
+
+### 1. CV Preview Text Cut Off
+**Location:** CV preview card (dark inner box)
+**Issue:** Text is hard-truncated mid-word — *"July 2023 – December 2023, Foo72 44 Ba..."* — completely unreadable, no ellipsis handling
+**Severity:** Critical — destroys content readability
+
+---
+
+## 🟠 HIGH Issues
+
+### 2. Only 2 Skills Extracted — Severely Underwhelming AI Output
+**Location:** "Skills extracted from CV" section
+**Issue:** CV clearly shows substantial professional experience (Grandhotel Giessbach, multiple date ranges) yet AI only extracted **2 skills**, both categorized as "TECHNICAL" despite being academic/conceptual ("Economics of Public Policy," "Innovating with AI"). This suggests a **classification logic bug**
+**Severity:** High — core feature failure
+
+### 3. Skill Category Misclassification
+**Location:** Skills list under "TECHNICAL" label
+**Issue:** "Economics of Public Policy" and "Innovating with AI" are **NOT technical skills** — they belong in "Soft Skills," "Academic," or "Domain Knowledge" categories
+**Severity:** High — misleading UX, wrong taxonomy
+
+### 4. "3 new" Badge vs "2 skills" Counter Mismatch
+**Location:** "Last Scan Results" badge shows **3 new** vs "Skills extracted from CV" shows **2 skills**
+**Issue:** Numerical inconsistency — user cannot reconcile these numbers
+**Severity:** High — trust/confusion issue
+
+### 5. "My CV **2**" Badge Ambiguity
+**Location:** My CV section header
+**Issue:** The badge "2" has no label/tooltip — 2 pages? 2 CVs? 2 versions? Completely unclear
+**Severity:** High — ambiguous UI element
+
+---
+
+## 🟡 MEDIUM Issues
+
+### 6. Inconsistent Skill Chip Visual Styling
+**Location:** Skills extracted section
+**Issue:** "Economics of Public Policy" chip has a **visible border/outline**, while "Innovating with AI" chip appears **filled/darker** — two different visual states for same-level items with no apparent reason
+**Severity:** Medium — visual inconsistency
+
+### 7. Skill Level Badge Inconsistency
+**Location:** "Lv 1" badges on both skills
+**Issue:** Both skills show "Lv 1" with no explanation of the leveling system. No tooltip, no legend, no scale reference (Lv 1 of what? 5? 10?)
+**Severity:** Medium — lacks context
+
+### 8. Upload Timestamp Shows Future Date
+**Location:** File card — *"Uploaded May 11, **2026** at 08:15 PM"*
+**Issue:** Date is in the **future** (2026) — likely a system clock bug or test data leak into production
+**Severity:** Medium — credibility/trust issue
+
+### 9. Bottom Navigation Active State Confusion
+**Location:** Bottom nav bar
+**Issue:** "SKILLS" is the active tab (filled circle indicator) but the screen title says "CV Scanner" — **navigational mismatch** between selected tab and displayed content
+**Severity:** Medium — navigation logic error
+
+### 10. Inconsistent Icon Styles in Bottom Nav
+**Location:** Bottom navigation
+**Issue:** Icons use mixed styles — diamond outlines (Overview, Interview), star/sparkle (Journal), circle (Skills, Gap) — **no visual cohesion**
+**Severity:** Medium — design system inconsistency
+
+### 11. CV Preview Box Contrast
+**Location:** Inner dark preview box within CV card
+**Issue:** Gray text on dark background (#999 on #1a1a1a approximate) — fails **WCAG AA contrast ratio** (requires 4.5:1 for normal text)
+**Severity:** Medium — accessibility violation
+
+---
+
+## 🔵 LOW Issues
+
+### 12. "Replace CV" Button Placement
+**Location:** Above the CV card
+**Issue:** The primary action ("Replace CV") appears **before** the current CV is shown — illogical visual hierarchy. User should see current CV first, then replacement option
+**Severity:** Low — UX flow issue
+
+### 13. "Last Scan Results" Indentation
+**Location:** Below "My CV" row
+**Issue:** The "→ Last Scan Results" row uses an arrow prefix and is indented, suggesting it's a sub-item, but the visual grouping with the card above is unclear — ambiguous parent-child relationship
+**Severity:** Low — hierarchy clarity
+
+### 14. Missing Empty State for Remaining Skill Categories
+**Location:** Skills section
+**Issue:** Only "TECHNICAL" category shown — no "SOFT SKILLS," "LANGUAGES," "TOOLS" sections even as empty states. User can't tell if they're absent or just empty
+**Severity:** Low — incomplete UI
+
+### 15. No Scroll Indicator
+**Location:** Skills section bottom
+**Issue:** Content appears to be cut off at the bottom with no scroll affordance, shadow, or "show more" indicator
+**Severity:** Low — discoverability issue
+
+### 16. Toggle Button Inconsistency
+**Location:** "My Skills / CV Scanner" toggle at top
+**Issue:** "CV Scanner" has a filled/active appearance but uses a **text icon (≡)** while "My Skills" uses a **radio button (◎)** — mixed metaphors for a segmented control
+**Severity:** Low — design system inconsistency
+
+---
+
+## 📊 Summary Table
+
+| Severity | Count |
+|----------|-------|
+| 🔴 Critical | 1 |
+| 🟠 High | 5 |
+| 🟡 Medium | 7 |
+| 🔵 Low | 5 |
+| **Total** | **18** |
+
+---
+
+## 🔧 Priority Fix Recommendations
+1. Fix AI skill extraction (quantity + classification)
+2. Resolve "3 new" vs "2 skills" counter mismatch
+3. Fix future date timestamp
+4. Improve CV preview text handling
+5. Clarify navigation state alignment
+
+================================================================================
+
+📸 Analyzing: 13-skillgap-desktop.png
+# CareerDNA Skill Gap - UI/UX QA Audit
+
+## CRITICAL Issues
+
+### None identified at critical level
+
+---
+
+## HIGH Severity Issues
+
+### 1. **Inconsistent Card Heights - Essential Skills Grid**
+**Location:** Essential Skills section, row 2-3
+The cards have varying heights due to content differences (e.g., "Communication Skills" wraps to two lines causing taller card vs single-line skill names). This creates a visually uneven grid layout that breaks visual rhythm.
+
+### 2. **Progress Bar Visual Mismatch**
+**Location:** Match percentage progress bar
+The filled yellow/gold progress bar appears to show ~65-70% visually, but the stated match is **42%**. The bar length does not accurately represent the 42% value — misleading data visualization.
+
+### 3. **"Time Management" Text Wrapping**
+**Location:** Essential Skills, row 3, first card
+"Time Management" wraps to two lines unnecessarily, while similar-length skill names in adjacent cards remain single-line. Inconsistent card content rendering suggests missing `white-space: nowrap` or insufficient minimum card width.
+
+---
+
+## MEDIUM Severity Issues
+
+### 4. **Inconsistent Level Badge Positioning**
+**Location:** Skill cards with "Lv X" badges
+| Card | Has Badge |
+|------|-----------|
+| Guest Relations | ✅ Lv 4 |
+| Team Management | ❌ Missing |
+| Communication Skills | ✅ Lv 5 |
+| Front Desk Management | ❌ Missing |
+
+Cards that are **matched** show level badges, while **missing** skills show none — this is logically correct but creates visual inconsistency in card structure/alignment between matched and unmatched states.
+
+### 5. **Color Dot Inconsistency on Skill Cards**
+**Location:** All skill cards, left side colored indicator dot
+- Missing skills show **red/orange dots**
+- Matched skills show **green dots**
+
+However, the dot color system is **not explained** anywhere in the UI. No legend exists, creating an accessibility/comprehension issue for new users.
+
+### 6. **"Analyze Role" Button Contrast**
+**Location:** Search bar area, top right of input
+The purple `Analyze Role` button against the dark input container has acceptable contrast, but the button color (`#7C5CFC` approximately) is not consistent with other accent colors used in the dashboard (yellow progress bar, green checkmarks), suggesting **inconsistent design token usage**.
+
+### 7. **Preferred Skills Section Header Spacing**
+**Location:** "PREFERRED SKILLS" section label
+The vertical spacing between the Essential Skills last row and the Preferred Skills header appears tighter than the spacing between the page title and the match card — **inconsistent section separation rhythm**.
+
+### 8. **Missing Skill Level Indicators for Missing Skills**
+**Location:** All red/missing skill cards
+Missing skills show no proficiency level requirement (no "Lv X" badge), making it impossible for the user to understand **what level they need to achieve**. This is a functional UX gap.
+
+---
+
+## LOW Severity Issues
+
+### 9. **"4/9 essential • 2/6 preferred" Legend Dot Sizes**
+**Location:** Below progress bar
+The blue dot (essential) and grey dot (preferred) used as legend indicators are very small (~6px) and may be **difficult to see** for users with visual impairments. Fails WCAG 2.1 non-text contrast guideline (3:1 ratio).
+
+### 10. **Sidebar Navigation Icon Inconsistency**
+**Location:** Left sidebar, SKILLS and CAREER sections
+Icons used are inconsistent in style:
+- Some appear filled circles
+- Some are outlined diamonds
+- Some are square-ish shapes
+No unified icon system/library is being followed consistently.
+
+### 11. **"lucagarbag..." Text Truncation**
+**Location:** Bottom-left user profile area
+The username `lucagarbag...` is truncated with ellipsis but the truncation seems premature — there appears to be enough horizontal space to show more characters. Suggests `max-width` is set too aggressively.
+
+### 12. **Card Border Radius Inconsistency**
+**Location:** Comparing the main match card vs skill grid cards
+The match summary card (top) appears to have a slightly larger border radius than the individual skill cards below it — minor but noticeable design inconsistency.
+
+### 13. **"Missing" Label Alignment**
+**Location:** Skill cards, bottom right
+The `✗ Missing` and `✓ You have this` text labels appear to be left-aligned within their container on some cards but the position shifts depending on the label length, creating subtle misalignment across the grid.
+
+### 14. **No Empty State / Scroll Indicator**
+**Location:** Bottom of visible skill cards
+There's no visual indicator that more content exists below (e.g., Hotel Industry Trends card is cut off at bottom). No scroll affordance or shadow gradient to hint at scrollable content.
+
+---
+
+## ACCESSIBILITY Issues Summary
+
+| Issue | WCAG Criterion | Severity |
+|-------|---------------|----------|
+| No legend for color coding | 1.4.1 Use of Color | High |
+| Small legend dots | 1.4.11 Non-text Contrast | Medium |
+| No focus indicators visible | 2.4.7 Focus Visible | Medium |
+| Truncated username | 1.4.4 Resize Text | Low |
+
+---
+
+## Summary Table
+
+| Severity | Count |
+|----------|-------|
+| Critical | 0 |
+| High | 3 |
+| Medium | 5 |
+| Low | 6 |
+| **Total** | **14** |
+
+> **Top Priority Fix:** The progress bar percentage mismatch (#2) is the most damaging as it directly misrepresents user data.
+
+================================================================================
+
+📸 Analyzing: 14-skillgap-mobile.png
+# CareerDNA App - UI/UX QA Analysis
+
+## 🔴 CRITICAL Issues
+
+### 1. Text Input Field Truncation
+**Location:** Search/input field
+**Issue:** "front office mana" is cut off — the text "ger" is missing, suggesting the input field width is too narrow or text isn't scrolling properly to show complete entry
+**Impact:** Users can't confirm what they've typed
+
+---
+
+## 🟠 HIGH Severity Issues
+
+### 2. Circular Progress Chart Incomplete/Broken
+**Location:** Center donut chart showing "42%"
+**Issue:** The arc only covers ~42% but the **remaining arc is completely missing** (no background track visible on the left/dark side), making the chart appear broken rather than showing a clear filled vs. unfilled state
+**Visual expectation:** Should show a complete circle with filled vs. unfilled segments
+
+### 3. Progress Bar Color Inconsistency
+**Location:** Horizontal progress bar below "42% match"
+**Issue:** The filled portion is **yellow/orange** while the circular chart is also yellow — but the bar appears **disproportionately long** (~40%+ of bar), inconsistent with a 42% fill relative to the overall track width
+
+### 4. Essential Skills Dot Indicator Inconsistency
+**Location:** "Hotel Operations" and "Revenue Management" skill cards
+**Issue:** Both use **orange/red filled dots** as bullet indicators, but the legend above uses **purple dot** for "essential" and **gray dot** for "preferred" — the orange dots don't match either legend color, creating a **confusing third color system**
+
+---
+
+## 🟡 MEDIUM Severity Issues
+
+### 5. Inconsistent Card Bottom Clipping
+**Location:** "Revenue Management" card at bottom of screen
+**Issue:** Card is **hard-clipped** at screen edge with no visual affordance (shadow, fade, partial reveal) to indicate scrollability — poor scroll discoverability
+
+### 6. Missing Secondary Metric on Revenue Management Card
+**Location:** "Revenue Management" card
+**Issue:** Unlike "Hotel Operations" which shows subcategory "Domain Knowledge" and a "Missing" badge, the Revenue Management card shows **no subcategory or status badge** — possibly cut off, but creates visual inconsistency between cards
+
+### 7. Legend Dot Color Mismatch
+**Location:** "4/9 essential • 2/6 preferred" legend row
+**Issue:** 
+- Essential uses a **purple/blue dot** 
+- Preferred uses a **gray dot**
+- But skill cards use **orange/red dots**
+- Three different dot colors with no explanation
+
+### 8. Spacing Inconsistency Between Sections
+**Location:** Gap between the match result card and "ESSENTIAL SKILLS" section header
+**Issue:** The spacing between the bottom card and the section label appears **tighter** than the spacing used elsewhere, breaking vertical rhythm
+
+### 9. "ESSENTIAL SKILLS" Label Styling
+**Location:** Section header
+**Issue:** All-caps label is visually **very small and low contrast** (gray on dark background) compared to the bold pill badge "4/9 matched" next to it — hierarchy feels inverted
+
+---
+
+## 🔵 LOW Severity Issues
+
+### 10. Bottom Navigation Active State Inconsistency
+**Location:** Bottom navigation bar
+**Issue:** "GAP" tab uses a **circle/ring icon** in purple as active state, while other tabs use outline diamond/star shapes — the active indicator style is **inconsistent** across tabs (some change color, active uses different icon style)
+
+### 11. User Avatar Contrast
+**Location:** Top-right corner avatar ("L")
+**Issue:** Purple circle with white "L" — while readable, the avatar has **no border or shadow** to separate it from the dark header background, reducing visual definition
+
+### 12. Analyze Role Button Padding
+**Location:** Purple "Analyze Role" CTA button
+**Issue:** Button appears to have **unequal horizontal padding** — text sits slightly left of center optically
+
+### 13. Missing Skill Count Context
+**Location:** "6 of 15 skills matched" subtitle
+**Issue:** The math shown (4/9 essential + 2/6 preferred = 6/15) is correct, but the **percentage calculation** shows 42% while 6/15 = **40%** — numerical inconsistency
+
+### 14. Input Field Border/Focus State
+**Location:** Search input field
+**Issue:** The input field has a **very subtle border** that's barely visible against the dark card background — low contrast, potential accessibility issue
+
+### 15. Navigation Bar Contrast
+**Location:** Bottom nav bar
+**Issue:** Inactive nav items (OVERVIEW, JOURNAL, SKILLS, INTERVIEW) are **very low contrast gray** against the dark background — may fail WCAG AA contrast requirements
+
+---
+
+## 📊 Summary Table
+
+| Severity | Count |
+|----------|-------|
+| 🔴 Critical | 1 |
+| 🟠 High | 4 |
+| 🟡 Medium | 5 |
+| 🔵 Low | 5 |
+| **Total** | **15** |
+
+---
+
+## 🎯 Top Priority Fixes
+1. Fix the **percentage math inconsistency** (6/15 ≠ 42%)
+2. **Unify the color coding system** for skill status indicators
+3. Fix the **broken donut chart** background track
+4. Add **scroll affordance** to the clipped bottom card
+5. Improve **nav bar contrast** for accessibility compliance
+
+================================================================================
+
+📸 Analyzing: 15-interview-desktop.png
+# CareerDNA UI/UX QA Analysis
+
+## CRITICAL Issues
+
+### 1. Progress Bar Color Inconsistency
+**Location:** Profile Analysis section, readiness score bar
+**Issue:** The progress bar uses **red/orange color** for a 39/100 score, but there's no legend or color scale explanation. Users cannot interpret what red means (danger? low score?)
+**Severity:** Critical — core data visualization is ambiguous
+
+---
+
+## HIGH Issues
+
+### 2. Score Text Contrast Problem
+**Location:** "39/100" readiness score
+**Issue:** The **"/100" suffix** appears in a muted gray against dark background while "39" is white — creates visual hierarchy confusion suggesting these are separate unrelated values
+**Severity:** High
+
+### 3. Role Selector Inconsistency
+**Location:** Top role pills — "Front Office Manager" vs "Lawyer"
+**Issue:** 
+- "Front Office Manager" has **orange/amber border + white text**
+- "Lawyer" has **no border, gray text**
+- No visual system established — unclear if these are tabs, filters, or toggles
+**Severity:** High
+
+### 4. Mode Toggle Inconsistency
+**Location:** "Prep Mode" / "Live Simulation" toggle
+**Issue:** 
+- Both options use **different icon styles** (diamond vs plus symbol)
+- Active state for "Prep Mode" is **not clearly differentiated** — subtle background difference insufficient
+**Severity:** High
+
+### 5. Card Height Imbalance
+**Location:** "Your Strengths" vs "Areas to Improve" side-by-side cards
+**Issue:** Left card has **3 bullet points with longer text** causing it to be taller than the right card — cards don't align to equal height, creating visual imbalance
+**Severity:** High
+
+---
+
+## MEDIUM Issues
+
+### 6. Inconsistent Bullet Point Spacing
+**Location:** Both strength/weakness cards
+**Issue:** Line spacing between bullet points is **inconsistent** — some bullets have tighter spacing than others within the same card
+**Severity:** Medium
+
+### 7. Interview Tip Card Border Ambiguity
+**Location:** Blue "Interview Tip" card
+**Issue:** The **left border accent** uses a blue/purple but the icon is a different shade of blue — lacks systematic color token usage
+**Severity:** Medium
+
+### 8. Section Header Hierarchy
+**Location:** "LIKELY INTERVIEW QUESTIONS" section
+**Issue:** "All answers are evaluated using the STAR method" subtitle text has **extremely low contrast** (dark gray on dark background) — likely fails WCAG AA 4.5:1 ratio
+**Severity:** Medium — Accessibility violation
+
+### 9. Regenerate Button Styling
+**Location:** Top-right of "Likely Interview Questions"
+**Issue:** The **"↺ Regenerate" button** uses a bordered ghost style that visually competes with the role selector pills — no consistent button hierarchy system
+**Severity:** Medium
+
+### 10. Navigation Icon Inconsistency
+**Location:** Left sidebar
+**Issue:** Icons use **mixed styles**:
+- Filled circles (My Skills)
+- Outlined squares (CV Scanner)
+- Outlined circles (Skill Gap)
+- Gradient circle (Overview)
+No consistent icon system applied
+**Severity:** Medium
+
+### 11. Tag Label Inconsistency
+**Location:** Interview questions — "BEHAVIORAL" vs "TECHNICAL" tags
+**Issue:** Both tags appear to use **same styling** but represent categorically different question types — needs stronger visual differentiation (color coding)
+**Severity:** Medium
+
+### 12. "Practice This →" Button Alignment
+**Location:** Question card #1
+**Issue:** Button is **vertically centered** relative to the question text block, but the arrow icon and text aren't perfectly baseline-aligned on close inspection
+**Severity:** Medium
+
+---
+
+## LOW Issues
+
+### 13. Sidebar Section Label Spacing
+**Location:** "MAIN", "SKILLS", "CAREER" section labels
+**Issue:** Inconsistent **top-margin spacing** between section groups — "CAREER" section sits closer to "SKILLS" than "SKILLS" sits to "MAIN"
+**Severity:** Low
+
+### 14. User Avatar Area
+**Location:** Bottom-left user profile
+**Issue:** Username "lucagarbag..." is **truncated with ellipsis** — no hover tooltip implemented to show full name. Also "L" avatar lacks border/shadow separation from dark background
+**Severity:** Low
+
+### 15. Page Title Missing
+**Location:** Main content area
+**Issue:** **No page title/H1** visible — the content jumps directly into "Profile Analysis" without a page-level heading for screen readers
+**Severity:** Low — Accessibility
+
+### 16. Readiness Improvement CTA Weakness
+**Location:** Below progress bar
+**Issue:** "Complete more practice sessions to increase your readiness score." is plain gray text with **no actionable link/button** — missed conversion opportunity and weak UX
+**Severity:** Low
+
+---
+
+## Summary Table
+
+| Severity | Count |
+|----------|-------|
+| Critical | 1 |
+| High | 4 |
+| Medium | 8 |
+| Low | 4 |
+| **Total** | **17** |
+
+---
+
+**Top Priority Fixes:**
+1. Define color system for progress bar with legend
+2. Establish consistent button/pill component library
+3. Fix WCAG contrast on subtitle text
+4. Unify sidebar icon style system
+
+================================================================================
+
+📸 Analyzing: 16-interview-mobile.png
+# CareerDNA App - UI/UX QA Analysis
+
+## 🔴 CRITICAL Issues
+
+### 1. Text Cutoff - "Areas to Improve" Section
+**Location:** Bottom of "Areas to Improve" card
+**Issue:** The bullet point text "Limited experience in financial management, which is a crucial aspect of front office management" is **abruptly cut off mid-word** ("manage-ment" split across boundary)
+**Impact:** Content is inaccessible without scrolling, no visual indicator that content continues
+
+---
+
+## 🟠 HIGH Severity Issues
+
+### 2. Progress Bar Color Inconsistency
+**Location:** Score progress bar (39/100)
+**Issue:** Red/coral fill color **contradicts** the score meaning — no legend explaining color semantics. Users may interpret red as "error state" vs. a progress indicator
+**Accessibility:** Fails color-meaning independence (WCAG 1.4.1)
+
+### 3. Score Typography Hierarchy Conflict
+**Location:** "39/100" readiness score
+**Issue:** "39" renders in **coral/red** while "/100" renders in **muted gray** — inconsistent weight/color treatment creates visual fragmentation. Appears as two separate elements rather than one cohesive metric
+
+### 4. Bottom Navigation Active State Confusion
+**Location:** Bottom navigation bar
+**Issue:** "INTERVIEW" tab appears **highlighted in purple** but the screen displays **Profile Analysis** content — active state doesn't match displayed content, breaking navigation feedback
+
+---
+
+## 🟡 MEDIUM Severity Issues
+
+### 5. Inconsistent Card Border Radius
+**Location:** Strengths card vs. Areas to Improve card
+**Issue:** Both inner cards appear to have **slightly different visual treatment** — the Strengths card has a more defined dark background while Areas to Improve blends into the parent container differently
+
+### 6. Role Selector Button Inconsistency
+**Location:** "Front Office Manager" vs "Lawyer" role pills
+**Issue:**
+- "Front Office Manager" has **purple border + bold white text**
+- "Lawyer" has **gray border + muted text**
+- No clear visual system — looks like selected vs. disabled rather than selected vs. unselected
+
+### 7. Section Header Spacing Inconsistency
+**Location:** Between "PROFILE ANALYSIS" header and readiness score subtitle
+**Issue:** Padding between the section title and descriptive text appears **tighter** than the spacing between other elements, creating uneven rhythm
+
+### 8. Navigation Icon Inconsistency
+**Location:** Bottom navigation bar
+**Issue:** Icons use **mixed styles** — some are outline (GAP, OVERVIEW), some filled/solid (JOURNAL, SKILLS), and INTERVIEW uses a diamond shape — **no unified icon system**
+
+### 9. "Prep Mode" / "Live Simulation" Toggle
+**Location:** Top toggle component
+**Issue:** 
+- "Prep Mode" uses a **hollow diamond** icon
+- "Live Simulation" uses a **filled diamond** icon
+- Icon meaning is **unclear** and doesn't communicate mode difference intuitively
+
+---
+
+## 🔵 LOW Severity Issues
+
+### 10. All-Caps Text Accessibility
+**Location:** "ROLE:", "PROFILE ANALYSIS", "YOUR STRENGTHS", "AREAS TO IMPROVE", bottom nav labels
+**Issue:** Excessive use of ALL CAPS reduces readability and **fails WCAG 1.4.12** for text spacing. Multiple competing all-caps elements reduce visual hierarchy
+
+### 11. Avatar Initial Contrast
+**Location:** Top-right user avatar ("L")
+**Issue:** White "L" on **light purple** background — contrast ratio appears **below 4.5:1** required for WCAG AA compliance
+
+### 12. Inconsistent Bullet Point Styles
+**Location:** Strengths and Areas to Improve sections
+**Issue:** Bullet points are **small colored dots** (green/yellow for headers, white for content) — the header indicator dots are the same size as content bullets, weakening hierarchy
+
+### 13. "ROLE:" Label Styling
+**Location:** Role selector row
+**Issue:** "ROLE:" label in small gray text feels **disconnected** from the selector pills — insufficient visual grouping between label and its associated controls
+
+### 14. Missing Score Context
+**Location:** 39/100 score area
+**Issue:** No **benchmark information** (e.g., "Average score: 65") making the score meaningless without context. No tooltip or info icon to explain scoring methodology
+
+### 15. Progress Bar Height
+**Location:** Score progress bar
+**Issue:** Bar appears **very thin** (~4px), making it difficult to perceive progress accurately, especially for users with visual impairments
+
+---
+
+## 📋 Summary Table
+
+| # | Issue | Location | Severity |
+|---|-------|----------|----------|
+| 1 | Text cutoff | Areas to Improve | 🔴 Critical |
+| 2 | Color semantics | Progress bar | 🟠 High |
+| 3 | Score typography | 39/100 display | 🟠 High |
+| 4 | Active nav mismatch | Bottom nav | 🟠 High |
+| 5 | Card inconsistency | Inner cards | 🟡 Medium |
+| 6 | Role pill states | Role selector | 🟡 Medium |
+| 7 | Spacing rhythm | Section headers | 🟡 Medium |
+| 8 | Icon style mix | Bottom nav | 🟡 Medium |
+| 9 | Toggle icons unclear | Top toggle | 🟡 Medium |
+| 10 | All-caps overuse | Multiple | 🔵 Low |
+| 11 | Avatar contrast | Top right | 🔵 Low |
+| 12 | Bullet hierarchy | Content lists | 🔵 Low |
+| 13 | Label grouping | Role row | 🔵 Low |
+| 14 | Missing context | Score area | 🔵 Low |
+| 15 | Bar thickness | Progress bar | 🔵 Low |
+
+---
+
+**Total Issues Found: 15**
+🔴 Critical: 1 | 🟠 High: 3 | 🟡 Medium: 5 | 🔵 Low: 6
+
+================================================================================
+
+📸 Analyzing: 17-live-simulation-desktop.png
+# UI/UX QA Analysis: Live Interview Simulation Screen
+
+## Summary
+Overall the design is clean and functional, but several issues were identified across different severity levels.
+
+---
+
+## 🔴 CRITICAL Issues
+
+### None identified
+The core functionality appears intact and usable.
+
+---
+
+## 🟠 HIGH Severity Issues
+
+### 1. Privacy Notice Icon Misalignment
+**Location:** Privacy/security notice box (dark bordered container)
+**Issue:** The lock/shield emoji icon (🔒) appears to be **vertically misaligned** — sitting too high relative to the text block it accompanies. It's not centered with the first line of text.
+**Impact:** Looks broken, reduces trust signal credibility in a privacy-sensitive context.
+
+### 2. Number Selector Inconsistent Visual Weight
+**Location:** "NUMBER OF QUESTIONS" — buttons 5, 10, 15
+**Issue:** The selected state (10) uses a **purple fill**, but buttons 5 and 15 use only a subtle dark border with very low contrast against the dark background. The unselected states are barely distinguishable from the background.
+**Impact:** Users may not perceive 5 and 15 as interactive/clickable elements.
+
+---
+
+## 🟡 MEDIUM Severity Issues
+
+### 3. Label Tracking Too Wide
+**Location:** "NUMBER OF QUESTIONS" label
+**Issue:** The letter-spacing appears excessively wide, creating a disconnected reading experience. While intentional stylistically, it reduces scannability at small sizes.
+**Impact:** Readability degradation.
+
+### 4. "Front Office Manager" Badge — Border Contrast
+**Location:** Role badge below the title
+**Issue:** The badge uses a **very subtle border** (barely visible purple/gray outline) against the dark card background. The contrast ratio likely fails **WCAG AA** for UI components (3:1 minimum).
+**Impact:** Accessibility non-compliance; badge may not register as a distinct element.
+
+### 5. Inconsistent Border Radius
+**Location:** Comparing the privacy notice box vs. the question selector buttons vs. the main card
+**Issue:** Three different border-radius values are in use:
+- Main card: ~16px
+- Privacy box: ~8px
+- Buttons: ~10px
+No clear design token hierarchy is evident.
+**Impact:** Visual inconsistency, lacks design system coherence.
+
+### 6. "Start Interview →" Arrow Character
+**Location:** CTA button
+**Issue:** The arrow uses a **unicode text arrow (→)** rather than an SVG/icon component. This can render inconsistently across operating systems/browsers and may appear at different weights than the button text.
+**Impact:** Cross-platform rendering inconsistency.
+
+---
+
+## 🔵 LOW Severity Issues
+
+### 7. Microphone Icon Visual Quality
+**Location:** Top center of card
+**Issue:** The microphone emoji/image appears to be a **low-resolution or emoji-based asset** rather than a crisp SVG. On high-DPI (Retina) displays this will appear pixelated.
+**Impact:** Perceived quality reduction on modern displays.
+
+### 8. Body Text Line Length
+**Location:** Description paragraph ("The AI will ask you questions out loud...")
+**Issue:** The text spans the full card width, creating lines that are **slightly too long** for optimal readability (ideal is 60-75 characters per line). Current appears to be ~85 characters.
+**Impact:** Minor readability fatigue.
+
+### 9. "← Back to Prep Mode" Touch Target
+**Location:** Bottom navigation link
+**Issue:** The back link appears to have **insufficient touch target size** (likely under 44×44px recommended by Apple HIG / WCAG 2.5.5). It's small text with no padding buffer.
+**Impact:** Mobile usability issue — difficult to tap accurately.
+
+### 10. Vertical Spacing Inconsistency
+**Location:** Gap between privacy notice box → "Number of Questions" label → buttons → CTA
+**Issue:** The spacing between the privacy box and the question selector (~16px) appears **tighter** than the spacing between other sections (~24px), creating uneven rhythm.
+**Impact:** Visual balance issue.
+
+---
+
+## Accessibility Summary
+
+| Issue | WCAG Criterion | Status |
+|---|---|---|
+| Badge border contrast | 1.4.11 Non-text Contrast | ⚠️ Likely Fail |
+| Unselected button contrast | 1.4.11 Non-text Contrast | ⚠️ Likely Fail |
+| Back link touch target | 2.5.5 Target Size | ❌ Fail |
+| Body text contrast | 1.4.3 Contrast (text) | ✅ Pass |
+| CTA button contrast | 1.4.3 Contrast (text) | ✅ Pass |
+
+---
+
+## Priority Fix Order
+1. Unselected button affordance (High)
+2. Touch target for back link (High on mobile)
+3. Badge contrast (Medium/Accessibility)
+4. Icon misalignment in privacy box (Medium)
+5. Microphone asset quality (Low)
+
+================================================================================
+
+📸 Analyzing: 18-live-simulation-mobile.png
+# UI/UX QA Analysis — CareerDNA Live Interview Simulation Screen
+
+---
+
+## 🔴 CRITICAL Issues
+
+**None identified** — Core functionality appears intact.
+
+---
+
+## 🟠 HIGH Severity Issues
+
+### 1. Microphone Icon Inconsistency
+- **Location:** Privacy notice box (left icon) vs. hero icon (top)
+- **Issue:** Two different microphone styles used — the hero uses a realistic 3D silver vintage mic, while the inline icon appears to be a flat/emoji-style mic. Breaks visual language consistency.
+- **Impact:** Brand coherence, professionalism
+
+### 2. Number Selector Button Visual Hierarchy Inconsistency
+- **Location:** "5" and "15" selector buttons
+- **Issue:** The unselected buttons ("5" and "15") have near-identical background color to the card background, making their boundaries barely distinguishable. Insufficient contrast between button surface and container background.
+- **Impact:** Affordance — users may not recognize them as interactive buttons
+
+---
+
+## 🟡 MEDIUM Severity Issues
+
+### 3. Uneven Button Width Optical Illusion
+- **Location:** Number selector row (5 / 10 / 15)
+- **Issue:** "5" is a single character, "10" is two, "15" is two — yet all buttons appear equal width. The "5" button's numeral appears optically off-center due to single-digit width vs. padding designed for two digits.
+- **Impact:** Minor visual imbalance
+
+### 4. Privacy Notice Box — Left Padding Inconsistency
+- **Location:** Dark info box, middle of screen
+- **Issue:** The microphone emoji icon appears to have tighter top-alignment than the text block beside it, causing slight vertical misalignment between icon baseline and text baseline.
+- **Impact:** Polish/professionalism
+
+### 5. "NUMBER OF QUESTIONS" Label Tracking
+- **Location:** Section label above number buttons
+- **Issue:** Letter-spacing appears very wide (tracked out). While intentional for hierarchy, it creates an awkward gap that feels disconnected from the buttons below — insufficient spacing relationship definition.
+- **Impact:** Visual grouping clarity
+
+### 6. CTA Button Gradient Direction
+- **Location:** "Start Interview →" button
+- **Issue:** Gradient shifts from purple-blue (left) to pink-purple (right). The arrow "→" sits at the far right on the warmer/lighter end, reducing its contrast against the lighter gradient terminus.
+- **Impact:** Readability of directional affordance cue
+
+### 7. Bottom Dead Space
+- **Location:** Below the card, bottom ~25% of screen
+- **Issue:** Excessive black dead space below the card with no intentional design purpose. Suggests the card isn't vertically centered or the viewport height is mishandled.
+- **Impact:** Layout completeness, perceived quality
+
+---
+
+## 🔵 LOW Severity Issues
+
+### 8. "Back to Prep Mode" Tap Target Size
+- **Location:** Bottom of card
+- **Issue:** The back-navigation link appears to be small plain text with no padding buffer. Tap/click target likely falls below the recommended **44×44px** minimum (WCAG 2.5.5).
+- **Impact:** Accessibility, mobile usability
+
+### 9. Arrow in CTA Uses Plain Text "→"
+- **Location:** "Start Interview →" button
+- **Issue:** Uses a Unicode arrow character rather than an SVG/icon arrow. Renders inconsistently across fonts/OS and can appear thinner or misaligned depending on the device.
+- **Impact:** Cross-platform rendering consistency
+
+### 10. Role Badge Contrast Check
+- **Location:** "Front Office Manager" pill/badge
+- **Issue:** White text on a medium-dark purple background — while likely passing AA, it sits close to the threshold. Should be verified against WCAG AA (4.5:1 for normal text).
+- **Impact:** Accessibility
+
+### 11. Body Copy Line Length
+- **Location:** Descriptive paragraph ("The AI will ask you questions out loud...")
+- **Issue:** Text spans nearly full card width on mobile. Optimal line length is 50–75 characters; this appears to exceed that, slightly reducing readability.
+- **Impact:** Readability/typography
+
+### 12. Missing Focus State Visibility
+- **Location:** All interactive elements (buttons, number selectors, back link)
+- **Issue:** No visible focus ring indicators observed. Critical for keyboard navigation and WCAG 2.4.7 compliance.
+- **Impact:** Accessibility (keyboard/screen reader users)
+
+---
+
+## 📊 Summary Table
+
+| # | Issue | Location | Severity |
+|---|-------|----------|----------|
+| 1 | Inconsistent mic icon styles | Hero vs. info box | High |
+| 2 | Low contrast unselected buttons | Number selector | High |
+| 3 | Single-digit optical misalignment | "5" button | Medium |
+| 4 | Icon/text vertical misalignment | Privacy box | Medium |
+| 5 | Label-to-content spacing gap | "NUMBER OF QUESTIONS" | Medium |
+| 6 | Arrow contrast on gradient | CTA button | Medium |
+| 7 | Excessive dead space | Bottom of screen | Medium |
+| 8 | Small tap target | "Back to Prep Mode" | Low |
+| 9 | Unicode arrow rendering | CTA button | Low |
+| 10 | Role badge contrast check | Badge | Low |
+| 11 | Line length too wide | Body paragraph | Low |
+| 12 | Missing focus states | All interactives | Low |
+
+---
+
+**Overall Assessment:** The design is aesthetically coherent with a clear dark-mode identity, but suffers from **affordance gaps** in the number selector, **accessibility deficiencies** in tap targets and focus states, and **icon inconsistency** that undermines polish. Priority fixes should target items 1, 2, 7, and 8.
+
+================================================================================
+
+✅ Analysis complete!
+unequal** left-to-right on the pill button. Text may not be perfectly centered within the capsule shape.
+- **Impact:** Subtle but affects perceived quality
+
+### 6. **"Start Interview →" Button Gradient Direction**
+- **Location:** CTA button at bottom
+- **Issue:** The gradient transitions from **purple (left) → lighter pink-purple (right)**, which is fine, but the gradient feels **abruptly lighter on the right edge** — could be mistaken for a hover/pressed state rather than default
+- **Impact:** May cause user confusion about button interactivity state
+
+### 7. **Back Link Insufficient Tap Target**
+- **Location:** "← Back to Prep Mode" text link at very bottom
+- **Issue:** Text-only link with no padding buffer. On mobile, tap target appears to be **well below the recommended 44×44px minimum** (Apple HIG / Material Design guidelines)
+- **Impact:** Accessibility + usability issue on touch devices
+
+---
+
+## 🔵 LOW Severity Issues
+
+### 8. **Title Typography Widows**
+- **Location:** "Live Interview Simulation" H1
+- **Issue:** Depending on viewport width, single words could be orphaned on a new line. Currently renders fine but is fragile without `text-wrap: balance` or similar.
+
+### 9. **Body Text Line Length**
+- **Location:** Subtitle paragraph ("The AI will ask you questions out loud...")
+- **Issue:** Line length is **very wide relative to font size** on this mobile width — around 65–70 characters per line, slightly exceeding optimal readability range (45–65 chars for body text on mobile)
+
+### 10. **No Visual Hierarchy Separator**
+- **Location:** Between the privacy notice box and "NUMBER OF QUESTIONS" section
+- **Issue:** Spacing between sections feels **inconsistent** — gap above "NUMBER OF QUESTIONS" label appears larger than gaps elsewhere, but there's no intentional divider to justify it. Could be tightened.
+
+### 11. **"NUMBER OF QUESTIONS" Label Styling**
+- **Location:** Section label above number buttons
+- **Issue:** All-caps label uses what appears to be **default letter-spacing** — standard practice for all-caps labels is to add `letter-spacing: 0.1em` or similar to improve legibility. Currently feels slightly cramped.
+
+### 12. **Card Border Radius vs. Screen Edge Proximity**
+- **Location:** Top corners of the main card
+- **Issue:** The card's rounded corners are **very close to the screen edges** with minimal margin (~12-16px). On certain devices, this could feel clipped or cause visual tension against the device's own rounded corners.
+
+---
+
+## ♿ ACCESSIBILITY Issues Summary
+
+| Issue | WCAG Criterion | Severity |
+|-------|---------------|----------|
+| Unselected number buttons low contrast | 1.4.3 Contrast (AA) | High |
+| "Back to Prep Mode" small tap target | 2.5.5 Target Size | Medium |
+| No visible focus indicators visible in screenshot | 2.4.7 Focus Visible | Medium |
+| Privacy box text (~14px estimated) on dark bg — verify contrast ratio | 1.4.3 | Low |
+
+---
+
+## 📋 Summary Table
+
+| # | Issue | Location | Severity |
+|---|-------|----------|----------|
+| 1 | Excessive dead space below card | Bottom of screen | High |
+| 2 | Low contrast unselected number buttons | Button group | High |
+| 3 | Dual microphone icon styles clash | Top + info box | Medium |
+| 4 | Icon vertical misalignment in info box | Privacy notice | Medium |
+| 5 | Pill padding asymmetry | Role badge | Medium |
+| 6 | CTA gradient ambiguity | Start button | Medium |
+| 7 | Insufficient tap target on back link | Bottom link | Medium |
+| 8 | Typography widow risk | H1 title | Low |
+| 9 | Body text line length too wide | Subtitle | Low |
+| 10 | Inconsistent section spacing | Mid-screen | Low |
+| 11 | All-caps label missing letter-spacing | Section label | Low |
+| 12 | Card proximity to screen edges | Card corners | Low |
+
+---
+
+**Overall Assessment:** The screen is functionally clear and visually coherent at a glance, but suffers from **polish-level inconsistencies** (icon style mismatch being the most jarring) and one significant **layout bug** (dead space below card). Addressing the High severity items would significantly improve perceived quality.
+
+================================================================================
+
+✅ Analysis complete!

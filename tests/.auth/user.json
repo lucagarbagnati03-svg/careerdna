@@ -1,0 +1,18 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "https://careerdna-orpin.vercel.app",
+      "localStorage": [
+        {
+          "name": "cdna_consent_v1",
+          "value": "true"
+        },
+        {
+          "name": "sb-hnwoulelscpgvkcevqnp-auth-token",
+          "value": "{\"access_token\":\"eyJhbGciOiJFUzI1NiIsImtpZCI6ImNjYTAxNDkzLTg4ODctNGI4OS05ZDc3LTc1NmFkOTA1OTM1MCIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2hud291bGVsc2NwZ3ZrY2V2cW5wLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiI5M2NlYjc5Mi1jYjNmLTRlZWMtYThiYS1mOTU4NTUxMzVlZDgiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzc5NDY5ODM2LCJpYXQiOjE3Nzk0NjYyMzYsImVtYWlsIjoibHVjYWdhcmJhZ25hdGkwM0BnbWFpbC5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsIjoibHVjYWdhcmJhZ25hdGkwM0BnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiZnVsbF9uYW1lIjoiTHVjYWdhcmJhIiwicGhvbmVfdmVyaWZpZWQiOmZhbHNlLCJzdWIiOiI5M2NlYjc5Mi1jYjNmLTRlZWMtYThiYS1mOTU4NTUxMzVlZDgifSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJwYXNzd29yZCIsInRpbWVzdGFtcCI6MTc3OTQ2NjIzNn1dLCJzZXNzaW9uX2lkIjoiZmMzYWRhNDgtMmYzMi00NTZjLWE2MzMtNmUyYzc5MTg3MTQ1IiwiaXNfYW5vbnltb3VzIjpmYWxzZX0.pVMzoKQCxxehCpzks8q20iMYx71MEVW4uT-xQWfo2tbhDi0LbO7OCaaNvpi9-HECAZFOusp5NuHO2yIMzlcXbw\",\"token_type\":\"bearer\",\"expires_in\":3600,\"expires_at\":1779469836,\"refresh_token\":\"g3g4a3waknty\",\"user\":{\"id\":\"93ceb792-cb3f-4eec-a8ba-f95855135ed8\",\"aud\":\"authenticated\",\"role\":\"authenticated\",\"email\":\"lucagarbagnati03@gmail.com\",\"email_confirmed_at\":\"2026-05-11T14:24:20.804586Z\",\"phone\":\"\",\"confirmation_sent_at\":\"2026-05-11T14:24:09.479749Z\",\"confirmed_at\":\"2026-05-11T14:24:20.804586Z\",\"last_sign_in_at\":\"2026-05-22T16:10:36.815282236Z\",\"app_metadata\":{\"provider\":\"email\",\"providers\":[\"email\"]},\"user_metadata\":{\"email\":\"lucagarbagnati03@gmail.com\",\"email_verified\":true,\"full_name\":\"Lucagarba\",\"phone_verified\":false,\"sub\":\"93ceb792-cb3f-4eec-a8ba-f95855135ed8\"},\"identities\":[{\"identity_id\":\"f225489d-0dbc-4d32-bf0a-3a271b89ff15\",\"id\":\"93ceb792-cb3f-4eec-a8ba-f95855135ed8\",\"user_id\":\"93ceb792-cb3f-4eec-a8ba-f95855135ed8\",\"identity_data\":{\"email\":\"lucagarbagnati03@gmail.com\",\"email_verified\":true,\"phone_verified\":false,\"sub\":\"93ceb792-cb3f-4eec-a8ba-f95855135ed8\"},\"provider\":\"email\",\"last_sign_in_at\":\"2026-05-11T14:24:09.473302Z\",\"created_at\":\"2026-05-11T14:24:09.473355Z\",\"updated_at\":\"2026-05-11T14:24:09.473355Z\",\"email\":\"lucagarbagnati03@gmail.com\"}],\"created_at\":\"2026-05-11T14:24:09.440896Z\",\"updated_at\":\"2026-05-22T16:10:36.819103Z\",\"is_anonymous\":false},\"weak_password\":null}"
+        }
+      ]
+    }
+  ]
+}
