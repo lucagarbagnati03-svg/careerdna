@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { extractTextFromPDF } from '../lib/pdfExtract'
-import { extractSkillsFromCV } from '../lib/groq'
 import './CVScanner.css'
 
 import { CATEGORIES, orderedCategories, displayCategory } from '../lib/categories'
@@ -111,9 +110,18 @@ export default function CVScanner() {
         throw new Error('Could not extract readable text. Make sure this is not a scanned image-only PDF.')
       }
 
-      // Step 2: AI extraction
+      // Step 2: AI extraction (via serverless proxy to avoid CORS)
       setStep('analyze')
-      const allExtracted = await extractSkillsFromCV(text)
+      const scanRes = await fetch('/api/scan-cv', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cvText: text }),
+      })
+      if (!scanRes.ok) {
+        const errData = await scanRes.json().catch(() => ({}))
+        throw new Error(errData.error || `Scan failed (${scanRes.status})`)
+      }
+      const { skills: allExtracted } = await scanRes.json()
 
       // Step 3: save
       setStep('save')
