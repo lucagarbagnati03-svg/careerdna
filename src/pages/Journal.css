@@ -337,6 +337,18 @@
   border: 1px solid rgba(74, 222, 128, 0.2);
 }
 
+.extract-already-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.extract-tag-existing {
+  background: rgba(124, 106, 247, 0.08);
+  color: var(--accent);
+  border-color: rgba(124, 106, 247, 0.2);
+}
+
 .extract-error {
   font-size: 12px;
   color: var(--danger);

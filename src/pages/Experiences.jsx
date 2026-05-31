@@ -179,7 +179,7 @@ export default function Experiences() {
       const skills = await extractSkillsFromText(context)
 
       if (skills.length === 0) {
-        setExtracting(prev => ({ ...prev, [exp.id]: { added: 0, skills: [] } }))
+        setExtracting(prev => ({ ...prev, [exp.id]: { added: 0, skills: [], alreadyExtracted: [] } }))
         return
       }
 
@@ -189,7 +189,8 @@ export default function Experiences() {
         .eq('user_id', user.id)
 
       const existingNames = new Set((existing ?? []).map(s => s.name.toLowerCase()))
-      const newSkills = skills.filter(s => !existingNames.has(s.name.toLowerCase()))
+      const newSkills        = skills.filter(s => !existingNames.has(s.name.toLowerCase()))
+      const alreadyExtracted = skills.filter(s =>  existingNames.has(s.name.toLowerCase()))
 
       if (newSkills.length > 0) {
         await supabase.from('skills').insert(
@@ -199,7 +200,7 @@ export default function Experiences() {
 
       setExtracting(prev => ({
         ...prev,
-        [exp.id]: { added: newSkills.length, skills: newSkills },
+        [exp.id]: { added: newSkills.length, skills: newSkills, alreadyExtracted },
       }))
     } catch (err) {
       console.error(err)
@@ -358,7 +359,16 @@ export default function Experiences() {
                     {extState && extState !== 'loading' && extState !== 'error' && (
                       <div className="extract-result">
                         {extState.added === 0 ? (
-                          <span className="extract-none">No new skills found</span>
+                          extState.alreadyExtracted?.length > 0 ? (
+                            <>
+                              <span className="extract-already-label">Skills from this entry:</span>
+                              {extState.alreadyExtracted.map(s => (
+                                <span key={s.name} className="extract-tag extract-tag-existing">{s.name}</span>
+                              ))}
+                            </>
+                          ) : (
+                            <span className="extract-none">No skills detected in this entry yet</span>
+                          )
                         ) : (
                           <>
                             <span className="extract-count">+{extState.added} skills added:</span>

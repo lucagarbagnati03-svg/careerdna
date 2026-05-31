@@ -119,7 +119,7 @@ export default function Journal() {
       const skills = await extractSkillsFromText(entry.content)
 
       if (skills.length === 0) {
-        setExtracting(prev => ({ ...prev, [entry.id]: { count: 0, skills: [] } }))
+        setExtracting(prev => ({ ...prev, [entry.id]: { count: 0, skills: [], alreadyExtracted: [] } }))
         return
       }
 
@@ -129,7 +129,8 @@ export default function Journal() {
         .eq('user_id', user.id)
 
       const existingNames = new Set((existing ?? []).map(s => s.name.toLowerCase()))
-      const newSkills = skills.filter(s => !existingNames.has(s.name.toLowerCase()))
+      const newSkills       = skills.filter(s => !existingNames.has(s.name.toLowerCase()))
+      const alreadyExtracted = skills.filter(s =>  existingNames.has(s.name.toLowerCase()))
 
       if (newSkills.length > 0) {
         await supabase.from('skills').insert(
@@ -139,7 +140,7 @@ export default function Journal() {
 
       setExtracting(prev => ({
         ...prev,
-        [entry.id]: { count: newSkills.length, skills: newSkills },
+        [entry.id]: { count: newSkills.length, skills: newSkills, alreadyExtracted },
       }))
     } catch (err) {
       console.error(err)
@@ -344,7 +345,16 @@ export default function Journal() {
                     {state && state !== 'loading' && state !== 'error' && (
                       <div className="extract-result">
                         {state.count === 0 ? (
-                          <span className="extract-none">No new skills found</span>
+                          state.alreadyExtracted?.length > 0 ? (
+                            <>
+                              <span className="extract-already-label">Skills from this entry:</span>
+                              {state.alreadyExtracted.map(s => (
+                                <span key={s.name} className="extract-tag extract-tag-existing">{s.name}</span>
+                              ))}
+                            </>
+                          ) : (
+                            <span className="extract-none">No skills detected in this entry yet</span>
+                          )
                         ) : (
                           <>
                             <span className="extract-count">+{state.count} skill{state.count !== 1 ? 's' : ''} added:</span>
