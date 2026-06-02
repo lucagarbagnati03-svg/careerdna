@@ -4,7 +4,6 @@
 // so every device always reads the same data — no localStorage, no divergence.
 
 import { supabase } from './supabase'
-import { analyzeRoleRequirements } from './groq'
 
 /**
  * Call Groq to generate job requirements for `role`, immediately persist
@@ -16,8 +15,24 @@ import { analyzeRoleRequirements } from './groq'
  * @returns {Array}        - requirements array from Groq
  */
 export async function analyzeAndSaveRequirements(userId, role) {
-  // Groq failure throws — caller handles the error.
-  const reqs = await analyzeRoleRequirements(role)
+  const res = await fetch('/api/esco-occupation', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ role }),
+  })
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.error || `ESCO API error ${res.status}`)
+  }
+
+  const { essentialSkills, optionalSkills } = await res.json()
+
+  const reqs = [
+    ...essentialSkills.map(s => ({ name: s.label, importance: 'essential', category: 'Other' })),
+    ...optionalSkills.map(s  => ({ name: s.label, importance: 'preferred', category: 'Other' })),
+  ]
+
   // DB save is best-effort: if job_requirements column doesn't exist yet (migration
   // not run) the upsert will fail, but we still return reqs so the UI works this session.
   try {
