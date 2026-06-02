@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
-import { extractSkillsFromText } from '../lib/groq'
 import DatePicker from '../components/DatePicker'
 import Experiences from './Experiences'
 import './Journal.css'
@@ -116,7 +115,16 @@ export default function Journal() {
   async function handleExtract(entry) {
     setExtracting(prev => ({ ...prev, [entry.id]: 'loading' }))
     try {
-      const skills = await extractSkillsFromText(entry.content)
+      const apiRes = await fetch('/api/extract-skills', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: entry.content }),
+      })
+      if (!apiRes.ok) {
+        const errData = await apiRes.json().catch(() => ({}))
+        throw new Error(errData.error || `Extraction failed (${apiRes.status})`)
+      }
+      const { skills } = await apiRes.json()
 
       if (skills.length === 0) {
         setExtracting(prev => ({ ...prev, [entry.id]: { count: 0, skills: [], alreadyExtracted: [] } }))
@@ -128,8 +136,8 @@ export default function Journal() {
         .select('name')
         .eq('user_id', user.id)
 
-      const existingNames = new Set((existing ?? []).map(s => s.name.toLowerCase()))
-      const newSkills       = skills.filter(s => !existingNames.has(s.name.toLowerCase()))
+      const existingNames    = new Set((existing ?? []).map(s => s.name.toLowerCase()))
+      const newSkills        = skills.filter(s => !existingNames.has(s.name.toLowerCase()))
       const alreadyExtracted = skills.filter(s =>  existingNames.has(s.name.toLowerCase()))
 
       if (newSkills.length > 0) {

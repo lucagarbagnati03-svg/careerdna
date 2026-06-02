@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
-import { extractSkillsFromText } from '../lib/groq'
 import './Experiences.css'
 
 const EMPTY_FORM = { company: '', title: '', start_date: '', end_date: '', description: '' }
@@ -176,7 +175,16 @@ export default function Experiences() {
     setExtracting(prev => ({ ...prev, [exp.id]: 'loading' }))
     try {
       const context = `${exp.title} at ${exp.company}: ${exp.description}`
-      const skills = await extractSkillsFromText(context)
+      const apiRes = await fetch('/api/extract-skills', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: context }),
+      })
+      if (!apiRes.ok) {
+        const errData = await apiRes.json().catch(() => ({}))
+        throw new Error(errData.error || `Extraction failed (${apiRes.status})`)
+      }
+      const { skills } = await apiRes.json()
 
       if (skills.length === 0) {
         setExtracting(prev => ({ ...prev, [exp.id]: { added: 0, skills: [], alreadyExtracted: [] } }))
@@ -188,7 +196,7 @@ export default function Experiences() {
         .select('name')
         .eq('user_id', user.id)
 
-      const existingNames = new Set((existing ?? []).map(s => s.name.toLowerCase()))
+      const existingNames    = new Set((existing ?? []).map(s => s.name.toLowerCase()))
       const newSkills        = skills.filter(s => !existingNames.has(s.name.toLowerCase()))
       const alreadyExtracted = skills.filter(s =>  existingNames.has(s.name.toLowerCase()))
 
