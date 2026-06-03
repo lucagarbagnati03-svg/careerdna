@@ -20,6 +20,13 @@ function MicIcon() {
   )
 }
 
+function wordOverlap(a, b) {
+  const words = s => new Set(s.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean))
+  const wa = words(a), wb = words(b)
+  const shared = [...wa].filter(w => wb.has(w)).length
+  return shared / Math.max(wa.size, wb.size)
+}
+
 export default function Journal() {
   const { user } = useAuth()
   const [entries,   setEntries]   = useState([])
@@ -151,11 +158,13 @@ export default function Journal() {
         .select('name, esco_uri')
         .eq('user_id', user.id)
 
-      const existingNames = new Set((existing ?? []).map(s => s.name.toLowerCase()))
-      const existingUris  = new Set((existing ?? []).filter(s => s.esco_uri).map(s => s.esco_uri))
+      const existingList  = existing ?? []
+      const existingNames = new Set(existingList.map(s => s.name.toLowerCase()))
+      const existingUris  = new Set(existingList.filter(s => s.esco_uri).map(s => s.esco_uri))
       const isDuplicate   = s =>
         existingNames.has(s.name.toLowerCase()) ||
-        (s.esco_uri && existingUris.has(s.esco_uri))
+        (s.esco_uri && existingUris.has(s.esco_uri)) ||
+        existingList.some(e => wordOverlap(s.name, e.name) > 0.6)
       const newSkills        = skills.filter(s => !isDuplicate(s))
       const alreadyExtracted = skills.filter(s =>  isDuplicate(s))
 

@@ -18,6 +18,13 @@ function formatDate(iso) {
   })
 }
 
+function wordOverlap(a, b) {
+  const words = s => new Set(s.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean))
+  const wa = words(a), wb = words(b)
+  const shared = [...wa].filter(w => wb.has(w)).length
+  return shared / Math.max(wa.size, wb.size)
+}
+
 export default function CVScanner() {
   const { user } = useAuth()
 
@@ -148,12 +155,18 @@ export default function CVScanner() {
 
       // Deduplicate against remaining (non-CV) skills
       const { data: nonCVSkills } = await supabase
-        .from('skills').select('name')
+        .from('skills').select('name, esco_uri')
         .eq('user_id', user.id)
 
-      const existingNames = new Set((nonCVSkills ?? []).map(s => s.name.toLowerCase()))
-      const newSkills     = allExtracted.filter(s => !existingNames.has(s.name.toLowerCase()))
-      const skipped       = allExtracted.filter(s =>  existingNames.has(s.name.toLowerCase()))
+      const existingList  = nonCVSkills ?? []
+      const existingNames = new Set(existingList.map(s => s.name.toLowerCase()))
+      const existingUris  = new Set(existingList.filter(s => s.esco_uri).map(s => s.esco_uri))
+      const isDuplicate   = s =>
+        existingNames.has(s.name.toLowerCase()) ||
+        (s.esco_uri && existingUris.has(s.esco_uri)) ||
+        existingList.some(e => wordOverlap(s.name, e.name) > 0.6)
+      const newSkills     = allExtracted.filter(s => !isDuplicate(s))
+      const skipped       = allExtracted.filter(s =>  isDuplicate(s))
 
       if (newSkills.length > 0) {
         await supabase.from('skills').insert(
