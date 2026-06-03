@@ -40,7 +40,23 @@ export default function SkillGap() {
   const [analyzing,    setAnalyzing]    = useState(false)
   const [loadingPage,  setLoadingPage]  = useState(true)
   const [error,        setError]        = useState('')
-  const inputRef = useRef(null)
+  const [suggestions,  setSuggestions]  = useState([])
+  const [showDropdown, setShowDropdown] = useState(false)
+  const [selectedUri,  setSelectedUri]  = useState(null)
+  const inputRef    = useRef(null)
+  const debounceRef = useRef(null)
+  const dropdownRef = useRef(null)
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function onMouseDown(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', onMouseDown)
+    return () => document.removeEventListener('mousedown', onMouseDown)
+  }, [])
 
   useEffect(() => {
     if (!user) return
@@ -71,9 +87,40 @@ export default function SkillGap() {
     load()
   }, [user])
 
-  async function handleAnalyze(e) {
+  async function fetchSuggestions(text) {
+    if (text.length < 2) { setSuggestions([]); setShowDropdown(false); return }
+    try {
+      const url = `https://ec.europa.eu/esco/api/search?text=${encodeURIComponent(text)}&language=en&type=occupation&selectedVersion=v1.2.0&limit=5`
+      const res = await fetch(url)
+      if (!res.ok) return
+      const data = await res.json()
+      const results = (data._embedded?.results ?? [])
+        .map(r => ({ label: r.preferredLabel?.en ?? r.title ?? '', uri: r.uri }))
+        .filter(r => r.label)
+      setSuggestions(results)
+      setShowDropdown(results.length > 0)
+    } catch { /* autocomplete is best-effort — silently ignore */ }
+  }
+
+  function handleRoleInputChange(e) {
+    const value = e.target.value
+    setRoleInput(value)
+    setSelectedUri(null)
+    clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => fetchSuggestions(value), 400)
+  }
+
+  function handleSuggestionClick(label, uri) {
+    setRoleInput(label)
+    setSelectedUri(uri)
+    setShowDropdown(false)
+    setSuggestions([])
+    handleAnalyze(null, label)
+  }
+
+  async function handleAnalyze(e, overrideRole) {
     e?.preventDefault()
-    const role = roleInput.trim().toLowerCase()
+    const role = (overrideRole ?? roleInput).trim().toLowerCase()
     if (!role) return
     setError('')
     setAnalyzing(true)
@@ -161,7 +208,7 @@ export default function SkillGap() {
       {/* Role input */}
       <form onSubmit={handleAnalyze} className="role-input-card">
         <div className="role-input-row">
-          <div className="role-input-wrap">
+          <div className="role-input-wrap" ref={dropdownRef}>
             <span className="role-input-icon">◎</span>
             <input
               ref={inputRef}
@@ -169,9 +216,47 @@ export default function SkillGap() {
               type="text"
               placeholder="e.g. Hotel Manager, Front Office Manager, Data Analyst…"
               value={roleInput}
-              onChange={e => setRoleInput(e.target.value)}
+              onChange={handleRoleInputChange}
               disabled={analyzing}
+              autoComplete="off"
             />
+            {showDropdown && suggestions.length > 0 && (
+              <div style={{
+                position:     'absolute',
+                top:          '100%',
+                left:         0,
+                right:        0,
+                zIndex:       200,
+                background:   'var(--bg-card)',
+                border:       '1px solid var(--border)',
+                borderRadius: '12px',
+                marginTop:    '6px',
+                overflow:     'hidden',
+                boxShadow:    '0 8px 24px rgba(0,0,0,0.3)',
+              }}>
+                {suggestions.map((s, i) => (
+                  <button
+                    key={s.uri}
+                    type="button"
+                    onMouseDown={e => { e.preventDefault(); handleSuggestionClick(s.label, s.uri) }}
+                    style={{
+                      display:      'block',
+                      width:        '100%',
+                      textAlign:    'left',
+                      padding:      '10px 14px',
+                      fontSize:     '14px',
+                      color:        'var(--text-primary)',
+                      background:   'none',
+                      border:       'none',
+                      borderBottom: i < suggestions.length - 1 ? '1px solid var(--border)' : 'none',
+                      cursor:       'pointer',
+                    }}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <button
             type="submit"
