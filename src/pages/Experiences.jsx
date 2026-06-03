@@ -193,12 +193,16 @@ export default function Experiences() {
 
       const { data: existing } = await supabase
         .from('skills')
-        .select('name')
+        .select('name, esco_uri')
         .eq('user_id', user.id)
 
-      const existingNames    = new Set((existing ?? []).map(s => s.name.toLowerCase()))
-      const newSkills        = skills.filter(s => !existingNames.has(s.name.toLowerCase()))
-      const alreadyExtracted = skills.filter(s =>  existingNames.has(s.name.toLowerCase()))
+      const existingNames = new Set((existing ?? []).map(s => s.name.toLowerCase()))
+      const existingUris  = new Set((existing ?? []).filter(s => s.esco_uri).map(s => s.esco_uri))
+      const isDuplicate   = s =>
+        existingNames.has(s.name.toLowerCase()) ||
+        (s.esco_uri && existingUris.has(s.esco_uri))
+      const newSkills        = skills.filter(s => !isDuplicate(s))
+      const alreadyExtracted = skills.filter(s =>  isDuplicate(s))
 
       if (newSkills.length > 0) {
         await supabase.from('skills').insert(
