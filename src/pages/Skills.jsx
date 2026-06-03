@@ -5,6 +5,13 @@ import { CATEGORIES, orderedCategories, displayCategory } from '../lib/categorie
 import CVScanner from './CVScanner'
 import './Skills.css'
 
+function wordOverlap(a, b) {
+  const words = s => new Set(s.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean))
+  const wa = words(a), wb = words(b)
+  const shared = [...wa].filter(w => wb.has(w)).length
+  return shared / Math.max(wa.size, wb.size)
+}
+
 export default function Skills() {
   const { user } = useAuth()
   const [skills,    setSkills]    = useState([])
@@ -13,6 +20,7 @@ export default function Skills() {
   const [category,  setCategory]  = useState('Technical')
   const [level,     setLevel]     = useState(3)
   const [saving,    setSaving]    = useState(false)
+  const [dupMessage, setDupMessage] = useState('')
 
   const [isMobile,       setIsMobile]       = useState(() => window.innerWidth < 768)
   const [activeSkillTab, setActiveSkillTab] = useState('skills')
@@ -45,11 +53,48 @@ export default function Skills() {
     e.preventDefault()
     if (!skillName.trim()) return
     setSaving(true)
+    setDupMessage('')
+
+    const typed = skillName.trim()
+    let name = typed, esco_uri = null, esco_label = null
+
+    // ESCO skill lookup — normalize the name to the canonical ESCO label
+    try {
+      const escoRes = await fetch(
+        `https://ec.europa.eu/esco/api/search?text=${encodeURIComponent(typed)}&language=en&type=skill&selectedVersion=v1.2.0&limit=1`
+      )
+      if (escoRes.ok) {
+        const escoData = await escoRes.json()
+        const first = escoData._embedded?.results?.[0]
+        if (first) {
+          name       = first.preferredLabel?.en ?? typed
+          esco_uri   = first.uri               ?? null
+          esco_label = first.preferredLabel?.en ?? null
+        }
+      }
+    } catch {
+      // ESCO unreachable — save with the typed name as-is
+    }
+
+    // Deduplication against existing skills (same rules as Journal/Experiences)
+    const isDuplicate =
+      skills.some(s => s.name.toLowerCase() === name.toLowerCase()) ||
+      (esco_uri && skills.some(s => s.esco_uri === esco_uri)) ||
+      skills.some(s => wordOverlap(name, s.name) > 0.6)
+
+    if (isDuplicate) {
+      setDupMessage('Similar skill already in your profile')
+      setSaving(false)
+      return
+    }
+
     await supabase.from('skills').insert({
       user_id: user.id,
-      name: skillName.trim(),
+      name,
       category,
       level: Number(level),
+      esco_uri,
+      esco_label,
     })
     setSkillName('')
     setLevel(3)
@@ -142,6 +187,9 @@ export default function Skills() {
         <button type="submit" className="btn-primary" disabled={saving || !skillName.trim()}>
           {saving ? 'Adding…' : '+ Add Skill'}
         </button>
+        {dupMessage && (
+          <p style={{ fontSize: '13px', color: 'var(--danger)', marginTop: '4px' }}>{dupMessage}</p>
+        )}
       </form>
 
       {loading ? (
