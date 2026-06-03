@@ -300,7 +300,8 @@ export default function SkillGap() {
 }
 
 function SkillCard({ gap, onAdd }) {
-  const [adding, setAdding] = useState(false)
+  const [adding,  setAdding]  = useState(false)
+  const [hovered, setHovered] = useState(false)
 
   async function handleAdd() {
     setAdding(true)
@@ -327,6 +328,8 @@ function SkillCard({ gap, onAdd }) {
         <button
           onClick={handleAdd}
           disabled={adding}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
           style={{
             marginTop: '10px',
             width: '100%',
@@ -334,12 +337,12 @@ function SkillCard({ gap, onAdd }) {
             fontSize: '12px',
             fontWeight: 500,
             borderRadius: '8px',
-            border: '1px solid var(--border-light)',
-            background: 'transparent',
-            color: 'var(--text-muted)',
+            border: hovered && !adding ? '1px solid var(--text-secondary)' : '1px solid var(--border-light)',
+            background: hovered && !adding ? 'rgba(255,255,255,0.06)' : 'transparent',
+            color: hovered && !adding ? 'var(--text-primary)' : 'var(--text-muted)',
             cursor: adding ? 'not-allowed' : 'pointer',
             opacity: adding ? 0.5 : 1,
-            transition: 'opacity 0.15s',
+            transition: 'border 0.15s, background 0.15s, color 0.15s',
           }}
         >
           {adding ? 'Adding…' : '✓ I have this'}
