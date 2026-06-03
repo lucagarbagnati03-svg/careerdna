@@ -5,6 +5,20 @@
 
 import { supabase } from './supabase'
 
+function wordOverlap(a, b) {
+  const words = s => new Set(s.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean))
+  const wa = words(a), wb = words(b)
+  const shared = [...wa].filter(w => wb.has(w)).length
+  return shared / Math.max(wa.size, wb.size)
+}
+
+function skillMatchesReq(skill, req) {
+  if (skill.esco_uri && req.uri && skill.esco_uri === req.uri) return true
+  if (skill.name.toLowerCase() === req.name.toLowerCase()) return true
+  if (wordOverlap(skill.name, req.name) > 0.5) return true
+  return false
+}
+
 /**
  * Call Groq to generate job requirements for `role`, immediately persist
  * them to user_preferences.job_requirements, and return the array.
@@ -29,8 +43,8 @@ export async function analyzeAndSaveRequirements(userId, role) {
   const { essentialSkills, optionalSkills } = await res.json()
 
   const reqs = [
-    ...essentialSkills.map(s => ({ name: s.label, importance: 'essential', category: 'Other' })),
-    ...optionalSkills.map(s  => ({ name: s.label, importance: 'preferred', category: 'Other' })),
+    ...essentialSkills.map(s => ({ name: s.label, importance: 'essential', category: 'Other', uri: s.uri })),
+    ...optionalSkills.map(s  => ({ name: s.label, importance: 'preferred', category: 'Other', uri: s.uri })),
   ]
 
   // DB save is best-effort: if job_requirements column doesn't exist yet (migration
@@ -50,20 +64,25 @@ export async function analyzeAndSaveRequirements(userId, role) {
  * Calculate the weighted match percentage between a set of role requirements
  * and the skills a user actually has.
  *
- * @param {Array}  requirements   - Array of { name, importance } from Groq.
- *                                  importance must be 'essential' | 'preferred'.
- * @param {Set}    userSkillNames - Set of lowercase skill names from the DB.
+ * @param {Array} requirements - Array of { name, importance, uri? } from ESCO.
+ *                               importance must be 'essential' | 'preferred'.
+ * @param {Array} userSkills   - Full skill objects from the DB ({ name, esco_uri, … }).
  * @returns {number|null} 0-100 rounded integer, or null if no requirements.
+ *
+ * A requirement is considered matched if ANY user skill satisfies skillMatchesReq:
+ *   1. esco_uri match (both non-null)
+ *   2. exact name match (case-insensitive)
+ *   3. word overlap > 0.5
  *
  * Weighting: essential skills count double.
  *   score = (essentialHave×2 + preferredHave) / (essential×2 + preferred) × 100
  */
-export function calcMatchPct(requirements, userSkillNames) {
+export function calcMatchPct(requirements, userSkills) {
   if (!requirements?.length) return null
   const essential = requirements.filter(r => r.importance === 'essential')
   const preferred  = requirements.filter(r => r.importance === 'preferred')
-  const essHave    = essential.filter(r => userSkillNames.has(r.name.toLowerCase())).length
-  const prefHave   = preferred.filter(r => userSkillNames.has(r.name.toLowerCase())).length
+  const essHave    = essential.filter(r => userSkills.some(s => skillMatchesReq(s, r))).length
+  const prefHave   = preferred.filter(r => userSkills.some(s => skillMatchesReq(s, r))).length
   const denom      = essential.length * 2 + preferred.length
   return denom ? Math.round(((essHave * 2 + prefHave) / denom) * 100) : 0
 }

@@ -27,7 +27,7 @@ export default function SkillGap() {
     async function load() {
       try {
         const [{ data: skillsData }, { data: prefData }] = await Promise.all([
-          supabase.from('skills').select('name, level, category').eq('user_id', user.id),
+          supabase.from('skills').select('name, level, category, esco_uri').eq('user_id', user.id),
           supabase.from('user_preferences')
             .select('target_role, job_requirements')
             .eq('user_id', user.id)
@@ -101,9 +101,8 @@ export default function SkillGap() {
     }
   }
 
-  // Build lookup structures: Map for card display (needs level), Set for calcMatchPct.
-  const userSkillMap   = Object.fromEntries(userSkills.map(s => [s.name.toLowerCase(), s]))
-  const userSkillNames = new Set(userSkills.map(s => s.name.toLowerCase()))
+  // Build lookup structure for card display (needs level).
+  const userSkillMap = Object.fromEntries(userSkills.map(s => [s.name.toLowerCase(), s]))
 
   // Annotate each requirement with whether the user has it (for individual card display).
   const gaps = requirements.map(req => {
@@ -117,7 +116,7 @@ export default function SkillGap() {
   const preferredHave = preferred.filter(g => g.have).length
   const totalHave     = essentialHave + preferredHave
   const total         = gaps.length
-  const weightedScore = calcMatchPct(requirements, userSkillNames) ?? 0
+  const weightedScore = calcMatchPct(requirements, userSkills) ?? 0
 
   return (
     <div className="page">
