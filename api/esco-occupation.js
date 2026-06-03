@@ -34,6 +34,17 @@ export default async function handler(req, res) {
     const occupationUri   = first.uri
     const occupationLabel = first.preferredLabel?.en ?? first.title ?? ''
 
+    // Validate that the returned label is close enough to what the user typed
+    const normalize = s => s.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean)
+    const wa = normalize(role.trim())
+    const wb = normalize(occupationLabel)
+    const wbSet = new Set(wb)
+    const shared = wa.filter(w => wbSet.has(w)).length
+    const overlap = shared / Math.max(wa.length, wb.length)
+    if (overlap < 0.6) {
+      return res.status(404).json({ error: 'Occupation not found in ESCO. Please check the spelling and try again.' })
+    }
+
     // Step 2: fetch the occupation resource to get skill relationships
     const resourceUrl = new URL('https://ec.europa.eu/esco/api/resource/occupation')
     resourceUrl.searchParams.set('uri', occupationUri)
