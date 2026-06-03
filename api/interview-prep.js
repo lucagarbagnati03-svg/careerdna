@@ -69,7 +69,7 @@ export default async function handler(req, res) {
 
     if (action === 'evaluateAnswer') {
       const result = await callGroq(apiKey,
-        `You are an interview coach. Evaluate this answer for the role of ${role}. Question: ${question}. Answer: ${answer}. Candidate skills: ${skills}. Return a JSON object with: { score: number 0-100, feedback: string, improvements: string[] }. Return only JSON, nothing else.`
+        `You are an interview coach. Evaluate this answer for the role of ${role}. Question: ${question}. Answer: ${answer}. Candidate skills: ${skills}. Return a JSON object with: { score: number 1-10, good: string (what the candidate did well), missing: string (what was absent or weak), improve: string (specific actionable advice), rewrite: string (a concise example of a strong answer) }. Return only JSON, nothing else.`
       )
       return res.status(200).json(result)
     }

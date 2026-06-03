@@ -232,7 +232,15 @@ export default function InterviewPrep() {
 
     // Analysis
     if (cached.analysis) {
-      setAnalysis(cached.analysis)
+      // Normalize cached data — it may have been stored with a different field shape
+      // (e.g. { gaps, advice } from the new API before normalization was added).
+      const ca = cached.analysis
+      setAnalysis({
+        strengths:    Array.isArray(ca.strengths)    ? ca.strengths    : [],
+        improvements: Array.isArray(ca.improvements) ? ca.improvements
+                    : Array.isArray(ca.gaps)         ? ca.gaps         : [],
+        tip:          ca.tip ?? ca.advice ?? '',
+      })
     } else {
       setAnalysisLoading(true)
       try {
@@ -279,8 +287,9 @@ export default function InterviewPrep() {
           throw new Error(e.error || `API error ${qRes.status}`)
         }
         const { questions: q } = await qRes.json()
-        setQuestions(q)
-        await persistRoleData(role, { questions: q }, currentRd)
+        const safeQ = Array.isArray(q) ? q : []
+        setQuestions(safeQ)
+        await persistRoleData(role, { questions: safeQ }, currentRd)
       } catch (err) {
         setQuestionsError(err.message)
       }
@@ -448,8 +457,9 @@ export default function InterviewPrep() {
         throw new Error(e.error || `API error ${rRes.status}`)
       }
       const { questions: q } = await rRes.json()
-      setQuestions(q)
-      await persistRoleData(activeRole, { questions: q }, roleData)
+      const safeQ = Array.isArray(q) ? q : []
+      setQuestions(safeQ)
+      await persistRoleData(activeRole, { questions: safeQ }, roleData)
     } catch (err) {
       setQuestionsError(err.message)
     }
