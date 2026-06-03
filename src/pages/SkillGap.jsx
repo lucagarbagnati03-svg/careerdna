@@ -332,13 +332,13 @@ function SkillCard({ gap, onAdd }) {
             width: '100%',
             padding: '6px 10px',
             fontSize: '12px',
-            fontWeight: 600,
+            fontWeight: 500,
             borderRadius: '8px',
-            border: '1px solid rgba(74,222,128,0.3)',
-            background: 'rgba(74,222,128,0.1)',
-            color: 'var(--success)',
+            border: '1px solid var(--border-light)',
+            background: 'transparent',
+            color: 'var(--text-muted)',
             cursor: adding ? 'not-allowed' : 'pointer',
-            opacity: adding ? 0.6 : 1,
+            opacity: adding ? 0.5 : 1,
             transition: 'opacity 0.15s',
           }}
         >
