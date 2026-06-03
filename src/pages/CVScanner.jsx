@@ -103,6 +103,20 @@ export default function CVScanner() {
     setResult(null)
 
     try {
+      // Guard: if not explicitly replacing, check Supabase before scanning
+      if (!replacing) {
+        const { data: existingCVSkills } = await supabase
+          .from('skills')
+          .select('name, esco_uri')
+          .eq('user_id', user.id)
+          .eq('source', 'cv')
+        if (existingCVSkills && existingCVSkills.length > 0) {
+          setCvSkills(existingCVSkills)
+          setActiveTab('cv')
+          return
+        }
+      }
+
       // Step 1: read PDF
       setStep('extract')
       const text = await extractTextFromPDF(file)
