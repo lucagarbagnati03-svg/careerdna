@@ -121,6 +121,21 @@ export default function SkillGap() {
     }
   }
 
+  async function handleAddSkill(gap) {
+    const newSkill = {
+      user_id:    user.id,
+      name:       gap.name,
+      category:   'Other',
+      level:      3,
+      source:     'manual',
+      esco_uri:   gap.uri   ?? null,
+      esco_label: gap.name,
+    }
+    // Optimistic update — recalculates gaps/percentage instantly
+    setUserSkills(prev => [...prev, newSkill])
+    await supabase.from('skills').insert(newSkill)
+  }
+
   // Annotate each requirement with whether the user has it (for individual card display).
   // Uses the same 4-condition semantic matching as calcMatchPct.
   const gaps = requirements.map(req => {
@@ -246,7 +261,7 @@ export default function SkillGap() {
                 <span className="gap-section-badge">{essentialHave}/{essential.length} matched</span>
               </div>
               <div className="gap-grid">
-                {essential.map(g => <SkillCard key={g.name} gap={g} />)}
+                {essential.map(g => <SkillCard key={g.name} gap={g} onAdd={handleAddSkill} />)}
               </div>
             </div>
           )}
@@ -259,7 +274,7 @@ export default function SkillGap() {
                 <span className="gap-section-badge">{preferredHave}/{preferred.length} matched</span>
               </div>
               <div className="gap-grid">
-                {preferred.map(g => <SkillCard key={g.name} gap={g} />)}
+                {preferred.map(g => <SkillCard key={g.name} gap={g} onAdd={handleAddSkill} />)}
               </div>
             </div>
           )}
@@ -284,7 +299,15 @@ export default function SkillGap() {
   )
 }
 
-function SkillCard({ gap }) {
+function SkillCard({ gap, onAdd }) {
+  const [adding, setAdding] = useState(false)
+
+  async function handleAdd() {
+    setAdding(true)
+    await onAdd(gap)
+    // adding stays true — the card flips to "have" via parent state, unmounting this button
+  }
+
   return (
     <div className={`skill-gap-card ${gap.have ? 'have' : 'missing'}`}>
       <div className="sgc-top">
@@ -300,6 +323,28 @@ function SkillCard({ gap }) {
           {gap.have ? '✓ You have this' : '✗ Missing'}
         </span>
       </div>
+      {!gap.have && (
+        <button
+          onClick={handleAdd}
+          disabled={adding}
+          style={{
+            marginTop: '10px',
+            width: '100%',
+            padding: '6px 10px',
+            fontSize: '12px',
+            fontWeight: 600,
+            borderRadius: '8px',
+            border: '1px solid rgba(74,222,128,0.3)',
+            background: 'rgba(74,222,128,0.1)',
+            color: 'var(--success)',
+            cursor: adding ? 'not-allowed' : 'pointer',
+            opacity: adding ? 0.6 : 1,
+            transition: 'opacity 0.15s',
+          }}
+        >
+          {adding ? 'Adding…' : '✓ I have this'}
+        </button>
+      )}
     </div>
   )
 }
