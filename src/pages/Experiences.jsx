@@ -174,6 +174,21 @@ export default function Experiences() {
   async function extractSkillsForExperience(exp) {
     setExtracting(prev => ({ ...prev, [exp.id]: 'loading' }))
     try {
+      // If skills were already extracted for this experience, show them without re-calling the API
+      const { data: alreadySaved } = await supabase
+        .from('skills')
+        .select('name, esco_uri')
+        .eq('user_id', user.id)
+        .eq('source', exp.id)
+
+      if (alreadySaved && alreadySaved.length > 0) {
+        setExtracting(prev => ({
+          ...prev,
+          [exp.id]: { added: 0, skills: [], alreadyExtracted: alreadySaved },
+        }))
+        return
+      }
+
       const context = `${exp.title} at ${exp.company}: ${exp.description}`
       const apiRes = await fetch('/api/extract-skills', {
         method: 'POST',
@@ -206,7 +221,7 @@ export default function Experiences() {
 
       if (newSkills.length > 0) {
         await supabase.from('skills').insert(
-          newSkills.map(s => ({ ...s, user_id: user.id }))
+          newSkills.map(s => ({ ...s, user_id: user.id, source: exp.id }))
         )
       }
 

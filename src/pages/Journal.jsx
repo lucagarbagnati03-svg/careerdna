@@ -115,6 +115,21 @@ export default function Journal() {
   async function handleExtract(entry) {
     setExtracting(prev => ({ ...prev, [entry.id]: 'loading' }))
     try {
+      // If skills were already extracted for this entry, show them without re-calling the API
+      const { data: alreadySaved } = await supabase
+        .from('skills')
+        .select('name, esco_uri')
+        .eq('user_id', user.id)
+        .eq('source', entry.id)
+
+      if (alreadySaved && alreadySaved.length > 0) {
+        setExtracting(prev => ({
+          ...prev,
+          [entry.id]: { count: 0, skills: [], alreadyExtracted: alreadySaved },
+        }))
+        return
+      }
+
       const apiRes = await fetch('/api/extract-skills', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -146,7 +161,7 @@ export default function Journal() {
 
       if (newSkills.length > 0) {
         await supabase.from('skills').insert(
-          newSkills.map(s => ({ ...s, user_id: user.id }))
+          newSkills.map(s => ({ ...s, user_id: user.id, source: entry.id }))
         )
       }
 
