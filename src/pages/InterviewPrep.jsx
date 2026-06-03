@@ -2,18 +2,18 @@ import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
-import {
-  analyzeInterviewProfile,
-  generateInterviewQuestions,
-  evaluateInterviewAnswer,
-  analyzeSimulation,
-  sleep,
-} from '../lib/groq'
+import { sleep } from '../lib/groq'
 import LiveSimulation from './LiveSimulation'
 import './InterviewPrep.css'
 
 // Normalize role: always lowercase + trimmed, everywhere in the app
 const norm = r => (r ?? '').toLowerCase().trim()
+
+function formatSkills(skills = []) {
+  return skills.slice(0, 25)
+    .map(s => `${s.name} (Level ${s.level}/5, ${s.category})`)
+    .join(', ') || 'None listed'
+}
 
 function scoreColor(n) {
   if (n >= 8) return 'var(--success)'
@@ -236,7 +236,16 @@ export default function InterviewPrep() {
     } else {
       setAnalysisLoading(true)
       try {
-        const a = await analyzeInterviewProfile({ ...p, targetRole: role })
+        const aRes = await fetch('/api/interview-prep', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'analyzeProfile', role, skills: formatSkills(p.skills) }),
+        })
+        if (!aRes.ok) {
+          const e = await aRes.json().catch(() => ({}))
+          throw new Error(e.error || `API error ${aRes.status}`)
+        }
+        const a = await aRes.json()
         setAnalysis(a)
         currentRd = await persistRoleData(role, { analysis: a }, currentRd)
       } catch (err) {
@@ -252,7 +261,16 @@ export default function InterviewPrep() {
       setQuestionsLoading(true)
       if (!cached.analysis) await sleep(2500)   // rate-limit guard between two Groq calls
       try {
-        const q = await generateInterviewQuestions({ ...p, targetRole: role })
+        const qRes = await fetch('/api/interview-prep', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'generateQuestions', role, skills: formatSkills(p.skills) }),
+        })
+        if (!qRes.ok) {
+          const e = await qRes.json().catch(() => ({}))
+          throw new Error(e.error || `API error ${qRes.status}`)
+        }
+        const { questions: q } = await qRes.json()
         setQuestions(q)
         await persistRoleData(role, { questions: q }, currentRd)
       } catch (err) {
@@ -362,7 +380,20 @@ export default function InterviewPrep() {
 
     const role = norm(session.target_role) || null
     try {
-      const newReport = await analyzeSimulation(session.questions_and_answers ?? [], role)
+      const rrRes = await fetch('/api/interview-prep', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'recalculateFeedback',
+          role,
+          questionsAndAnswers: session.questions_and_answers ?? [],
+        }),
+      })
+      if (!rrRes.ok) {
+        const e = await rrRes.json().catch(() => ({}))
+        throw new Error(e.error || `API error ${rrRes.status}`)
+      }
+      const newReport = await rrRes.json()
       const finalReport = {
         score:        newReport.score,
         strengths:    newReport.strengths    ?? [],
@@ -399,7 +430,16 @@ export default function InterviewPrep() {
     setActiveQ(null)
     setFeedback(null)
     try {
-      const q = await generateInterviewQuestions({ ...profile, targetRole: activeRole })
+      const rRes = await fetch('/api/interview-prep', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'generateQuestions', role: activeRole, skills: formatSkills(profile.skills) }),
+      })
+      if (!rRes.ok) {
+        const e = await rRes.json().catch(() => ({}))
+        throw new Error(e.error || `API error ${rRes.status}`)
+      }
+      const { questions: q } = await rRes.json()
       setQuestions(q)
       await persistRoleData(activeRole, { questions: q }, roleData)
     } catch (err) {
@@ -423,7 +463,22 @@ export default function InterviewPrep() {
     setEvalError('')
     setFeedback(null)
     try {
-      const fb = await evaluateInterviewAnswer(activeQ.question, answer, activeRole)
+      const fbRes = await fetch('/api/interview-prep', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'evaluateAnswer',
+          role: activeRole,
+          question: activeQ.question,
+          answer,
+          skills: formatSkills(profile?.skills),
+        }),
+      })
+      if (!fbRes.ok) {
+        const e = await fbRes.json().catch(() => ({}))
+        throw new Error(e.error || `API error ${fbRes.status}`)
+      }
+      const fb = await fbRes.json()
       setFeedback(fb)
 
       await supabase.from('interview_sessions').insert({
