@@ -153,16 +153,20 @@ export default function SkillGap() {
     setAnalyzing(true)
     try {
       const encoded = encodeURIComponent(roleInput.trim())
-      const res = await fetch(`https://ec.europa.eu/esco/api/search?text=${encoded}&language=en&type=occupation&selectedVersion=v1.2.0&limit=1`)
+      const url = `https://ec.europa.eu/esco/api/search?text=${encoded}&language=en&type=occupation&selectedVersion=v1.2.0&limit=1`
+      console.log('[SkillGap] ESCO validation URL:', url)
+      const res = await fetch(url)
       let validLabel = null
       if (res.ok) {
         const data = await res.json()
+        console.log('[SkillGap] ESCO validation response:', data)
         const first = data._embedded?.results?.[0]
         if (first) {
           const label = first.preferredLabel?.en ?? first.title ?? ''
           if (wordOverlap(roleInput.trim(), label) > 0.0) validLabel = label
         }
       }
+      console.log('[SkillGap] validLabel:', validLabel)
       if (validLabel) {
         setAnalyzing(false)
         handleAnalyze(null, validLabel)
