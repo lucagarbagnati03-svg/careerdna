@@ -138,6 +138,44 @@ export default function SkillGap() {
     handleAnalyze(null, label)
   }
 
+  async function handleFormSubmit(e) {
+    e?.preventDefault()
+    if (!roleInput.trim()) return
+
+    // User already selected from the autocomplete dropdown — use it directly
+    if (selectedUri) {
+      handleAnalyze(null, roleInput)
+      return
+    }
+
+    // Free-text entry — validate against ESCO before analyzing
+    setError('')
+    setAnalyzing(true)
+    try {
+      const encoded = encodeURIComponent(roleInput.trim())
+      const res = await fetch(`https://ec.europa.eu/esco/api/search?text=${encoded}&language=en&type=occupation&selectedVersion=v1.2.0&limit=1`)
+      let validLabel = null
+      if (res.ok) {
+        const data = await res.json()
+        const first = data._embedded?.results?.[0]
+        if (first) {
+          const label = first.preferredLabel?.en ?? first.title ?? ''
+          if (wordOverlap(roleInput.trim(), label) > 0.3) validLabel = label
+        }
+      }
+      if (validLabel) {
+        setAnalyzing(false)
+        handleAnalyze(null, validLabel)
+      } else {
+        setError('Occupation not found in ESCO. Please check the spelling and try again.')
+        setAnalyzing(false)
+      }
+    } catch {
+      setError('Occupation not found in ESCO. Please check the spelling and try again.')
+      setAnalyzing(false)
+    }
+  }
+
   async function handleAnalyze(e, overrideRole) {
     e?.preventDefault()
     const role = (overrideRole ?? roleInput).trim().toLowerCase()
@@ -226,7 +264,7 @@ export default function SkillGap() {
       </div>
 
       {/* Role input */}
-      <form onSubmit={handleAnalyze} className="role-input-card">
+      <form onSubmit={handleFormSubmit} className="role-input-card">
         <div className="role-input-row">
           <div className="role-input-wrap" ref={dropdownRef}>
             <span className="role-input-icon">◎</span>
