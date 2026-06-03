@@ -11,6 +11,26 @@ import {
 } from '../lib/skillGap'
 import './SkillGap.css'
 
+function wordOverlap(a, b) {
+  const words = s => new Set(s.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean))
+  const wa = words(a), wb = words(b)
+  const shared = [...wa].filter(w => wb.has(w)).length
+  return shared / Math.max(wa.size, wb.size)
+}
+
+function skillMatchesReq(skill, req) {
+  if (skill.esco_uri && req.uri && skill.esco_uri === req.uri) return true
+  if (skill.name.toLowerCase() === req.name.toLowerCase()) return true
+  if (wordOverlap(skill.name, req.name) > 0.35) return true
+  const normalize = s => s.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean)
+  const wa = normalize(skill.name)
+  const wb = normalize(req.name)
+  const wbSet = new Set(wb), waSet = new Set(wa)
+  if (wa.some(w => w.length > 4 && wbSet.has(w))) return true
+  if (wb.some(w => w.length > 4 && waSet.has(w))) return true
+  return false
+}
+
 export default function SkillGap() {
   const { user } = useAuth()
   const [userSkills,   setUserSkills]   = useState([])
@@ -101,12 +121,10 @@ export default function SkillGap() {
     }
   }
 
-  // Build lookup structure for card display (needs level).
-  const userSkillMap = Object.fromEntries(userSkills.map(s => [s.name.toLowerCase(), s]))
-
   // Annotate each requirement with whether the user has it (for individual card display).
+  // Uses the same 4-condition semantic matching as calcMatchPct.
   const gaps = requirements.map(req => {
-    const match = userSkillMap[req.name.toLowerCase()]
+    const match = userSkills.find(s => skillMatchesReq(s, req))
     return { ...req, have: !!match, level: match?.level ?? 0 }
   })
 
