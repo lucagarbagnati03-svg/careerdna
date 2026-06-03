@@ -90,19 +90,25 @@ export default function SkillGap() {
   async function fetchSuggestions(text) {
     if (text.length < 2) { setSuggestions([]); setShowDropdown(false); return }
     try {
-      const encoded = encodeURIComponent(text)
-      const [searchRes, suggestRes] = await Promise.all([
-        fetch(`https://ec.europa.eu/esco/api/search?text=${encoded}&language=en&type=occupation&selectedVersion=v1.2.0&limit=15`),
-        fetch(`https://ec.europa.eu/esco/api/suggest2?text=${encoded}&language=en&type=occupation&selectedVersion=v1.2.0&limit=10`),
+      const encoded      = encodeURIComponent(text)
+      const encodedExact = encodeURIComponent(`"${text}"`)
+      const base         = `language=en&type=occupation&selectedVersion=v1.2.0`
+      const scheme       = encodeURIComponent('http://data.europa.eu/esco/concept-scheme/occupations')
+      const responses = await Promise.all([
+        fetch(`https://ec.europa.eu/esco/api/search?text=${encoded}&${base}&limit=15`),
+        fetch(`https://ec.europa.eu/esco/api/suggest2?text=${encoded}&${base}&limit=10`),
+        fetch(`https://ec.europa.eu/esco/api/search?text=${encoded}&${base}&isInScheme=${scheme}&limit=15`),
+        fetch(`https://ec.europa.eu/esco/api/search?text=${encodedExact}&${base}&limit=10`),
       ])
       const extract = data => (data._embedded?.results ?? [])
         .map(r => ({ label: r.preferredLabel?.en ?? r.title ?? '', uri: r.uri }))
         .filter(r => r.label)
-      const searchResults  = searchRes.ok  ? extract(await searchRes.json())  : []
-      const suggestResults = suggestRes.ok ? extract(await suggestRes.json()) : []
-      // Merge and deduplicate by URI
+      const allResults = (await Promise.all(
+        responses.map(r => r.ok ? r.json().then(extract) : [])
+      )).flat()
+      // Deduplicate by URI
       const seen = new Set()
-      const merged = [...searchResults, ...suggestResults].filter(r => {
+      const merged = allResults.filter(r => {
         if (seen.has(r.uri)) return false
         seen.add(r.uri)
         return true
