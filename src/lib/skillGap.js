@@ -15,7 +15,15 @@ function wordOverlap(a, b) {
 function skillMatchesReq(skill, req) {
   if (skill.esco_uri && req.uri && skill.esco_uri === req.uri) return true
   if (skill.name.toLowerCase() === req.name.toLowerCase()) return true
-  if (wordOverlap(skill.name, req.name) > 0.5) return true
+  if (wordOverlap(skill.name, req.name) > 0.35) return true
+  // Any word longer than 4 chars that appears in both names (either direction)
+  const normalize = s => s.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean)
+  const wa = normalize(skill.name)
+  const wb = normalize(req.name)
+  const wbSet = new Set(wb)
+  const waSet = new Set(wa)
+  if (wa.some(w => w.length > 4 && wbSet.has(w))) return true
+  if (wb.some(w => w.length > 4 && waSet.has(w))) return true
   return false
 }
 
