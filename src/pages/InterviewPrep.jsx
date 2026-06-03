@@ -245,7 +245,15 @@ export default function InterviewPrep() {
           const e = await aRes.json().catch(() => ({}))
           throw new Error(e.error || `API error ${aRes.status}`)
         }
-        const a = await aRes.json()
+        const raw = await aRes.json()
+        // Normalize to the shape the UI expects: { strengths, improvements, tip }
+        // The API may return { gaps, advice } instead — remap defensively.
+        const a = {
+          strengths:    Array.isArray(raw.strengths)    ? raw.strengths    : [],
+          improvements: Array.isArray(raw.improvements) ? raw.improvements
+                      : Array.isArray(raw.gaps)         ? raw.gaps         : [],
+          tip:          raw.tip ?? raw.advice ?? '',
+        }
         setAnalysis(a)
         currentRd = await persistRoleData(role, { analysis: a }, currentRd)
       } catch (err) {
