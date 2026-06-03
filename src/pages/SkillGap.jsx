@@ -160,7 +160,7 @@ export default function SkillGap() {
         const first = data._embedded?.results?.[0]
         if (first) {
           const label = first.preferredLabel?.en ?? first.title ?? ''
-          if (wordOverlap(roleInput.trim(), label) > 0.3) validLabel = label
+          if (wordOverlap(roleInput.trim(), label) > 0.0) validLabel = label
         }
       }
       if (validLabel) {
