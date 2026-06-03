@@ -5,15 +5,6 @@
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
-const CV_PROMPT = `You are an expert CV/resume parser. Extract every professional skill from the CV text provided.
-Return ONLY a JSON array. Each item must have:
-- "name": skill name (concise, 1-4 words)
-- "category": one of "Technical", "Soft Skills", "Domain Knowledge", "Languages", "Tools & Software", "Certifications", "Other"
-- "level": integer 1-5 inferred from experience depth (1=mentioned once, 3=used regularly, 5=expert/lead-level)
-
-Be comprehensive: include technical skills, frameworks, tools, soft skills, domain expertise, languages, certifications.
-Deduplicate. Return ONLY valid JSON, no markdown, no explanation.`
-
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 export default async function handler(req, res) {
@@ -35,6 +26,82 @@ export default async function handler(req, res) {
 
   const truncated = cvText.slice(0, 28000)
 
+  // Step A1: extract 5 skill-related keywords from the CV text (best-effort)
+  let keywords = []
+  try {
+    const kwRes = await fetch(GROQ_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          {
+            role: 'user',
+            content: `Extract exactly 5 short skill-related keywords (2-3 words max each) from this text. Return only a JSON array of strings, nothing else: ${truncated.slice(0, 2000)}`,
+          },
+        ],
+        temperature: 0.2,
+        max_tokens: 128,
+      }),
+    })
+    if (kwRes.ok) {
+      const kwData    = await kwRes.json()
+      const kwContent = kwData.choices?.[0]?.message?.content ?? '[]'
+      const kwClean   = kwContent.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim()
+      keywords = JSON.parse(kwClean)
+    }
+  } catch {
+    // keyword extraction is best-effort; proceed with empty list if it fails
+  }
+
+  // Step A2: search ESCO for skills matching each keyword — run in parallel (best-effort)
+  const escoByUri = new Map()
+
+  await Promise.all(keywords.map(async (keyword) => {
+    try {
+      const searchUrl = new URL('https://ec.europa.eu/esco/api/search')
+      searchUrl.searchParams.set('text', keyword)
+      searchUrl.searchParams.set('language', 'en')
+      searchUrl.searchParams.set('type', 'skill')
+      searchUrl.searchParams.set('selectedVersion', 'v1.2.0')
+      searchUrl.searchParams.set('limit', '5')
+
+      const searchRes = await fetch(searchUrl.toString())
+      if (!searchRes.ok) return
+
+      const searchData = await searchRes.json()
+      const results    = searchData?._embedded?.results ?? []
+
+      for (const r of results) {
+        if (r.uri && !escoByUri.has(r.uri)) {
+          escoByUri.set(r.uri, {
+            uri:   r.uri,
+            label: r.preferredLabel?.en ?? r.title ?? '',
+          })
+        }
+      }
+    } catch {
+      // individual keyword search failure is non-fatal
+    }
+  }))
+
+  const escoSkills    = Array.from(escoByUri.values())
+  const escoByLabel   = new Map(escoSkills.map(s => [s.label.toLowerCase(), s]))
+  const escoLabelsList = escoSkills.map(s => s.label).join('\n')
+
+  const escoPrompt = `You are a career skills extractor. From the following CV text, identify which skills the person has.
+You MUST only choose skills from this official ESCO list — do not invent any skill not in this list.
+Return a JSON array of objects with this exact format, nothing else:
+[{ "name": "skill label exactly as written in the list", "category": "choose one of: Technical, Soft Skills, Domain Knowledge, Tools & Software, Language", "level": a number from 1 to 5 }]
+
+CV text: ${truncated}
+
+ESCO skills list:
+${escoLabelsList}`
+
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
       console.log(`[API] CV scan attempt ${attempt}`)
@@ -48,8 +115,7 @@ export default async function handler(req, res) {
         body: JSON.stringify({
           model: 'llama-3.3-70b-versatile',
           messages: [
-            { role: 'system', content: CV_PROMPT },
-            { role: 'user',   content: `CV text:\n\n${truncated}` },
+            { role: 'user', content: escoPrompt },
           ],
           temperature: 0.2,
           max_tokens: 2048,
@@ -83,11 +149,21 @@ export default async function handler(req, res) {
       const data    = await groqRes.json()
       const content = data.choices?.[0]?.message?.content ?? '[]'
       const clean   = content.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim()
-      const skills  = JSON.parse(clean)
+      const parsed  = JSON.parse(clean)
 
-      if (!Array.isArray(skills)) {
+      if (!Array.isArray(parsed)) {
         throw new Error('Invalid skills format returned by AI')
       }
+
+      // Enrich each skill with esco_uri and esco_label by matching label (case-insensitive)
+      const skills = parsed.map(skill => {
+        const matched = escoByLabel.get(skill.name.toLowerCase())
+        return {
+          ...skill,
+          esco_uri:   matched?.uri   ?? null,
+          esco_label: matched?.label ?? skill.name,
+        }
+      })
 
       console.log(`[API] CV scan complete, extracted ${skills.length} skills`)
       return res.status(200).json({ skills })
