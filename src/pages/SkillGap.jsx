@@ -90,15 +90,29 @@ export default function SkillGap() {
   async function fetchSuggestions(text) {
     if (text.length < 2) { setSuggestions([]); setShowDropdown(false); return }
     try {
-      const url = `https://ec.europa.eu/esco/api/search?text=${encodeURIComponent(text)}&language=en&type=occupation&selectedVersion=v1.2.0&limit=5`
-      const res = await fetch(url)
-      if (!res.ok) return
-      const data = await res.json()
-      const results = (data._embedded?.results ?? [])
+      const encoded = encodeURIComponent(text)
+      const [searchRes, suggestRes] = await Promise.all([
+        fetch(`https://ec.europa.eu/esco/api/search?text=${encoded}&language=en&type=occupation&selectedVersion=v1.2.0&limit=15`),
+        fetch(`https://ec.europa.eu/esco/api/suggest2?text=${encoded}&language=en&type=occupation&selectedVersion=v1.2.0&limit=10`),
+      ])
+      const extract = data => (data._embedded?.results ?? [])
         .map(r => ({ label: r.preferredLabel?.en ?? r.title ?? '', uri: r.uri }))
         .filter(r => r.label)
-      setSuggestions(results)
-      setShowDropdown(results.length > 0)
+      const searchResults  = searchRes.ok  ? extract(await searchRes.json())  : []
+      const suggestResults = suggestRes.ok ? extract(await suggestRes.json()) : []
+      // Merge and deduplicate by URI
+      const seen = new Set()
+      const merged = [...searchResults, ...suggestResults].filter(r => {
+        if (seen.has(r.uri)) return false
+        seen.add(r.uri)
+        return true
+      })
+      // Sort by word overlap with user input, descending
+      const sorted = merged
+        .map(r => ({ ...r, score: wordOverlap(text, r.label) }))
+        .sort((a, b) => b.score - a.score)
+      setSuggestions(sorted)
+      setShowDropdown(sorted.length > 0)
     } catch { /* autocomplete is best-effort — silently ignore */ }
   }
 
