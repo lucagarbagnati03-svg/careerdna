@@ -558,6 +558,7 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--accent-hover);
+  text-transform: capitalize;
 }
 
 .result-tag.existing .result-tag-name {

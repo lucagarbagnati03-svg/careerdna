@@ -335,6 +335,7 @@
   background: rgba(74, 222, 128, 0.1);
   color: var(--success);
   border: 1px solid rgba(74, 222, 128, 0.2);
+  text-transform: capitalize;
 }
 
 .extract-already-label {

@@ -297,6 +297,7 @@
   font-weight: 600;
   color: var(--text-primary);
   flex: 1;
+  text-transform: capitalize;
 }
 
 .sgc-level {
