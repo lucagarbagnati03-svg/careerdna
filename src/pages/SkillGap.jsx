@@ -90,17 +90,17 @@ export default function SkillGap() {
   async function fetchSuggestions(text) {
     if (text.length < 2) { setSuggestions([]); setShowDropdown(false); return }
     try {
-      const encoded      = encodeURIComponent(text)
-      const encodedExact = encodeURIComponent(`"${text}"`)
-      const base         = `language=en&type=occupation&selectedVersion=v1.2.0`
-      const scheme       = encodeURIComponent('http://data.europa.eu/esco/concept-scheme/occupations')
+      const post = (body) => fetch('/api/esco-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
       const responses = await Promise.all([
-        fetch(`https://ec.europa.eu/esco/api/search?text=${encoded}&${base}&limit=15`),
-        fetch(`https://ec.europa.eu/esco/api/suggest2?text=${encoded}&${base}&limit=10`),
-        fetch(`https://ec.europa.eu/esco/api/search?text=${encoded}&${base}&isInScheme=${scheme}&limit=15`),
-        fetch(`https://ec.europa.eu/esco/api/search?text=${encodedExact}&${base}&limit=10`),
+        post({ text, type: 'occupation', limit: 15 }),
+        post({ text, type: 'occupation', limit: 15 }),
+        post({ text: `"${text}"`, type: 'occupation', limit: 10 }),
       ])
-      const extract = data => (data._embedded?.results ?? [])
+      const extract = data => (data.results ?? [])
         .map(r => ({ label: r.preferredLabel?.en ?? r.title ?? '', uri: r.uri }))
         .filter(r => r.label)
       const allResults = (await Promise.all(
@@ -152,18 +152,16 @@ export default function SkillGap() {
     setError('')
     setAnalyzing(true)
     try {
-      const encoded = encodeURIComponent(roleInput.trim())
-      const url = `https://ec.europa.eu/esco/api/search?text=${encoded}&language=en&type=occupation&selectedVersion=v1.2.0&limit=1`
-      console.log('[SkillGap] ESCO validation fetch:', url)
-      const res = await fetch(url)
-      console.log('[SkillGap] ESCO response status:', res.status)
+      const res = await fetch('/api/esco-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: roleInput.trim(), type: 'occupation', limit: 1 }),
+      })
       let validLabel = null
       if (res.ok) {
         const data = await res.json()
-        console.log('[SkillGap] ESCO response data:', JSON.stringify(data?._embedded?.results?.slice(0, 1)))
-        const first = data?._embedded?.results?.[0]
+        const first = data?.results?.[0]
         if (first) validLabel = first.preferredLabel?.en ?? first.title ?? null
-        console.log('[SkillGap] ESCO first result label:', validLabel)
       }
       if (validLabel) {
         setAnalyzing(false)
@@ -172,8 +170,7 @@ export default function SkillGap() {
         setError('Occupation not found in ESCO. Please check the spelling and try again.')
         setAnalyzing(false)
       }
-    } catch (err) {
-      console.error('[SkillGap] ESCO validation error:', err)
+    } catch {
       setError('Occupation not found in ESCO. Please check the spelling and try again.')
       setAnalyzing(false)
     }
