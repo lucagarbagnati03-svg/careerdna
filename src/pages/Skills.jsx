@@ -60,12 +60,14 @@ export default function Skills() {
 
     // ESCO skill lookup — normalize the name to the canonical ESCO label
     try {
-      const escoRes = await fetch(
-        `https://ec.europa.eu/esco/api/search?text=${encodeURIComponent(typed)}&language=en&type=skill&selectedVersion=v1.2.0&limit=1`
-      )
+      const escoRes = await fetch('/api/esco-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: typed, type: 'skill', limit: 1 }),
+      })
       if (escoRes.ok) {
         const escoData = await escoRes.json()
-        const first = escoData._embedded?.results?.[0]
+        const first = escoData.results?.[0]
         if (first) {
           name       = first.preferredLabel?.en ?? typed
           esco_uri   = first.uri               ?? null
