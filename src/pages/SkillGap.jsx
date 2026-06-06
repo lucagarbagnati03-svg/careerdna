@@ -153,12 +153,17 @@ export default function SkillGap() {
     setAnalyzing(true)
     try {
       const encoded = encodeURIComponent(roleInput.trim())
-      const res = await fetch(`https://ec.europa.eu/esco/api/search?text=${encoded}&language=en&type=occupation&selectedVersion=v1.2.0&limit=1`)
+      const url = `https://ec.europa.eu/esco/api/search?text=${encoded}&language=en&type=occupation&selectedVersion=v1.2.0&limit=1`
+      console.log('[SkillGap] ESCO validation fetch:', url)
+      const res = await fetch(url)
+      console.log('[SkillGap] ESCO response status:', res.status)
       let validLabel = null
       if (res.ok) {
         const data = await res.json()
-        const first = data._embedded?.results?.[0]
+        console.log('[SkillGap] ESCO response data:', JSON.stringify(data?._embedded?.results?.slice(0, 1)))
+        const first = data?._embedded?.results?.[0]
         if (first) validLabel = first.preferredLabel?.en ?? first.title ?? null
+        console.log('[SkillGap] ESCO first result label:', validLabel)
       }
       if (validLabel) {
         setAnalyzing(false)
@@ -167,7 +172,8 @@ export default function SkillGap() {
         setError('Occupation not found in ESCO. Please check the spelling and try again.')
         setAnalyzing(false)
       }
-    } catch {
+    } catch (err) {
+      console.error('[SkillGap] ESCO validation error:', err)
       setError('Occupation not found in ESCO. Please check the spelling and try again.')
       setAnalyzing(false)
     }

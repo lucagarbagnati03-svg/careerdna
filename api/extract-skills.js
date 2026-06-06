@@ -1,5 +1,15 @@
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
+function parseGroqJson(text) {
+  let s = text.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim()
+  const startArr = s.indexOf('['), startObj = s.indexOf('{')
+  let start = startArr === -1 ? startObj : startObj === -1 ? startArr : Math.min(startArr, startObj)
+  if (start === -1) return null
+  const end = Math.max(s.lastIndexOf(']'), s.lastIndexOf('}'))
+  if (end === -1 || end < start) return null
+  return JSON.parse(s.slice(start, end + 1))
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
@@ -44,8 +54,9 @@ export default async function handler(req, res) {
 
     const keywordsData    = await keywordsRes.json()
     const keywordsContent = keywordsData.choices?.[0]?.message?.content ?? '[]'
-    const keywordsClean   = keywordsContent.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim()
-    const keywords        = JSON.parse(keywordsClean)
+    let keywords = []
+    try { keywords = parseGroqJson(keywordsContent) ?? [] } catch { keywords = [] }
+    if (!Array.isArray(keywords)) keywords = []
 
     // Step 2: Search ESCO for skills matching each keyword — run in parallel
     const escoByUri = new Map() // uri → { uri, label }
@@ -112,8 +123,9 @@ ${escoLabelsList}`,
 
     const identifyData    = await identifyRes.json()
     const identifyContent = identifyData.choices?.[0]?.message?.content ?? '[]'
-    const identifyClean   = identifyContent.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim()
-    const identified      = JSON.parse(identifyClean)
+    let identified = []
+    try { identified = parseGroqJson(identifyContent) ?? [] } catch { identified = [] }
+    if (!Array.isArray(identified)) identified = []
 
     // Step 4: Match each identified skill back to the ESCO results by label (case-insensitive)
     const escoByLabel = new Map(escoSkills.map(s => [s.label.toLowerCase(), s]))
