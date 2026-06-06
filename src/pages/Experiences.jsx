@@ -206,7 +206,7 @@ export default function Experiences() {
         const errData = await apiRes.json().catch(() => ({}))
         throw new Error(errData.error || `Extraction failed (${apiRes.status})`)
       }
-      const { skills } = await apiRes.json()
+      const { skills = [] } = await apiRes.json()
 
       if (skills.length === 0) {
         setExtracting(prev => ({ ...prev, [exp.id]: { added: 0, skills: [], alreadyExtracted: [] } }))

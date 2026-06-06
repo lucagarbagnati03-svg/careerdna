@@ -272,6 +272,7 @@ export default function SkillGap() {
               placeholder="e.g. Hotel Manager, Front Office Manager, Data Analyst…"
               value={roleInput}
               onChange={handleRoleInputChange}
+              onInput={handleRoleInputChange}
               disabled={analyzing}
               autoComplete="off"
             />
